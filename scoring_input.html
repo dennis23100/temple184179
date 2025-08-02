@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>營隊加分系統</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 25px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            max-width: 450px;
+            width: 100%;
+            text-align: center;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .logo {
+            font-size: 4em;
+            margin-bottom: 20px;
+            animation: bounce 2s ease-in-out infinite;
+        }
+        
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-10px); }
+            60% { transform: translateY(-5px); }
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 2.2em;
+            font-weight: bold;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .status-indicator {
+            display: inline-block;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: bold;
+            margin-bottom: 25px;
+            transition: all 0.3s ease;
+        }
+        
+        .status-connected {
+            background: linear-gradient(45deg, #28a745, #20c997);
+            color: white;
+            box-shadow: 0 4px 15px rgba(40, 167, 69, 0.4);
+        }
+        
+        .status-offline {
+            background: linear-gradient(45deg, #ffc107, #fd7e14);
+            color: #333;
+            box-shadow: 0 4px 15px rgba(255, 193, 7, 0.4);
+        }
+        
+        .form-group {
+            margin-bottom: 25px;
+            text-align: left;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #495057;
+            font-size: 1.1em;
+        }
+        
+        select, input {
+            width: 100%;
+            padding: 15px;
+            border: 3px solid #e9ecef;
+            border-radius: 12px;
+            font-size: 18px;
+            transition: all 0.3s ease;
+            background: white;
+        }
+        
+        select:focus, input:focus {
+            outline: none;
+            border-color: #28a745;
+            box-shadow: 0 0 20px rgba(40, 167, 69, 0.3);
+            transform: translateY(-2px);
+        }
+        
+        select {
+            cursor: pointer;
+        }
+        
+        .add-button {
+            width: 100%;
+            background: linear-gradient(45deg, #28a745, #20c997);
+            color: white;
+            border: none;
+            padding: 18px;
+            font-size: 20px;
+            font-weight: bold;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 25px rgba(40, 167, 69, 0.4);
+            margin-bottom: 20px;
+        }
+        
+        .add-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 35px rgba(40, 167, 69, 0.6);
+        }
+        
+        .add-button:active {
+            transform: translateY(-1px);
+        }
+        
+        .add-button:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: 0 4px 15px rgba(108, 117, 125, 0.3);
+        }
+        
+        .quick-scores {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin-bottom: 25px;
+        }
+        
+        .quick-score-btn {
+            background: linear-gradient(45deg, #6f42c1, #e83e8c);
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(111, 66, 193, 0.3);
+        }
+        
+        .quick-score-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(111, 66, 193, 0.5);
+        }
+        
+        .recent-actions {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 20px;
+            margin-top: 25px;
+            border: 2px solid #e9ecef;
+        }
+        
+        .recent-actions h3 {
+            color: #495057;
+            margin-bottom: 15px;
+            font-size: 1.1em;
+        }
+        
+        .action-item {
+            background: white;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            border-left: 4px solid #28a745;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            font-size: 14px;
+        }
+        
+        .action-item:last-child {
+            margin-bottom: 0;
+        }
+        
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 25px;
+            border-radius: 12px;
+            color: white;
+            font-weight: bold;
+            transform: translateX(400px);
+            transition: transform 0.4s ease;
+            z-index: 1000;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+        }
+        
+        .notification.show {
+            transform: translateX(0);
+        }
+        
+        .notification.success {
+            background: linear-gradient(45deg, #28a745, #20c997);
+        }
+        
+        .notification.error {
+            background: linear-gradient(45deg, #dc3545, #fd7e14);
+        }
+        
+        .room-info {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .room-id {
+            font-family: 'Courier New', monospace;
+            font-size: 18px;
+            font-weight: bold;
+            color: #495057;
+            background: rgba(255, 255, 255, 0.8);
+            padding: 8px 12px;
+            border-radius: 8px;
+            display: inline-block;
+            margin-top: 8px;
+        }
+        
+        @media (max-width: 480px) {
+            .container {
+                padding: 25px;
+                margin: 10px;
+            }
+            
+            h1 {
+                font-size: 1.8em;
+            }
+            
+            .logo {
+                font-size: 3em;
+            }
+            
+            select, input {
+                padding: 12px;
+                font-size: 16px;
+            }
+            
+            .add-button {
+                padding: 15px;
+                font-size: 18px;
+            }
+            
+            .quick-scores {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        
+        .floating-elements {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+        }
+        
+        .floating-emoji {
+            position: absolute;
+            font-size: 30px;
+            animation: float 6s ease-in-out infinite;
+            opacity: 0.1;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(180deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="floating-elements" id="floatingElements"></div>
+    
+    <div class="container">
+        <div class="logo">🚀</div>
+        <h1>營隊加分系統</h1>
+        
+        <div class="status-indicator status-connected" id="statusIndicator">
+            🌐 已連線
+        </div>
+        
+        <div class="room-info">
+            <div style="color: #666; font-size: 14px;">房間代碼</div>
+            <div class="room-id" id="roomId">載入中...</div>
+        </div>
+        
+        <form onsubmit="addScore(event)">
+            <div class="form-group">
+                <label for="teamSelect">🏆 選擇組別</label>
+                <select id="teamSelect" required>
+                    <option value="">請選擇組別</option>
+                    <option value="1">第1組</option>
+                    <option value="2">第2組</option>
+                    <option value="3">第3組</option>
+                    <option value="4">第4組</option>
+                    <option value="5">第5組</option>
+                    <option value="6">第6組</option>
+                    <option value="7">第7組</option>
+                    <option value="8">第8組</option>
+                    <option value="9">第9組</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="scoreInput">⭐ 加分數值</label>
+                <input type="number" id="scoreInput" min="1" max="1000" value="10" required>
+            </div>
+            
+            <div class="quick-scores">
+                <button type="button" class="quick-score-btn" onclick="setQuickScore(5)">+5</button>
+                <button type="button" class="quick-score-btn" onclick="setQuickScore(10)">+10</button>
+                <button type="button" class="quick-score-btn" onclick="setQuickScore(20)">+20</button>
+                <button type="button" class="quick-score-btn" onclick="setQuickScore(50)">+50</button>
+            </div>
+            
+            <button type="submit" class="add-button" id="addButton">
+                🚀 確認加分
+            </button>
+        </form>
+        
+        <div class="recent-actions">
+            <h3>📋 最近操作</h3>
+            <div id="recentActions">
+                <div style="color: #999; font-style: italic;">尚無操作記錄</div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="notification" id="notification"></div>
+
+    <script>
+        // 全局變量
+        let roomId = '';
+        let recentActions = [];
+        
+        // 生成或獲取房間ID
+        function initializeRoom() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const urlRoomId = urlParams.get('room');
+            
+            if (urlRoomId) {
+                roomId = urlRoomId;
+            } else {
+                roomId = 'camp_' + Math.random().toString(36).substr(2, 6);
+                const newUrl = window.location.pathname + '?room=' + roomId;
+                window.history.replaceState({}, '', newUrl);
+            }
+            
+            document.getElementById('roomId').textContent = roomId;
+            
+            // 顯示分享提示
+            setTimeout(() => {
+                showNotification(`房間已創建！分享此網址給其他人加入：${window.location.href}`, 'success');
+            }, 1000);
+        }
+        
+        // 創建浮動元素
+        function createFloatingElements() {
+            const container = document.getElementById('floatingElements');
+            const emojis = ['🚀', '⭐', '🏆', '🎯', '💫', '🌟'];
+            
+            for (let i = 0; i < 15; i++) {
+                const element = document.createElement('div');
+                element.className = 'floating-emoji';
+                element.innerHTML = emojis[Math.floor(Math.random() * emojis.length)];
+                element.style.left = Math.random() * 100 + '%';
+                element.style.top = Math.random() * 100 + '%';
+                element.style.animationDelay = Math.random() * 6 + 's';
+                element.style.animationDuration = (4 + Math.random() * 4) + 's';
+                container.appendChild(element);
+            }
+        }
+        
+        // 顯示通知
+        function showNotification(message, type = 'success') {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.className = `notification ${type} show`;
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 4000);
+        }
+        
+        // 設置快速分數
+        function setQuickScore(score) {
+            document.getElementById('scoreInput').value = score;
+        }
+        
+        // 保存分數到本地存儲
+        function saveScore(team, points) {
+            const storageKey = `campScores_${roomId}`;
+            let data = JSON.parse(localStorage.getItem(storageKey)) || {
+                scores: {},
+                timestamp: Date.now(),
+                roomId: roomId
+            };
+            
+            // 初始化分數
+            for (let i = 1; i <= 9; i++) {
+                if (!data.scores[i]) data.scores[i] = 0;
+            }
+            
+            // 加分
+            data.scores[team] += points;
+            data.timestamp = Date.now();
+            
+            // 保存
+            localStorage.setItem(storageKey, JSON.stringify(data));
+            
+            // 觸發更新事件
+            window.dispatchEvent(new CustomEvent('scoresUpdated', { 
+                detail: data 
+            }));
+            
+            return data.scores[team];
+        }
+        
+        // 添加到最近操作
+        function addRecentAction(team, points, newTotal) {
+            const now = new Date();
+            const timeString = now.toLocaleTimeString('zh-TW', { 
+                hour: '2-digit', 
+                minute: '2-digit' 
+            });
+            
+            const action = {
+                time: timeString,
+                team: team,
+                points: points,
+                total: newTotal
+            };
+            
+            recentActions.unshift(action);
+            if (recentActions.length > 5) {
+                recentActions.pop();
+            }
+            
+            updateRecentActionsDisplay();
+        }
+        
+        // 更新最近操作顯示
+        function updateRecentActionsDisplay() {
+            const container = document.getElementById('recentActions');
+            
+            if (recentActions.length === 0) {
+                container.innerHTML = '<div style="color: #999; font-style: italic;">尚無操作記錄</div>';
+                return;
+            }
+            
+            container.innerHTML = recentActions.map(action => 
+                `<div class="action-item">
+                    <strong>${action.time}</strong> - 第${action.team}組 +${action.points}分 
+                    <span style="color: #28a745;">(總計: ${action.total}分)</span>
+                </div>`
+            ).join('');
+        }
+        
+        // 加分功能
+        function addScore(event) {
+            event.preventDefault();
+            
+            const teamSelect = document.getElementById('teamSelect');
+            const scoreInput = document.getElementById('scoreInput');
+            
+            const team = parseInt(teamSelect.value);
+            const points = parseInt(scoreInput.value);
+            
+            if (!team || points <= 0) {
+                showNotification('請選擇組別並輸入有效分數', 'error');
+                return;
+            }
+            
+            // 保存分數
+            const newTotal = saveScore(team, points);
+            
+            // 添加到最近操作
+            addRecentAction(team, points, newTotal);
+            
+            // 顯示成功訊息
+            showNotification(`第${team}組 +${points}分！目前總分: ${newTotal}分`, 'success');
+            
+            // 重置表單
+            scoreInput.value = 10;
+            teamSelect.value = '';
+            
+            // 聚焦到組別選擇
+            teamSelect.focus();
+        }
+        
+        // 鍵盤快捷鍵
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Enter' && event.target.tagName !== 'BUTTON') {
+                const form = document.querySelector('form');
+                if (form.checkValidity()) {
+                    addScore(event);
+                }
+            }
+        });
+        
+        // 初始化
+        window.addEventListener('load', function() {
+            initializeRoom();
+            createFloatingElements();
+            
+            // 聚焦到第一個輸入欄位
+            document.getElementById('teamSelect').focus();
+        });
+    </script>
+</body>
+</html>

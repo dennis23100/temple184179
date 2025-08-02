@@ -1,0 +1,825 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>營隊火箭競賽顯示</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(to bottom, 
+                #000428 0%, 
+                #004e92 30%, 
+                #009ffd 60%, 
+                #87CEEB 80%, 
+                #98FB98 100%);
+            height: 100vh;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .title-bar {
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            text-align: center;
+            padding: 15px 0;
+            position: relative;
+            z-index: 100;
+            backdrop-filter: blur(10px);
+            border-bottom: 3px solid #FFD700;
+        }
+        
+        .title {
+            font-size: 2.5em;
+            font-weight: bold;
+            text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.7);
+            margin-bottom: 5px;
+        }
+        
+        .subtitle {
+            font-size: 1.2em;
+            opacity: 0.9;
+            font-weight: normal;
+        }
+        
+        .control-bar {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            gap: 15px;
+            z-index: 200;
+        }
+        
+        .control-btn {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            padding: 12px 20px;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+        
+        .control-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+        }
+        
+        .final-btn {
+            background: linear-gradient(45deg, #dc3545, #fd7e14);
+            border-color: #dc3545;
+        }
+        
+        .reset-btn {
+            background: linear-gradient(45deg, #6c757d, #495057);
+            border-color: #6c757d;
+        }
+        
+        .status-indicator {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(40, 167, 69, 0.9);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-weight: bold;
+            backdrop-filter: blur(10px);
+            z-index: 200;
+        }
+        
+        .rocket-area {
+            position: relative;
+            height: calc(100vh - 120px);
+            overflow: hidden;
+            background: transparent;
+        }
+        
+        .background-elements {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+        
+        .stars {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+        }
+        
+        .star {
+            position: absolute;
+            color: white;
+            font-size: 15px;
+            animation: twinkle 3s ease-in-out infinite;
+        }
+        
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.3; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.3); }
+        }
+        
+        .clouds {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+        }
+        
+        .cloud {
+            position: absolute;
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 40px;
+            animation: cloudFloat 12s ease-in-out infinite;
+        }
+        
+        @keyframes cloudFloat {
+            0%, 100% { transform: translateX(-20px); }
+            50% { transform: translateX(20px); }
+        }
+        
+        .rocket {
+            position: absolute;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transition: bottom 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            bottom: 30px;
+            z-index: 50;
+        }
+        
+        .rocket-emoji {
+            font-size: 45px;
+            filter: drop-shadow(3px 3px 6px rgba(0, 0, 0, 0.5));
+            animation: rocketFloat 2.5s ease-in-out infinite alternate;
+            position: relative;
+        }
+        
+        @keyframes rocketFloat {
+            0% { transform: translateY(0px) rotate(-3deg); }
+            100% { transform: translateY(-12px) rotate(3deg); }
+        }
+        
+        .rocket-trail {
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 20px;
+            animation: trail 1s ease-in-out infinite;
+        }
+        
+        @keyframes trail {
+            0%, 100% { opacity: 0.8; transform: translateX(-50%) scale(1); }
+            50% { opacity: 0.4; transform: translateX(-50%) scale(1.2); }
+        }
+        
+        .rocket-info {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 8px 12px;
+            border-radius: 10px;
+            margin-top: 15px;
+            border: 2px solid #333;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(5px);
+        }
+        
+        .rocket-label {
+            font-size: 14px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 4px;
+        }
+        
+        .rocket-score {
+            background: linear-gradient(45deg, #28a745, #20c997);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: bold;
+        }
+        
+        .score-board {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            z-index: 100;
+        }
+        
+        .score-board h3 {
+            margin-bottom: 15px;
+            color: #FFD700;
+            font-size: 1.2em;
+        }
+        
+        .score-list {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            max-width: 300px;
+        }
+        
+        .score-item {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 8px;
+            border-radius: 6px;
+            text-align: center;
+            font-size: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .final-results {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            z-index: 1000;
+            color: white;
+            text-align: center;
+            padding: 50px;
+            box-sizing: border-box;
+            backdrop-filter: blur(20px);
+        }
+        
+        .results-title {
+            font-size: 4em;
+            font-weight: bold;
+            margin-bottom: 30px;
+            text-shadow: 4px 4px 8px rgba(0, 0, 0, 0.7);
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+        
+        @keyframes glow {
+            0% { text-shadow: 4px 4px 8px rgba(0, 0, 0, 0.7), 0 0 20px rgba(255, 215, 0, 0.5); }
+            100% { text-shadow: 4px 4px 8px rgba(0, 0, 0, 0.7), 0 0 40px rgba(255, 215, 0, 0.8); }
+        }
+        
+        .celebration {
+            font-size: 60px;
+            animation: bounce 1.5s infinite;
+            margin: 30px 0;
+        }
+        
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-30px); }
+            60% { transform: translateY(-15px); }
+        }
+        
+        .podium {
+            display: flex;
+            justify-content: center;
+            align-items: end;
+            gap: 40px;
+            margin: 50px 0;
+            flex-wrap: wrap;
+        }
+        
+        .podium-place {
+            text-align: center;
+            padding: 30px;
+            border-radius: 20px;
+            color: white;
+            font-weight: bold;
+            font-size: 1.3em;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .podium-place::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            animation: shine 3s ease-in-out infinite;
+        }
+        
+        @keyframes shine {
+            0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+            50% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+            100% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+        }
+        
+        .first { 
+            background: linear-gradient(45deg, #FFD700, #FFA500);
+            height: 180px;
+            transform: scale(1.1);
+            border: 3px solid #FFD700;
+        }
+        
+        .second { 
+            background: linear-gradient(45deg, #C0C0C0, #A9A9A9);
+            height: 150px;
+            border: 3px solid #C0C0C0;
+        }
+        
+        .third { 
+            background: linear-gradient(45deg, #CD7F32, #B8860B);
+            height: 120px;
+            border: 3px solid #CD7F32;
+        }
+        
+        .fireworks {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 50;
+        }
+        
+        .firework {
+            position: absolute;
+            font-size: 35px;
+            animation: fireworkExplode 3s ease-out infinite;
+        }
+        
+        @keyframes fireworkExplode {
+            0% { 
+                transform: scale(0) rotate(0deg); 
+                opacity: 1; 
+            }
+            50% { 
+                transform: scale(1.2) rotate(180deg); 
+                opacity: 1; 
+            }
+            100% { 
+                transform: scale(2) rotate(360deg); 
+                opacity: 0; 
+            }
+        }
+        
+        .score-update-animation {
+            position: absolute;
+            font-size: 28px;
+            font-weight: bold;
+            color: #FFD700;
+            text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.8);
+            animation: scorePopup 2.5s ease-out forwards;
+            pointer-events: none;
+            z-index: 150;
+        }
+        
+        @keyframes scorePopup {
+            0% { 
+                transform: translateY(0) scale(1);
+                opacity: 1;
+            }
+            50% {
+                transform: translateY(-40px) scale(1.3);
+                opacity: 1;
+            }
+            100% { 
+                transform: translateY(-80px) scale(0.8);
+                opacity: 0;
+            }
+        }
+        
+        .room-info {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            z-index: 100;
+        }
+        
+        .room-id {
+            font-family: 'Courier New', monospace;
+            font-size: 16px;
+            font-weight: bold;
+            color: #FFD700;
+        }
+        
+        @media (max-width: 768px) {
+            .title {
+                font-size: 2em;
+            }
+            
+            .control-bar {
+                position: relative;
+                top: auto;
+                right: auto;
+                justify-content: center;
+                margin: 10px 0;
+            }
+            
+            .control-btn {
+                padding: 10px 15px;
+                font-size: 14px;
+            }
+            
+            .rocket-emoji {
+                font-size: 35px;
+            }
+            
+            .score-board {
+                position: relative;
+                bottom: auto;
+                left: auto;
+                margin: 20px;
+                width: calc(100% - 40px);
+            }
+            
+            .score-list {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .podium {
+                flex-direction: column;
+                align-items: center;
+                gap: 20px;
+            }
+            
+            .podium-place {
+                width: 80%;
+                max-width: 300px;
+            }
+            
+            .results-title {
+                font-size: 2.5em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="title-bar">
+        <div class="title">🏕️ 營隊火箭競賽 🚀</div>
+        <div class="subtitle">即時競賽排行榜</div>
+        <div class="control-bar">
+            <button class="control-btn final-btn" onclick="showFinalResults()">🏆 結算排名</button>
+            <button class="control-btn reset-btn" onclick="resetScores()">🔄 重置</button>
+        </div>
+    </div>
+    
+    <div class="status-indicator" id="statusIndicator">
+        🌐 即時同步中
+    </div>
+    
+    <div class="rocket-area" id="rocketArea">
+        <div class="background-elements">
+            <div class="stars" id="stars"></div>
+            <div class="clouds" id="clouds"></div>
+            <div class="fireworks" id="fireworks"></div>
+        </div>
+        <!-- 火箭將由JavaScript生成 -->
+    </div>
+    
+    <div class="score-board">
+        <h3>📊 即時分數</h3>
+        <div class="score-list" id="scoreList">
+            <!-- 分數列表將由JavaScript生成 -->
+        </div>
+    </div>
+    
+    <div class="room-info">
+        <div style="font-size: 12px; opacity: 0.8;">房間代碼</div>
+        <div class="room-id" id="roomId">載入中...</div>
+    </div>
+    
+    <div class="final-results" id="finalResults">
+        <div class="results-title">🎉 最終排名揭曉 🎉</div>
+        <div class="celebration">🎊✨🎆✨🎊</div>
+        <div class="podium" id="podium">
+            <!-- 頒獎台將由JavaScript生成 -->
+        </div>
+        <div class="celebration">🎇🌟🎇🌟🎇</div>
+        <button class="control-btn" onclick="hideFinalResults()" style="margin-top: 30px;">
+            ↩️ 返回競賽
+        </button>
+    </div>
+
+    <script>
+        // 全局變量
+        let scores = {};
+        let previousScores = {};
+        let roomId = '';
+        let isShowingResults = false;
+        
+        // 初始化分數
+        for (let i = 1; i <= 9; i++) {
+            scores[i] = 0;
+            previousScores[i] = 0;
+        }
+        
+        // 獲取房間ID
+        function initializeRoom() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const urlRoomId = urlParams.get('room');
+            
+            if (urlRoomId) {
+                roomId = urlRoomId;
+            } else {
+                roomId = 'camp_' + Math.random().toString(36).substr(2, 6);
+                const newUrl = window.location.pathname + '?room=' + roomId;
+                window.history.replaceState({}, '', newUrl);
+            }
+            
+            document.getElementById('roomId').textContent = roomId;
+        }
+        
+        // 創建星星背景
+        function createStars() {
+            const starsContainer = document.getElementById('stars');
+            for (let i = 0; i < 80; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                star.innerHTML = '✨';
+                star.style.left = Math.random() * 100 + '%';
+                star.style.top = Math.random() * 70 + '%';
+                star.style.animationDelay = Math.random() * 3 + 's';
+                star.style.animationDuration = (2 + Math.random() * 2) + 's';
+                starsContainer.appendChild(star);
+            }
+        }
+        
+        // 創建雲朵
+        function createClouds() {
+            const cloudsContainer = document.getElementById('clouds');
+            for (let i = 0; i < 12; i++) {
+                const cloud = document.createElement('div');
+                cloud.className = 'cloud';
+                cloud.innerHTML = '☁️';
+                cloud.style.left = Math.random() * 90 + '%';
+                cloud.style.top = (20 + Math.random() * 50) + '%';
+                cloud.style.animationDelay = Math.random() * 12 + 's';
+                cloud.style.animationDuration = (8 + Math.random() * 8) + 's';
+                cloudsContainer.appendChild(cloud);
+            }
+        }
+        
+        // 創建火箭
+        function createRockets() {
+            const rocketArea = document.getElementById('rocketArea');
+            
+            for (let i = 1; i <= 9; i++) {
+                const rocket = document.createElement('div');
+                rocket.className = 'rocket';
+                rocket.id = `rocket-${i}`;
+                rocket.style.left = `${(i - 1) * 10.5 + 3}%`;
+                rocket.innerHTML = `
+                    <div class="rocket-emoji">
+                        🚀
+                        <div class="rocket-trail">🔥</div>
+                    </div>
+                    <div class="rocket-info">
+                        <div class="rocket-label">第${i}組</div>
+                        <div class="rocket-score" id="rocket-score-${i}">0分</div>
+                    </div>
+                `;
+                rocketArea.appendChild(rocket);
+            }
+        }
+        
+        // 創建分數列表
+        function createScoreList() {
+            const scoreList = document.getElementById('scoreList');
+            scoreList.innerHTML = '';
+            
+            for (let i = 1; i <= 9; i++) {
+                const scoreItem = document.createElement('div');
+                scoreItem.className = 'score-item';
+                scoreItem.innerHTML = `第${i}組: <span id="score-${i}">0</span>分`;
+                scoreList.appendChild(scoreItem);
+            }
+        }
+        
+        // 顯示分數更新動畫
+        function showScoreUpdateAnimation(team, points) {
+            const rocket = document.getElementById(`rocket-${team}`);
+            if (!rocket) return;
+            
+            const animation = document.createElement('div');
+            animation.className = 'score-update-animation';
+            animation.innerHTML = `+${points}`;
+            
+            const rect = rocket.getBoundingClientRect();
+            animation.style.left = rect.left + rect.width / 2 + 'px';
+            animation.style.top = rect.top - 30 + 'px';
+            
+            document.body.appendChild(animation);
+            
+            setTimeout(() => {
+                if (document.body.contains(animation)) {
+                    document.body.removeChild(animation);
+                }
+            }, 2500);
+        }
+        
+        // 更新顯示
+        function updateDisplay() {
+            const maxScore = Math.max(...Object.values(scores));
+            const maxHeight = window.innerHeight - 250;
+            
+            for (let i = 1; i <= 9; i++) {
+                // 檢查是否有分數更新
+                if (scores[i] > previousScores[i]) {
+                    showScoreUpdateAnimation(i, scores[i] - previousScores[i]);
+                }
+                
+                // 更新分數顯示
+                const scoreElement = document.getElementById(`score-${i}`);
+                const rocketScoreElement = document.getElementById(`rocket-score-${i}`);
+                
+                if (scoreElement) scoreElement.textContent = scores[i];
+                if (rocketScoreElement) rocketScoreElement.textContent = `${scores[i]}分`;
+                
+                // 更新火箭位置
+                const rocket = document.getElementById(`rocket-${i}`);
+                if (rocket) {
+                    let height = 30;
+                    if (maxScore > 0) {
+                        height = 30 + (scores[i] / maxScore) * (maxHeight * 0.8);
+                    }
+                    rocket.style.bottom = height + 'px';
+                }
+            }
+            
+            // 更新前一次分數記錄
+            previousScores = { ...scores };
+        }
+        
+        // 創建煙火效果
+        function createFireworks() {
+            const fireworksContainer = document.getElementById('fireworks');
+            const fireworkEmojis = ['🎆', '🎇', '✨', '💥', '🌟', '💫', '🎊'];
+            
+            for (let i = 0; i < 30; i++) {
+                setTimeout(() => {
+                    const firework = document.createElement('div');
+                    firework.className = 'firework';
+                    firework.innerHTML = fireworkEmojis[Math.floor(Math.random() * fireworkEmojis.length)];
+                    firework.style.left = Math.random() * 100 + '%';
+                    firework.style.top = Math.random() * 100 + '%';
+                    firework.style.animationDelay = Math.random() * 2 + 's';
+                    fireworksContainer.appendChild(firework);
+                    
+                    setTimeout(() => {
+                        if (fireworksContainer.contains(firework)) {
+                            fireworksContainer.removeChild(firework);
+                        }
+                    }, 3000);
+                }, i * 150);
+            }
+        }
+        
+        // 顯示最終結果
+        function showFinalResults() {
+            if (isShowingResults) return;
+            isShowingResults = true;
+            
+            // 創建排名數組
+            const ranking = [];
+            for (let i = 1; i <= 9; i++) {
+                ranking.push({ team: i, score: scores[i] });
+            }
+            
+            // 按分數排序
+            ranking.sort((a, b) => b.score - a.score);
+            
+            // 所有火箭升空動畫
+            for (let i = 1; i <= 9; i++) {
+                const rocket = document.getElementById(`rocket-${i}`);
+                if (rocket) {
+                    rocket.style.bottom = (window.innerHeight - 150) + 'px';
+                    rocket.style.transition = 'bottom 3s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+                }
+            }
+            
+            // 創建煙火效果
+            createFireworks();
+            
+            // 延遲顯示結果
+            setTimeout(() => {
+                const podium = document.getElementById('podium');
+                podium.innerHTML = '';
+                
+                // 顯示前三名
+                for (let i = 0; i < Math.min(3, ranking.length); i++) {
+                    if (ranking[i].score >= 0) {
+                        const place = document.createElement('div');
+                        place.className = `podium-place ${i === 0 ? 'first' : i === 1 ? 'second' : 'third'}`;
+                        place.innerHTML = `
+                            <div style="font-size: 50px; margin-bottom: 15px;">
+                                ${i === 0 ? '🥇' : i === 1 ? '🥈' : '🥉'}
+                            </div>
+                            <div style="font-size: 1.5em; margin-bottom: 10px;">第${ranking[i].team}組</div>
+                            <div style="font-size: 1.3em; opacity: 0.9;">${ranking[i].score}分</div>
+                        `;
+                        podium.appendChild(place);
+                    }
+                }
+                
+                document.getElementById('finalResults').style.display = 'block';
+            }, 3000);
+        }
+        
+        // 隱藏最終結果
+        function hideFinalResults() {
+            document.getElementById('finalResults').style.display = 'none';
+            isShowingResults = false;
+            
+            // 恢復火箭位置
+            updateDisplay();
+        }
+        
+        // 重置分數
+        function resetScores() {
+            if (confirm('確定要重置所有分數嗎？這將清除所有組別的分數記錄。')) {
+                for (let i = 1; i <= 9; i++) {
+                    scores[i] = 0;
+                    previousScores[i] = 0;
+                }
+                
+                // 保存到本地存儲
+                const storageKey = `campScores_${roomId}`;
+                const data = {
+                    scores: scores,
+                    timestamp: Date.now(),
+                    roomId: roomId
+                };
+                localStorage.setItem(storageKey, JSON.stringify(data));
+                
+                updateDisplay();
+                hideFinalResults();
+                
+                // 觸發更新事件
+                window.dispatchEvent(new CustomEvent('scoresUpdated', { 
+                    detail: data 
+                }));
+            }
+        }
+        
+        // 從本地存儲載入分數
+        function loadScores() {
+            const storageKey = `campScores_${roomId}`;
+            const savedData = localStorage.getItem(storageKey);
+            
+            if (savedData) {
+                const data = JSON.parse(savedData);
+                if (data.scores) {
+                    scores = data.scores;
+                    updateDisplay();
+                }
+            }
+        }
+        
+        // 監聽存儲變化
+        window.addEventListener('storage', function(e) {
+            const storageKey = `campScores_${roomId}`;
+            if (e.key === storageKey) {
+                loadScores();
+            }
+        });
+        
+        // 監聽自定義事件
+        window.addEventListener('scoresUpdated', function(e) {
+            if (e.detail.roomId === roomId) {
+                scores = e.detail.scores;
+                updateDisplay();
+            }
+        });
+        
+        // 定期檢查分數更新
+        setInterval(loadScores, 1000);
+        
+        // 初始化
+        window.addEventListener('load', function() {
+            initializeRoom();
+            createStars();
+            createClouds();
+            createRockets();
+            createScoreList();
+            loadScores();
+        });
+    </script>
+</body>
+</html>
