@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>營隊系統 - 火箭控制台</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0; /* 移除 body 的預設邊距 */
+        }
+        
+        /* --- 修改處：讓火箭區全螢幕 --- */
+        .rocket-area {
+            position: fixed; /* 固定在視窗中 */
+            top: 0;
+            left: 0;
+            width: 100vw; /* 100% 視窗寬度 */
+            height: 100vh; /* 100% 視窗高度 */
+            z-index: -1; /* 把它放到最底層 */
+            background: linear-gradient(to top, 
+                #8B4513 0%, 
+                #DEB887 10%, 
+                #98FB98 30%, 
+                #87CEEB 60%, 
+                #4169E1 80%, 
+                #000428 100%);
+            overflow: hidden;
+        }
+
+        /* --- 修改處：讓控制台容器懸浮在背景之上 --- */
+        .container {
+            max-width: 1200px;
+            margin: 15px auto; /* 調整置中與上下邊距 */
+            background: rgba(255, 255, 255, 0.9); /* 讓背景稍微透明，更有層次感 */
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            position: relative; /* 確保 z-index 生效 */
+            z-index: 10;
+        }
+        
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 25px;
+            font-size: 2.2em;
+        }
+        
+        .status-bar {
+            background: #f8f9fa;
+            padding: 10px 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        .connection-status {
+            padding: 5px 12px;
+            border-radius: 15px;
+            color: white;
+            font-weight: bold;
+            font-size: 14px;
+        }
+        
+        .connected { background: #28a745; }
+        .disconnected { background: #dc3545; }
+        .connecting { background: #ffc107; color: #333; }
+        
+        .room-info {
+            font-weight: bold;
+            color: #495057;
+        }
+        
+        .control-panel {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 20px; /* 縮小一點間距 */
+            border: 2px solid #dee2e6;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        
+        button {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-width: 120px;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .final-button {
+            background: linear-gradient(45deg, #ff6b6b, #feca57);
+            color: white;
+        }
+        
+        .reset-button {
+            background: linear-gradient(45deg, #ff7675, #fd79a8);
+            color: white;
+        }
+        
+        .rocket {
+            position: absolute;
+            bottom: 5vh; /* 初始高度使用 vh 單位 */
+            width: 8%;
+            max-width: 80px; /* 避免火箭在超大螢幕上過大 */
+            text-align: center;
+            /* --- 修改處：動畫速度變慢 --- */
+            transition: bottom 2.5s ease-in-out;
+            z-index: 1;
+        }
+        
+        .rocket-emoji {
+            font-size: 3vw; /* emoji 大小隨螢幕寬度變化 */
+            margin-bottom: 5px;
+            filter: drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.5));
+            transform: rotate(-45deg);
+        }
+        
+        .rocket-label {
+            font-size: 12px;
+            font-weight: bold;
+            color: white;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+            margin-bottom: 2px;
+        }
+
+        .final-results {
+            display: none;
+            text-align: center;
+            background: linear-gradient(135deg, #ffeaa7, #fab1a0);
+            padding: 30px;
+            border-radius: 20px;
+            margin-top: 30px;
+            animation: fadeIn 1s ease-in;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .final-results h2, .celebration, .podium {
+            position: relative;
+            z-index: 20; /* 確保結算畫面在最上層 */
+        }
+
+    </style>
+</head>
+<body>
+    <div class="rocket-area" id="rocketArea"></div>
+
+    <div class="container">
+        <h1>🏕️ 營隊系統 - 火箭控制台 🚀</h1>
+        
+        <div class="status-bar">
+            <div class="connection-status connecting" id="connectionStatus">🔄 連接中...</div>
+            <div class="room-info" id="roomInfo">房間ID: <span id="roomId">載入中...</span></div>
+        </div>
+        
+        <div class="share-info" id="shareInfo" style="display: none;">
+            <h4>📱 分享填分網址給其他人：</h4>
+            <div class="share-url" id="shareUrl"></div>
+            <button class="copy-button" onclick="copyShareUrl()">📋 複製網址</button>
+        </div>
+        
+        <div class="control-panel">
+            <div class="button-group">
+                <button class="final-button" onclick="showFinalResults()" id="finalButton">🏆 結算排名</button>
+                <button class="reset-button" onclick="resetScores()" id="resetButton">🔄 重置</button>
+            </div>
+        </div>
+        
+        <div class="final-results" id="finalResults">
+            <h2>🎉 最終排名 🎉</h2>
+            <div class="celebration">🎊🎊🎊</div>
+            <div class="podium" id="podium"></div>
+        </div>
+    </div>
+    
+    <div class="notification" id="notification"></div>
+
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script>
+
+    <script>
+        // Firebase 配置
+        const firebaseConfig = {
+            apiKey: "AIzaSyD5ytWrUOI6UIUBIcKpF3fyODQR2pXFMmY",
+            authDomain: "score-calculation-ef584.firebaseapp.com",
+            databaseURL: "https://score-calculation-ef584-default-rtdb.firebaseio.com",
+            projectId: "score-calculation-ef584",
+            storageBucket: "score-calculation-ef584.firebasestorage.app",
+            messagingSenderId: "634074718336",
+            appId: "1:634074718336:web:38960860ad796197a50665",
+            measurementId: "G-R6NT2QJQSC"
+        };
+        
+        let database;
+        let scoresRef;
+        let scores = {};
+        let roomId = '';
+        let isConnected = false;
+        
+        for (let i = 1; i <= 9; i++) {
+            scores[i] = 0;
+        }
+        
+        function initFirebase() {
+            try {
+                if (!firebase.apps.length) {
+                    firebase.initializeApp(firebaseConfig);
+                }
+                database = firebase.database();
+                updateConnectionStatus('connected');
+                return true;
+            } catch (error) {
+                console.error('Firebase 初始化失敗:', error);
+                updateConnectionStatus('disconnected');
+                return false;
+            }
+        }
+        
+        function initializeRoom() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const urlRoomId = urlParams.get('room');
+            
+            if (urlRoomId) {
+                roomId = urlRoomId;
+            } else {
+                roomId = 'camp_' + Math.random().toString(36).substr(2, 6);
+                const newUrl = window.location.pathname + '?room=' + roomId;
+                window.history.replaceState({}, '', newUrl);
+            }
+            
+            document.getElementById('roomId').textContent = roomId;
+            
+            if (database) {
+                scoresRef = database.ref('rooms/' + roomId + '/scores');
+                
+                scoresRef.on('value', (snapshot) => {
+                    const data = snapshot.val();
+                    if (data) {
+                        scores = data;
+                        updateDisplay();
+                    }
+                });
+            }
+            
+            showShareInfo();
+        }
+        
+        function showShareInfo() {
+            const shareInfo = document.getElementById('shareInfo');
+            const shareUrl = document.getElementById('shareUrl');
+            const baseUrl = window.location.origin + window.location.pathname.replace('rocket_control.html', 'score_input_simple.html');
+            const inputUrl = baseUrl + '?room=' + roomId;
+            
+            shareUrl.textContent = inputUrl;
+            shareInfo.style.display = 'block';
+            
+            showNotification(`房間已創建！房間ID: ${roomId}`);
+        }
+        
+        function copyShareUrl() {
+            const shareUrl = document.getElementById('shareUrl').textContent;
+            navigator.clipboard.writeText(shareUrl).then(() => {
+                showNotification('網址已複製到剪貼板！');
+            }).catch(() => {
+                showNotification('複製失敗，請手動複製', 'error');
+            });
+        }
+        
+        function updateConnectionStatus(status) {
+            const statusElement = document.getElementById('connectionStatus');
+            const buttons = ['finalButton', 'resetButton'];
+            
+            switch(status) {
+                case 'connected':
+                    statusElement.textContent = '🌐 已連線';
+                    statusElement.className = 'connection-status connected';
+                    isConnected = true;
+                    buttons.forEach(id => {
+                        document.getElementById(id).disabled = false;
+                    });
+                    break;
+                case 'disconnected':
+                    statusElement.textContent = '❌ 連線失敗';
+                    statusElement.className = 'connection-status disconnected';
+                    isConnected = false;
+                    buttons.forEach(id => {
+                        document.getElementById(id).disabled = true;
+                    });
+                    break;
+                case 'connecting':
+                    statusElement.textContent = '🔄 連接中...';
+                    statusElement.className = 'connection-status connecting';
+                    isConnected = false;
+                    break;
+            }
+        }
+        
+        function showNotification(message, type = 'success') {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.className = `notification ${type} show`;
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 5000);
+        }
+
+        function createRockets() {
+            const rocketArea = document.getElementById('rocketArea');
+            rocketArea.innerHTML = '';
+            
+            for (let i = 1; i <= 9; i++) {
+                const rocket = document.createElement('div');
+                rocket.className = 'rocket';
+                rocket.id = `rocket-${i}`;
+                
+                rocket.style.left = `${(i - 1) * 10.5 + 2}%`;
+                
+                rocket.innerHTML = `
+                    <div class="rocket-emoji">🚀</div>
+                    <div class="rocket-label">第${i}組</div>
+                `;
+                rocketArea.appendChild(rocket);
+            }
+        }
+        
+        // --- 修改處：更新顯示邏輯，以整個視窗高度為準 ---
+        function updateDisplay() {
+            const maxScore = Math.max(1, ...Object.values(scores));
+            
+            // 火箭的飛行總行程，佔視窗高度的 80%
+            const travelRange = window.innerHeight * 0.8;
+            // 火箭的初始底部位置，佔視窗高度的 5%
+            const baseBottom = window.innerHeight * 0.05;
+
+            for (let i = 1; i <= 9; i++) {
+                const rocket = document.getElementById(`rocket-${i}`);
+                if (rocket) {
+                    const scoreRatio = (scores[i] || 0) / maxScore;
+                    const scoreHeight = scoreRatio * travelRange;
+                    
+                    rocket.style.bottom = `${baseBottom + scoreHeight}px`;
+                }
+            }
+        }
+        
+        async function showFinalResults() {
+            const ranking = [];
+            for (let i = 1; i <= 9; i++) {
+                ranking.push({ team: i, score: scores[i] || 0 });
+            }
+            
+            ranking.sort((a, b) => b.score - a.score);
+            
+            for (let i = 1; i <= 9; i++) {
+                const rocket = document.getElementById(`rocket-${i}`);
+                if (rocket) {
+                    rocket.style.transition = 'bottom 1.5s cubic-bezier(0.25, 1, 0.5, 1)';
+                    rocket.style.bottom = '90vh'; // 飛到視窗頂部
+                }
+            }
+            
+            setTimeout(() => {
+                const podium = document.getElementById('podium');
+                podium.innerHTML = '';
+                
+                for (let i = 0; i < Math.min(3, ranking.length); i++) {
+                    const place = document.createElement('div');
+                    place.className = `podium-place ${i === 0 ? 'first' : i === 1 ? 'second' : 'third'}`;
+                    place.innerHTML = `
+                        <div style="font-size: 25px;">${i === 0 ? '🥇' : i === 1 ? '🥈' : '🥉'}</div>
+                        <div>第${ranking[i].team}組</div>
+                    `;
+                    podium.appendChild(place);
+                }
+                
+                document.getElementById('finalResults').style.display = 'block';
+            }, 1500);
+        }
+        
+        async function resetScores() {
+            if (confirm('確定要重置所有隊伍的進度嗎？')) {
+                for (let i = 1; i <= 9; i++) {
+                    scores[i] = 0;
+                }
+                
+                if (scoresRef) {
+                    await scoresRef.set(scores);
+                }
+                
+                updateDisplay();
+                document.getElementById('finalResults').style.display = 'none';
+                showNotification('進度已重置！');
+            }
+        }
+        
+        window.addEventListener('load', function() {
+            createRockets();
+            updateDisplay(); // 初始載入時也根據視窗大小定位
+            
+            if (initFirebase()) {
+                initializeRoom();
+            } else {
+                showNotification('Firebase 連接失敗，請檢查配置', 'error');
+            }
+            // 監聽視窗大小變化，重新計算位置
+            window.addEventListener('resize', updateDisplay);
+        });
+    </script>
+</body>
+</html>
