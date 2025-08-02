@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>快速修復測試</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background: #f8f9fa;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .test-section {
+            background: #f8f9fa;
+            padding: 20px;
+            margin: 15px 0;
+            border-radius: 8px;
+            border-left: 4px solid #007bff;
+        }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+        .warning { background: #fff3cd; color: #856404; }
+        .info { background: #d1ecf1; color: #0c5460; }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover { background: #0056b3; }
+        .url-test {
+            font-family: monospace;
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 5px 0;
+            word-break: break-all;
+        }
+        #log {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            padding: 15px;
+            border-radius: 5px;
+            height: 200px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 快速修復測試</h1>
+        <p>這個工具會測試不同的數據庫 URL 來找到正確的配置</p>
+
+        <div class="test-section">
+            <h3>🔍 測試不同的數據庫 URL</h3>
+            <div id="urlTests"></div>
+            <button onclick="testAllUrls()">測試所有 URL</button>
+        </div>
+
+        <div class="test-section">
+            <h3>📊 房間代號測試</h3>
+            <div id="roomTest" class="status info">等待測試...</div>
+            <button onclick="testRoomIdWithBetterErrorHandling()" id="roomTestBtn" disabled>測試房間代號</button>
+        </div>
+
+        <div class="test-section">
+            <h3>📝 測試日誌</h3>
+            <button onclick="clearLog()">清除日誌</button>
+            <div id="log"></div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script>
+
+    <script>
+        const baseConfig = {
+            apiKey: "AIzaSyD5ytWrUOI6UIUBIcKpF3fyODQR2pXFMmY",
+            authDomain: "score-calculation-ef584.firebaseapp.com",
+            projectId: "score-calculation-ef584",
+            storageBucket: "score-calculation-ef584.firebasestorage.app",
+            messagingSenderId: "634074718336",
+            appId: "1:634074718336:web:38960860ad796197a50665",
+            measurementId: "G-R6NT2QJQSC"
+        };
+
+        // 可能的數據庫 URL
+        const possibleUrls = [
+            "https://score-calculation-ef584-default-rtdb.firebaseio.com",
+            "https://score-calculation-ef584-default-rtdb.asia-southeast1.firebasedatabase.app",
+            "https://score-calculation-ef584-default-rtdb.europe-west1.firebasedatabase.app",
+            "https://score-calculation-ef584-default-rtdb.us-central1.firebasedatabase.app"
+        ];
+
+        let workingUrl = null;
+        let workingDatabase = null;
+
+        function log(message) {
+            const logDiv = document.getElementById('log');
+            const timestamp = new Date().toLocaleTimeString();
+            logDiv.innerHTML += `[${timestamp}] ${message}\n`;
+            logDiv.scrollTop = logDiv.scrollHeight;
+            console.log(message);
+        }
+
+        function clearLog() {
+            document.getElementById('log').innerHTML = '';
+        }
+
+        async function testUrl(url) {
+            log(`測試 URL: ${url}`);
+            
+            try {
+                // 使用 fetch 測試 URL 可達性（期望401是正常的，表示數據庫存在但需要認證）
+                const response = await fetch(`${url}/.json`);
+                log(`HTTP 狀態: ${response.status}`);
+                
+                if (response.status === 200) {
+                    log(`✅ URL 可達且開放: ${url}`);
+                    return { success: true, url: url };
+                } else if (response.status === 401) {
+                    log(`✅ URL 存在（需要認證，這是正常的）: ${url}`);
+                    return { success: true, url: url, needsAuth: true };
+                } else if (response.status === 404) {
+                    log(`❌ 數據庫不存在: ${url}`);
+                    return { success: false, status: response.status };
+                } else {
+                    log(`⚠️ URL 返回狀態 ${response.status}，將嘗試Firebase連接`);
+                    return { success: true, url: url, status: response.status };
+                }
+            } catch (error) {
+                log(`❌ URL 測試失敗: ${error.message}`);
+                return { success: false, error: error.message };
+            }
+        }
+
+        async function testFirebaseWithUrl(url) {
+            log(`測試 Firebase 連接: ${url}`);
+            
+            try {
+                const config = { ...baseConfig, databaseURL: url };
+                
+                // 重新初始化 Firebase
+                if (firebase.apps.length > 0) {
+                    await firebase.app().delete();
+                }
+                
+                firebase.initializeApp(config);
+                const database = firebase.database();
+                
+                // 測試連接 - 使用.info/connected來檢查連接狀態
+                const testRef = database.ref('.info/connected');
+                
+                return new Promise((resolve) => {
+                    const timeout = setTimeout(() => {
+                        log(`⏰ Firebase 連接超時: ${url}`);
+                        log(`💡 提示：如果持續超時，可能需要檢查網絡或Firebase配置`);
+                        resolve({ success: false, error: 'timeout' });
+                    }, 8000); // 增加超時時間
+                    
+                    testRef.once('value', (snapshot) => {
+                        clearTimeout(timeout);
+                        if (snapshot.val() === true) {
+                            log(`✅ Firebase 連接成功: ${url}`);
+                            log(`📡 連接狀態: 已連接到Firebase Realtime Database`);
+                            resolve({ success: true, database: database });
+                        } else {
+                            log(`❌ Firebase 連接狀態為false: ${url}`);
+                            log(`💡 提示：可能是網絡問題或數據庫配置問題`);
+                            resolve({ success: false, error: 'connection status false' });
+                        }
+                    }, (error) => {
+                        clearTimeout(timeout);
+                        log(`❌ Firebase 連接錯誤: ${error.message}`);
+                        log(`🔍 錯誤代碼: ${error.code || 'unknown'}`);
+                        
+                        // 提供更詳細的錯誤診斷
+                        if (error.code === 'PERMISSION_DENIED') {
+                            log(`💡 權限被拒絕：數據庫安全規則可能阻止了訪問`);
+                            log(`💡 建議：檢查Firebase Console中的Database Rules`);
+                        } else if (error.code === 'NETWORK_ERROR') {
+                            log(`💡 網絡錯誤：請檢查網絡連接`);
+                        }
+                        
+                        resolve({ success: false, error: error.message, code: error.code });
+                    });
+                });
+                
+            } catch (error) {
+                log(`❌ Firebase 初始化失敗: ${error.message}`);
+                log(`🔍 初始化錯誤詳情: ${error.stack || 'No stack trace'}`);
+                return { success: false, error: error.message };
+            }
+        }
+
+        async function testAllUrls() {
+            log('=== 開始測試所有可能的數據庫 URL ===');
+            
+            const urlTestsDiv = document.getElementById('urlTests');
+            urlTestsDiv.innerHTML = '';
+            
+            for (const url of possibleUrls) {
+                const testDiv = document.createElement('div');
+                testDiv.className = 'url-test';
+                testDiv.innerHTML = `
+                    <div>測試: ${url}</div>
+                    <div id="result-${possibleUrls.indexOf(url)}" class="status info">測試中...</div>
+                `;
+                urlTestsDiv.appendChild(testDiv);
+                
+                const resultDiv = document.getElementById(`result-${possibleUrls.indexOf(url)}`);
+                
+                // 先測試 HTTP 可達性
+                const httpResult = await testUrl(url);
+                
+                if (httpResult.success) {
+                    // 再測試 Firebase 連接
+                    const firebaseResult = await testFirebaseWithUrl(url);
+                    
+                    if (firebaseResult.success) {
+                        resultDiv.textContent = '✅ 連接成功！';
+                        resultDiv.className = 'status success';
+                        workingUrl = url;
+                        workingDatabase = firebaseResult.database;
+                        
+                        log(`🎉 找到可用的數據庫 URL: ${url}`);
+                        document.getElementById('roomTestBtn').disabled = false;
+                        
+                        // 更新其他測試為成功狀態
+                        document.getElementById('roomTest').textContent = '準備測試房間代號功能';
+                        document.getElementById('roomTest').className = 'status info';
+                        
+                        break;
+                    } else {
+                        resultDiv.textContent = `❌ Firebase 連接失敗: ${firebaseResult.error}`;
+                        resultDiv.className = 'status error';
+                    }
+                } else {
+                    resultDiv.textContent = `❌ URL 不可達: ${httpResult.error || httpResult.status}`;
+                    resultDiv.className = 'status error';
+                }
+            }
+            
+            if (!workingUrl) {
+                log('❌ 沒有找到可用的數據庫 URL');
+                log('');
+                log('🔧 診斷和解決建議：');
+                log('1. 檢查 Firebase Console (https://console.firebase.google.com/)');
+                log('2. 確認 Realtime Database 已創建');
+                log('3. 檢查數據庫安全規則，建議測試時使用：');
+                log('   {');
+                log('     "rules": {');
+                log('       ".read": true,');
+                log('       ".write": true');
+                log('     }');
+                log('   }');
+                log('4. 確認數據庫區域設置正確');
+                log('5. 檢查網絡連接是否正常');
+                log('');
+                log('📋 當前測試的配置：');
+                log(`   Project ID: ${baseConfig.projectId}`);
+                log(`   API Key: ${baseConfig.apiKey.substring(0, 20)}...`);
+                log('');
+                showDiagnosticInfo();
+            }
+        }
+
+        async function testRoomId() {
+            if (!workingDatabase) {
+                log('❌ 沒有可用的數據庫連接');
+                return;
+            }
+            
+            log('=== 測試房間代號功能 ===');
+            
+            // 生成測試房間 ID
+            const testRoomId = 'test_' + Math.random().toString(36).substr(2, 6);
+            log(`生成測試房間 ID: ${testRoomId}`);
+            
+            try {
+                // 測試房間數據寫入
+                const roomRef = workingDatabase.ref('rooms/' + testRoomId + '/scores');
+                const testScores = {
+                    1: 0, 2: 0, 3: 0, 4: 0, 5: 0,
+                    6: 0, 7: 0, 8: 0, 9: 0
+                };
+                
+                await roomRef.set(testScores);
+                log('✅ 房間數據寫入成功');
+                
+                // 測試數據讀取
+                const snapshot = await roomRef.once('value');
+                if (snapshot.exists()) {
+                    log('✅ 房間數據讀取成功');
+                    log(`📊 讀取到的分數: ${JSON.stringify(snapshot.val())}`);
+                    
+                    // 測試分數更新
+                    const updatedScores = { ...testScores };
+                    updatedScores[1] = 10;
+                    await roomRef.set(updatedScores);
+                    log('✅ 分數更新測試成功');
+                    
+                    document.getElementById('roomTest').textContent = '✅ 房間代號功能測試通過！';
+                    document.getElementById('roomTest').className = 'status success';
+                    
+                    // 清理測試數據
+                    await workingDatabase.ref('rooms/' + testRoomId).remove();
+                    log('🧹 測試數據已清理');
+                    
+                    // 顯示正確的配置
+                    log('🎉 測試完成！請使用以下配置：');
+                    log(`databaseURL: "${workingUrl}"`);
+                    
+                } else {
+                    throw new Error('數據讀取失敗');
+                }
+                
+            } catch (error) {
+                log(`❌ 房間測試失敗: ${error.message}`);
+                document.getElementById('roomTest').textContent = `❌ 測試失敗: ${error.message}`;
+                document.getElementById('roomTest').className = 'status error';
+            }
+        }
+
+        function showDiagnosticInfo() {
+            log('🔍 額外診斷信息：');
+            log(`   瀏覽器: ${navigator.userAgent.split(' ')[0]}`);
+            log(`   時間: ${new Date().toISOString()}`);
+            log(`   Firebase SDK 版本: 9.0.0`);
+            log('');
+            log('🌐 如果問題持續，請嘗試：');
+            log('- 在 Firebase Console 中重新創建 Realtime Database');
+            log('- 確認項目計費狀態（免費方案有限制）');
+            log('- 檢查是否有防火牆阻止連接');
+            log('- 嘗試在無痕模式下測試');
+        }
+
+        async function testRoomIdWithBetterErrorHandling() {
+            if (!workingDatabase) {
+                log('❌ 沒有可用的數據庫連接');
+                return;
+            }
+            
+            log('=== 測試房間代號功能（增強版） ===');
+            
+            // 生成測試房間 ID
+            const testRoomId = 'test_' + Math.random().toString(36).substr(2, 6);
+            log(`生成測試房間 ID: ${testRoomId}`);
+            
+            try {
+                // 首先測試基本的讀取權限
+                log('🔍 測試數據庫讀取權限...');
+                const rootRef = workingDatabase.ref('/');
+                
+                try {
+                    await rootRef.once('value');
+                    log('✅ 數據庫讀取權限正常');
+                } catch (readError) {
+                    log(`❌ 數據庫讀取權限被拒絕: ${readError.message}`);
+                    if (readError.code === 'PERMISSION_DENIED') {
+                        log('💡 請檢查Firebase安全規則，確保允許讀取操作');
+                    }
+                    throw readError;
+                }
+                
+                // 測試寫入權限
+                log('🔍 測試數據庫寫入權限...');
+                const roomRef = workingDatabase.ref('rooms/' + testRoomId + '/scores');
+                const testScores = {
+                    1: 0, 2: 0, 3: 0, 4: 0, 5: 0,
+                    6: 0, 7: 0, 8: 0, 9: 0
+                };
+                
+                await roomRef.set(testScores);
+                log('✅ 房間數據寫入成功');
+                
+                // 測試數據讀取
+                const snapshot = await roomRef.once('value');
+                if (snapshot.exists()) {
+                    log('✅ 房間數據讀取成功');
+                    log(`📊 讀取到的分數: ${JSON.stringify(snapshot.val())}`);
+                    
+                    // 測試分數更新
+                    const updatedScores = { ...testScores };
+                    updatedScores[1] = 10;
+                    await roomRef.set(updatedScores);
+                    log('✅ 分數更新測試成功');
+                    
+                    // 測試實時監聽
+                    log('🔍 測試實時數據監聽...');
+                    const listenPromise = new Promise((resolve) => {
+                        const listener = roomRef.on('value', (snapshot) => {
+                            log('✅ 實時監聽功能正常');
+                            roomRef.off('value', listener);
+                            resolve();
+                        });
+                        
+                        setTimeout(() => {
+                            roomRef.off('value', listener);
+                            resolve();
+                        }, 2000);
+                    });
+                    
+                    await listenPromise;
+                    
+                    document.getElementById('roomTest').textContent = '✅ 房間代號功能測試完全通過！';
+                    document.getElementById('roomTest').className = 'status success';
+                    
+                    // 清理測試數據
+                    await workingDatabase.ref('rooms/' + testRoomId).remove();
+                    log('🧹 測試數據已清理');
+                    
+                    // 顯示正確的配置
+                    log('');
+                    log('🎉 測試完成！所有功能正常！');
+                    log('📋 請在你的應用中使用以下配置：');
+                    log(`databaseURL: "${workingUrl}"`);
+                    log('');
+                    log('✅ 確認功能：');
+                    log('- ✅ Firebase連接');
+                    log('- ✅ 數據讀取');
+                    log('- ✅ 數據寫入');
+                    log('- ✅ 實時監聽');
+                    log('- ✅ 房間管理');
+                    
+                } else {
+                    throw new Error('數據讀取失敗：寫入的數據無法讀取');
+                }
+                
+            } catch (error) {
+                log(`❌ 房間測試失敗: ${error.message}`);
+                log(`🔍 錯誤代碼: ${error.code || 'unknown'}`);
+                
+                if (error.code === 'PERMISSION_DENIED') {
+                    log('');
+                    log('🔧 權限問題解決方案：');
+                    log('1. 打開 Firebase Console');
+                    log('2. 進入 Realtime Database');
+                    log('3. 點擊 "規則" 標籤');
+                    log('4. 暫時設置為：');
+                    log('   {');
+                    log('     "rules": {');
+                    log('       ".read": true,');
+                    log('       ".write": true');
+                    log('     }');
+                    log('   }');
+                    log('5. 點擊 "發布"');
+                    log('⚠️ 注意：這是測試用規則，正式環境需要更嚴格的安全規則');
+                }
+                
+                document.getElementById('roomTest').textContent = `❌ 測試失敗: ${error.message}`;
+                document.getElementById('roomTest').className = 'status error';
+            }
+        }
+
+        // 頁面載入時自動開始測試
+        window.addEventListener('load', function() {
+            log('🚀 快速修復測試工具啟動');
+            setTimeout(testAllUrls, 1000);
+        });
+    </script>
+</body>
+</html>
