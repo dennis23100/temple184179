@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>營隊系統 - 火箭控制台</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            overflow: hidden; /* 隱藏滾動條，保持畫面乾淨 */
+        }
+        
+        .rocket-area {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: -1;
+            background: linear-gradient(to top, 
+                #8B4513 0%, 
+                #DEB887 10%, 
+                #98FB98 30%, 
+                #87CEEB 60%, 
+                #4169E1 80%, 
+                #000428 100%);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 15px auto;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            position: relative;
+            z-index: 20;
+            transition: transform 0.5s ease-in-out, opacity 0.5s ease-in-out;
+        }
+
+        /* --- 新增：控制台隱藏時的樣式 --- */
+        .container.hidden {
+            opacity: 0;
+            transform: translateY(-120%);
+            pointer-events: none;
+        }
+        
+        /* --- 新增：隱藏/顯示按鈕 --- */
+        #hide-panel-btn {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            font-size: 24px;
+            cursor: pointer;
+            opacity: 0.6;
+            transition: opacity 0.2s;
+        }
+        #hide-panel-btn:hover {
+            opacity: 1;
+        }
+
+        #show-panel-btn {
+            position: fixed;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 19;
+            padding: 8px 16px;
+            background-color: rgba(255, 255, 255, 0.8);
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: bold;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            transition: opacity 0.5s, transform 0.5s;
+        }
+        #show-panel-btn.hidden {
+            opacity: 0;
+            transform: translate(-50%, -150%);
+            pointer-events: none;
+        }
+
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 25px;
+            font-size: 2.2em;
+        }
+        
+        .status-bar, .control-panel, .share-info {
+            margin-bottom: 20px;
+        }
+
+        .rocket {
+            position: absolute;
+            width: 8%;
+            max-width: 80px;
+            text-align: center;
+            transition: bottom 2.5s ease-in-out;
+            z-index: 1;
+        }
+        
+        .rocket-emoji {
+            font-size: 3vw;
+            min-font-size: 20px;
+            margin-bottom: 5px;
+            filter: drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.5));
+            transform: rotate(-45deg);
+        }
+        
+        .rocket-label {
+            font-size: 12px;
+            font-weight: bold;
+            color: white;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+        }
+
+        /* --- 新增：煙火效果 --- */
+        #fireworks-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 50;
+            pointer-events: none;
+        }
+        .particle {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            transition: transform 1s ease-out, opacity 1s ease-out;
+        }
+        
+        /* --- 新增：最終頒獎台的全螢幕樣式 --- */
+        #final-podium-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.6);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 40;
+            opacity: 0;
+            transition: opacity 1s ease-in;
+            pointer-events: none;
+        }
+        #final-podium-overlay.visible {
+            opacity: 1;
+            pointer-events: all;
+        }
+        #final-podium-overlay h2 {
+            color: #FFD700;
+            font-size: 4em;
+            text-shadow: 0 0 20px #FFD700;
+        }
+        .podium {
+            display: flex;
+            justify-content: center;
+            align-items: end;
+            gap: 20px;
+            margin-top: 30px;
+        }
+        .podium-place {
+             padding: 20px 40px; border-radius: 15px; box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2); font-weight: bold; text-align: center;
+        }
+        .podium-place.first { background: linear-gradient(135deg, #ffd700, #ffed4e); transform: scale(1.1); order: 2; }
+        .podium-place.second { background: linear-gradient(135deg, #c0c0c0, #e8e8e8); order: 1; }
+        .podium-place.third { background: linear-gradient(135deg, #cd7f32, #daa520); order: 3; }
+    </style>
+</head>
+<body>
+    <div class="rocket-area" id="rocketArea"></div>
+    <div id="fireworks-container"></div>
+    
+    <button id="show-panel-btn" class="hidden">🔼 顯示控制台</button>
+
+    <div class="container" id="mainContainer">
+        <div id="hide-panel-btn">🔽</div>
+        <h1>🏕️ 營隊系統 - 火箭控制台 🚀</h1>
+        <div class="share-info" id="shareInfo" style="display: none;"></div>
+        <div class="status-bar" id="statusBar"></div>
+        <div class="control-panel" id="controlPanel"></div>
+    </div>
+
+    <div id="final-podium-overlay"></div>
+    
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script>
+
+    <script>
+        // DOM Elements
+        const mainContainer = document.getElementById('mainContainer');
+        const hidePanelBtn = document.getElementById('hide-panel-btn');
+        const showPanelBtn = document.getElementById('show-panel-btn');
+        const finalPodiumOverlay = document.getElementById('final-podium-overlay');
+        const fireworksContainer = document.getElementById('fireworks-container');
+
+        // Global state
+        let scores = {};
+        for (let i = 1; i <= 9; i++) scores[i] = 0;
+        let fireworksInterval;
+
+        // --- 控制台顯示/隱藏 ---
+        function togglePanel() {
+            mainContainer.classList.toggle('hidden');
+            showPanelBtn.classList.toggle('hidden');
+        }
+        hidePanelBtn.addEventListener('click', togglePanel);
+        showPanelBtn.addEventListener('click', togglePanel);
+
+        // --- 煙火動畫 ---
+        function launchFireworks() {
+            const colors = ['#ffc700', '#ff5a00', '#ff005a', '#00ff5a', '#00c7ff'];
+            const fireworksCount = 10 + Math.random() * 10;
+            const x = Math.random() * window.innerWidth;
+            const y = Math.random() * window.innerHeight * 0.5;
+
+            for (let i = 0; i < fireworksCount; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = `${x}px`;
+                particle.style.top = `${y}px`;
+                particle.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                fireworksContainer.appendChild(particle);
+
+                const angle = Math.random() * 360;
+                const distance = Math.random() * 150 + 50;
+                const transformX = Math.cos(angle * Math.PI / 180) * distance;
+                const transformY = Math.sin(angle * Math.PI / 180) * distance;
+
+                // Force reflow
+                particle.offsetWidth;
+
+                particle.style.transform = `translate(${transformX}px, ${transformY}px)`;
+                particle.style.opacity = 0;
+
+                setTimeout(() => {
+                    particle.remove();
+                }, 1000);
+            }
+        }
+        
+        // --- 創建與更新火箭 ---
+        function createRockets() {
+            const rocketArea = document.getElementById('rocketArea');
+            rocketArea.innerHTML = '';
+            for (let i = 1; i <= 9; i++) {
+                const rocket = document.createElement('div');
+                rocket.className = 'rocket';
+                rocket.id = `rocket-${i}`;
+                rocket.style.left = `${(i - 1) * 10.5 + 2}%`;
+                rocket.innerHTML = `<div class="rocket-emoji">🚀</div><div class="rocket-label">第${i}組</div>`;
+                rocketArea.appendChild(rocket);
+            }
+        }
+
+        function updateDisplay() {
+            const maxScore = Math.max(1, ...Object.values(scores));
+            const travelRange = window.innerHeight * 0.8;
+            const baseBottom = window.innerHeight * 0.05;
+
+            for (let i = 1; i <= 9; i++) {
+                const rocket = document.getElementById(`rocket-${i}`);
+                if (rocket) {
+                    const scoreRatio = (scores[i] || 0) / maxScore;
+                    const scoreHeight = scoreRatio * travelRange;
+                    rocket.style.bottom = `${baseBottom + scoreHeight}px`;
+                }
+            }
+        }
+
+        // --- 結算與重置 ---
+        async function showFinalResults() {
+            // 1. 隱藏控制台
+            mainContainer.classList.add('hidden');
+            showPanelBtn.classList.add('hidden');
+
+            // 2. 煙火與火箭升空
+            fireworksInterval = setInterval(launchFireworks, 600);
+            for (let i = 1; i <= 9; i++) {
+                const rocket = document.getElementById(`rocket-${i}`);
+                if (rocket) {
+                    rocket.style.transition = 'bottom 6s cubic-bezier(0.2, 0.6, 0.8, 1)';
+                    rocket.style.bottom = '110vh';
+                }
+            }
+            
+            // 3. 顯示最終排名
+            setTimeout(() => {
+                clearInterval(fireworksInterval); // 停止煙火
+                const ranking = [];
+                for (let i = 1; i <= 9; i++) {
+                    ranking.push({ team: i, score: scores[i] || 0 });
+                }
+                ranking.sort((a, b) => b.score - a.score);
+
+                let podiumHTML = `<h2>🎉 最終排名 🎉</h2><div class="podium">`;
+                for (let i = 0; i < Math.min(3, ranking.length); i++) {
+                    const place = i === 0 ? 'first' : i === 1 ? 'second' : 'third';
+                    const emoji = i === 0 ? '🥇' : i === 1 ? '🥈' : '🥉';
+                    podiumHTML += `<div class="podium-place ${place}">
+                                    <div style="font-size: 40px;">${emoji}</div>
+                                    <div style="font-size: 24px;">第${ranking[i].team}組</div>
+                                 </div>`;
+                }
+                podiumHTML += `</div>`;
+                
+                finalPodiumOverlay.innerHTML = podiumHTML;
+                finalPodiumOverlay.classList.add('visible');
+
+            }, 6500); // 等待動畫結束
+        }
+
+        async function resetScores() {
+            if (confirm('確定要重置所有隊伍的進度嗎？')) {
+                // 隱藏頒獎台
+                finalPodiumOverlay.classList.remove('visible');
+                finalPodiumOverlay.innerHTML = '';
+                
+                // 恢復控制台
+                if(mainContainer.classList.contains('hidden')){
+                    togglePanel();
+                }
+
+                // 重置分數和火箭
+                for (let i = 1; i <= 9; i++) scores[i] = 0;
+                if (window.scoresRef) await window.scoresRef.set(scores);
+                createRockets(); // 重新創建火箭以重置動畫樣式
+                updateDisplay();
+            }
+        }
+        
+        // --- 初始化 ---
+        function setupUI() {
+            // 為了讓HTML簡潔，用JS生成UI內容
+            document.getElementById('shareInfo').innerHTML = `<h4>📱 分享填分網址給其他人：</h4><div class="share-url" id="shareUrl"></div><button class="copy-button" onclick="copyShareUrl()">📋 複製網址</button>`;
+            document.getElementById('statusBar').innerHTML = `<div class="connection-status connecting" id="connectionStatus">🔄 連接中...</div><div class="room-info">房間ID: <span id="roomId">載入中...</span></div>`;
+            document.getElementById('controlPanel').innerHTML = `<div class="button-group"><button class="final-button" onclick="showFinalResults()">🏆 結算排名</button><button class="reset-button" onclick="resetScores()">🔄 重置</button></div>`;
+        }
+        
+        // --- Firebase 相關 (保持不變) ---
+        let roomId = '';
+        function copyShareUrl() {
+            navigator.clipboard.writeText(document.getElementById('shareUrl').textContent);
+        }
+        function initializeApp() {
+            // Setup UI first
+            setupUI();
+            createRockets();
+            updateDisplay();
+
+            // Firebase Config and Init
+            const firebaseConfig = { apiKey: "AIzaSyD5ytWrUOI6UIUBIcKpF3fyODQR2pXFMmY", authDomain: "score-calculation-ef584.firebaseapp.com", databaseURL: "https://score-calculation-ef584-default-rtdb.firebaseio.com", projectId: "score-calculation-ef584" };
+            if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+            window.database = firebase.database();
+            
+            // Room and Data Sync
+            const urlParams = new URLSearchParams(window.location.search);
+            roomId = urlParams.get('room') || 'camp_' + Math.random().toString(36).substr(2, 6);
+            if (!urlParams.get('room')) {
+                window.history.replaceState({}, '', window.location.pathname + '?room=' + roomId);
+            }
+            document.getElementById('roomId').textContent = roomId;
+            const baseUrl = window.location.origin + window.location.pathname.replace('rocket_control.html', 'score_input_simple.html');
+            document.getElementById('shareUrl').textContent = baseUrl + '?room=' + roomId;
+            document.getElementById('shareInfo').style.display = 'block';
+            document.getElementById('connectionStatus').textContent = '🌐 已連線';
+            document.getElementById('connectionStatus').className = 'connection-status connected';
+            
+            window.scoresRef = window.database.ref('rooms/' + roomId + '/scores');
+            window.scoresRef.on('value', (snapshot) => {
+                const data = snapshot.val();
+                if (data) {
+                    scores = data;
+                    updateDisplay();
+                }
+            });
+
+            window.addEventListener('resize', updateDisplay);
+        }
+
+        window.addEventListener('load', initializeApp);
+
+    </script>
+</body>
+</html>
