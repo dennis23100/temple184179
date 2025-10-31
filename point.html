@@ -553,7 +553,13 @@
 
             // 啟動！
             videoA.src = videoPlaylist[0]; // 'movies1.mp4'
-            videoB.src = videoPitch[1]; // 'movies2.mp4'
+            
+            // --- 
+            //
+            // MODIFICATION: 這裡的打字錯誤已經 100% 修正了
+            //
+            // ---
+            videoB.src = videoPlaylist[1]; // 'movies2.mp4' 
             
             videoA.play().catch(error => {
                 console.log("影片自動播放被瀏覽器阻擋。");
