@@ -8,7 +8,8 @@
         * { box-sizing: border-box; }
         body { font-family: 'Arial', sans-serif; margin: 0; overflow: hidden; }
         
-        #bg-video {
+        /* MODIFICATION: "雙播放器" 樣式 */
+        .video-player {
             position: fixed;
             top: 0;
             left: 0;
@@ -17,7 +18,15 @@
             object-fit: cover; 
             z-index: -2; 
             filter: brightness(0.8);
+            /* 關鍵：新增 0.5 秒的淡入淡出動畫 */
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
         }
+        /* .active 表示 "目前正在播放" 的播放器 */
+        .video-player.active {
+            opacity: 1;
+        }
+        /* 結束 MODIFICATION */
 
         .climb-area {
             position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -1;
@@ -49,8 +58,7 @@
         .climber {
             position: absolute; width: 10%; max-width: 120px;
             text-align: center; 
-            /* 速度已調慢為 5 秒 */
-            transition: bottom 5s ease-in-out, left 1s, transform 1s;
+            transition: bottom 5s ease-in-out, left 1s, transform 1s; /* 速度已調慢 */
             z-index: 1; display: flex; flex-direction: column; align-items: center;
         }
         
@@ -232,9 +240,8 @@
     </style>
 </head>
 <body>
-    <video autoplay muted id="bg-video">
-        你的瀏覽器不支援影片播放。
-    </video>
+    <video muted id="bg-video-a" class="video-player active"></video>
+    <video muted id="bg-video-b" class="video-player"></video>
 
     <div class="climb-area" id="climbArea"></div>
     <div id="fireworks-container"></div>
@@ -286,7 +293,9 @@
         const scoreList = document.getElementById('score-list');
         const closeScoreModalBtn = document.getElementById('close-score-modal-btn');
         
-        const videoPlayer = document.getElementById('bg-video');
+        // MODIFICATION: 取得 "雙播放器"
+        const videoA = document.getElementById('bg-video-a');
+        const videoB = document.getElementById('bg-video-b');
 
         // --- State Variables ---
         let scores = {};
@@ -302,21 +311,16 @@
             '#98FB98', '#7FFFD4', '#DDA0DD', '#FFA07A'
         ];
 
-        // --- 影片播放列表邏輯 ---
+        // --- MODIFICATION: "雙播放器" 影片播放列表邏輯 ---
         const videoPlaylist = [
             'movies1.mp4',
             'movies2.mp4',
             'movies3.mp4',
             'movies4.mp4'
         ];
-        let currentVideoIndex = 0;
-
-        function playNextVideo() {
-            currentVideoIndex = (currentVideoIndex + 1) % videoPlaylist.length; 
-            videoPlayer.src = videoPlaylist[currentVideoIndex];
-            videoPlayer.play();
-        }
-        // --- 結束 ---
+        // 索引 0, 1, 2, 3
+        let currentVideoIndex = 0; // 指向 "正在播放" 的影片索引
+        // --- 結束 MODIFICATION ---
 
 
         // --- Functions ---
@@ -489,7 +493,7 @@
         function initializeApp() {
             setupUI(); createClimbers(); updateDisplay();
             
-            const firebaseConfig = { apiKey: "AIzaSyD5ytWrUOI6UIUBIcKpF3fyODQR2pXFMmY", authDomain: "score-calculation-ef584.firebaseapp.com", databaseURL: "https://score-calculation-ef584-default-rtdb.firebaseio.com", projectId: "score-calculation-ef584" };
+            const firebaseConfig = { apiKey: "AIzaSyD5ytWrUOI6UIUBIcKpF3fyODQR2pXFMmY", authDomain: "score-calculation-ef5M.firebaseapp.com", databaseURL: "https://score-calculation-ef584-default-rtdb.firebaseio.com", projectId: "score-calculation-ef584" };
             if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
             window.database = firebase.database();
             
@@ -502,12 +506,7 @@
             document.getElementById('shareUrl').textContent = baseUrl;
             document.getElementById('connectionStatus').textContent = '🌐 已連線';
             
-            // --- 
-            //
-            // MODIFICATION: 修正了這裡的打字錯誤
-            //
-            // ---
-            window.scoresRef = window.database.ref('rooms/' + roomId + '/scores');
+            window.scoresRef = window.database.ref('rooms/'' + roomId + ''/scores');
             
             window.scoresRef.on('value', (snapshot) => {
                 const data = snapshot.val();
@@ -529,14 +528,54 @@
                 }
             });
 
-            // --- 啟動影片播放邏輯 ---
-            videoPlayer.src = videoPlaylist[currentVideoIndex];
-            videoPlayer.play().catch(error => {
-                console.log("影片自動播放被瀏覽器阻擋。");
-                document.body.addEventListener('click', () => videoPlayer.play(), { once: true });
-            });
+            // --- MODIFICATION: "雙播放器" 啟動邏輯 ---
             
-            videoPlayer.addEventListener('ended', playNextVideo);
+            // 監聽 videoA 播完事件
+            videoA.addEventListener('ended', () => {
+                // 1. 淡出 A, 淡入 B
+                videoB.classList.add('active');
+                videoA.classList.remove('active');
+                // 2. 播放 B (B 已經預載好了)
+                videoB.play();
+                
+                // 3. 更新索引
+                currentVideoIndex = (currentVideoIndex + 1) % videoPlaylist.length;
+                
+                // 4. 讓 A (現在是隱藏的) 預載 "下下個" 影片
+                let nextIndex = (currentVideoIndex + 1) % videoPlaylist.length;
+                videoA.src = videoPlaylist[nextIndex];
+            });
+
+            // 監聽 videoB 播完事件
+            videoB.addEventListener('ended', () => {
+                // 1. 淡出 B, 淡入 A
+                videoA.classList.add('active');
+                videoB.classList.remove('active');
+                // 2. 播放 A (A 已經預載好了)
+                videoA.play();
+
+                // 3. 更新索引
+                currentVideoIndex = (currentVideoIndex + 1) % videoPlaylist.length;
+                
+                // 4. 讓 B (現在是隱藏的) 預載 "下下個" 影片
+                let nextIndex = (currentVideoIndex + 1) % videoPlaylist.length;
+                videoB.src = videoPlaylist[nextIndex];
+            });
+
+            // 啟動！
+            // 預載前兩個影片
+            videoA.src = videoPlaylist[0]; // 'movies1.mp4'
+            videoB.src = videoPlaylist[1]; // 'movies2.mp4'
+            
+            // 嘗試播放第一個影片
+            videoA.play().catch(error => {
+                console.log("影片自動播放被瀏覽器阻擋。");
+                // 如果被擋住，改成 "點擊頁面任一處" 來啟動
+                document.body.addEventListener('click', () => {
+                    videoA.play();
+                }, { once: true });
+            });
+            // --- 結束 MODIFICATION ---
         }
 
         window.addEventListener('load', initializeApp);
