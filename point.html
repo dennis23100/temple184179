@@ -8,19 +8,17 @@
         * { box-sizing: border-box; }
         body { font-family: 'Arial', sans-serif; margin: 0; overflow: hidden; }
         
-        /* MODIFICATION: 新增影片背景樣式 */
         #bg-video {
             position: fixed;
             top: 0;
             left: 0;
             width: 100vw;
             height: 100vh;
-            object-fit: cover; /* 確保影片填滿螢幕，可能會裁切 */
-            z-index: -2; /* 放在最底層 */
-            filter: brightness(0.8); /* 稍微調暗影片，讓前景更突出 */
+            object-fit: cover; 
+            z-index: -2; 
+            filter: brightness(0.8);
         }
 
-        /* MODIFICATION: 移除背景漸層，它現在只是一個透明容器 */
         .climb-area {
             position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -1;
         }
@@ -50,37 +48,36 @@
 
         .climber {
             position: absolute; width: 10%; max-width: 120px;
-            text-align: center; transition: bottom 5s ease-in-out, left 1s, transform 1s;
+            text-align: center; 
+            /* MODIFICATION: 將速度調慢為 5 秒 */
+            transition: bottom 5s ease-in-out, left 1s, transform 1s;
             z-index: 1; display: flex; flex-direction: column; align-items: center;
         }
         
-        /* MODIFICATION: 新增繩索 (::before 偽元素) */
         .climber::before {
             content: '';
             position: absolute;
-            bottom: 50%; /* 從攀爬者的中心點開始 */
+            bottom: 50%; 
             left: 50%;
             transform: translateX(-50%);
-            width: 3px; /* 繩索粗細 */
-            height: 150vh; /* 繩索長度 (足夠長到螢幕頂端外) */
-            background: #6D4C41; /* 繩索的棕色 */
-            z-index: -1; /* 放在攀爬者圖示後面 */
-            box-shadow: 0 0 5px rgba(0,0,0,0.5); /* 繩索陰影 */
+            width: 3px; 
+            height: 150vh; 
+            background: #6D4C41; 
+            z-index: -1; 
+            box-shadow: 0 0 5px rgba(0,0,0,0.5); 
         }
         
-        /* MODIFICATION: 新增 "wiggle" (抖動) 動畫 */
         @keyframes wiggle {
             0%, 100% { transform: translateX(0); }
-            25% { transform: translateX(-3px); } /* 往左抖動 3px */
-            75% { transform: translateX(3px); } /* 往右抖動 3px */
+            25% { transform: translateX(-3px); } 
+            75% { transform: translateX(3px); } 
         }
 
         .climber-emoji {
             font-size: 5.5vw; min-font-size: 35px; margin-bottom: 5px;
             filter: drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.5));
             transition: filter 0.5s, transform 0.5s;
-            /* MODIFICATION: 套用抖動動畫 */
-            animation: wiggle 0.8s ease-in-out infinite; /* 0.8秒抖一次, 無限循環 */
+            animation: wiggle 0.8s ease-in-out infinite;
         }
         
         .climber-label {
@@ -89,7 +86,7 @@
             padding: 2px 5px; border-radius: 5px;
         }
 
-        /* --- 以下是結算畫面和分數面板，樣式不變 --- */
+        /* --- 結算畫面和分數面板 (樣式不變) --- */
         #fireworks-container {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             z-index: 50; pointer-events: none;
@@ -169,7 +166,7 @@
             font-size: 15vw !important; min-font-size: 150px !important;
             filter: drop-shadow(4px 4px 8px rgba(0, 0, 0, 0.7));
             margin-bottom: 15px;
-            animation: none; /* 結算大畫面的攀爬者不需要抖動 */
+            animation: none;
         }
         
         .big-climber-display .climber-label {
@@ -235,8 +232,7 @@
     </style>
 </head>
 <body>
-    <video autoplay muted loop id="bg-video">
-        <source src="movies.mp4" type="video/mp4">
+    <video autoplay muted id="bg-video">
         你的瀏覽器不支援影片播放。
     </video>
 
@@ -276,7 +272,6 @@
 
     <script>
         // --- DOM Elements ---
-        // (JavaScript 邏輯部分完全不需要修改，我們只改了 CSS 和 HTML)
         const mainContainer = document.getElementById('mainContainer');
         const hidePanelBtn = document.getElementById('hide-panel-btn');
         const showPanelBtn = document.getElementById('show-panel-btn');
@@ -291,6 +286,9 @@
         const scoreList = document.getElementById('score-list');
         const closeScoreModalBtn = document.getElementById('close-score-modal-btn');
         
+        // MODIFICATION: 取得影片播放器
+        const videoPlayer = document.getElementById('bg-video');
+
         // --- State Variables ---
         let scores = {};
         for (let i = 1; i <= 9; i++) scores[i] = 0;
@@ -304,6 +302,26 @@
             '#FF6B6B', '#4ECDC4', '#45B7D1', '#FED766', '#F0E68C',
             '#98FB98', '#7FFFD4', '#DDA0DD', '#FFA07A'
         ];
+
+        // --- MODIFICATION: 新增影片播放列表邏輯 ---
+        const videoPlaylist = [
+            'movies1.mp4',
+            'movies2.mp4',
+            'movies3.mp4',
+            'movies4.mp4'
+        ];
+        let currentVideoIndex = 0;
+
+        function playNextVideo() {
+            // 計算下一個影片的索引
+            currentVideoIndex = (currentVideoIndex + 1) % videoPlaylist.length; // % 符號確保播完會回到 0
+            
+            // 設定影片來源並播放
+            videoPlayer.src = videoPlaylist[currentVideoIndex];
+            videoPlayer.play();
+        }
+        // --- 結束 MODIFICATION ---
+
 
         // --- Functions ---
         function togglePanel() {
@@ -488,7 +506,7 @@
             document.getElementById('shareUrl').textContent = baseUrl;
             document.getElementById('connectionStatus').textContent = '🌐 已連線';
             
-            window.scoresRef = window.database.ref('rooms/' + roomId + '/scores');
+            window.scoresRef = window.database.ref('rooms/'' + roomId + ''/scores');
             window.scoresRef.on('value', (snapshot) => {
                 const data = snapshot.val();
                 if (data) { scores = data; updateDisplay(); }
@@ -508,10 +526,22 @@
                     toggleScoreModal();
                 }
             });
+
+            // --- MODIFICATION: 啟動影片播放邏輯 ---
+            // 設定要播放的第一個影片
+            videoPlayer.src = videoPlaylist[currentVideoIndex];
+            videoPlayer.play().catch(error => {
+                console.log("影片自動播放被瀏覽器阻擋。");
+                // 許多瀏覽器會阻擋自動播放，直到使用者點擊頁面
+                // 我們增加一個備用方案：使用者點擊頁面任何地方時，就開始播放
+                document.body.addEventListener('click', () => videoPlayer.play(), { once: true });
+            });
+            
+            // 監聽 'ended' 事件，在影片播完時呼叫 playNextVideo
+            videoPlayer.addEventListener('ended', playNextVideo);
         }
 
         window.addEventListener('load', initializeApp);
     </script>
 </body>
-
 </html>
