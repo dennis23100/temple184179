@@ -43,17 +43,22 @@
         #hide-panel-btn:hover { opacity: 1; }
         
         /* MODIFICATION:
-         - "顯示控制台" 按鈕改到右上角
-         - 移除 left/transform, 改用 right
-         - 樣式改成圓形
+         - 保持在右上角 (top: 10px; right: 15px;)
+         - 移除 padding，改用 flex 完美置中圖示
         */
         #show-panel-btn {
             position: fixed; 
             top: 10px; 
-            right: 15px; /* 改到右上角 */
+            right: 15px; /* 保持在右上角 */
             transform: none; /* 移除 X 軸置中 */
             z-index: 19;
-            padding: 8px 12px; /* 微調內距 */
+            
+            /* Flex 完美置中 */
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
             background-color: rgba(255, 255, 255, 0.8); border: none;
             border-radius: 50%; /* 改成圓形 */
             cursor: pointer; font-weight: bold;
@@ -71,13 +76,11 @@
         h1 { text-align: center; color: #333; margin-bottom: 25px; font-size: 2.2em; }
         .status-bar, .control-panel, .share-info { margin-bottom: 20px; }
 
-        /* MODIFICATION: 新增控制台按鈕的統一
-        樣式 */
         .control-panel .control-button-group {
             display: flex;
             gap: 10px;
             justify-content: center;
-            flex-wrap: wrap; /* 換行 */
+            flex-wrap: wrap; 
         }
         .control-panel .control-button-group button {
             padding: 10px 15px;
@@ -229,11 +232,6 @@
             white-space: nowrap; display: flex; align-items: center; gap: 15px;
         }
         
-        /* MODIFICATION: 
-         - 刪除 #score-display-btn 的 CSS
-         - (因為它現在是 .control-panel button 的一部分)
-        */
-        
         #score-modal-overlay {
             position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
             background-color: rgba(0, 0, 0, 0.7); z-index: 1000;
@@ -281,10 +279,11 @@
 
     <div class="container" id="mainContainer">
         <div id="hide-panel-btn">🔽</div>
-        <h1>🏕️ 追 - 攀爬控制台 🧗</h1>
+        <h1>🏕️ 營隊系統 - 攀爬控制台 🧗</h1>
         <div class="share-info" id="shareInfo"></div>
         <div class="status-bar" id="statusBar"></div>
-        <div class="control-panel" id="controlPanel"></div> </div>
+        <div class="control-panel" id="controlPanel"></div>
+    </div>
 
     <div id="final-podium-overlay">
         <div id="podium-container"></div>
@@ -317,10 +316,6 @@
         const nextStepBtn = document.getElementById('next-step-btn');
         const playBtn = document.getElementById('play-btn');
         
-        /* MODIFICATION: 
-         - 改成 let
-         - 這裡它會是 null，但沒關係，我們會在 initializeApp 重新抓取
-        */
         let scoreDisplayBtn = document.getElementById('score-display-btn');
         
         const scoreModalOverlay = document.getElementById('score-modal-overlay');
@@ -518,11 +513,6 @@
             document.getElementById('shareInfo').innerHTML = `<h4>📱 分享填分網址給其他人：</h4><div style="font-size:12px; padding:8px; background:#eee; border-radius:5px; word-break:break-all;" id="shareUrl"></div><button onclick="copyShareUrl()">📋 複製網址</button>`;
             document.getElementById('statusBar').innerHTML = `<div id="connectionStatus">🔄 連接中...</div><div>房間ID: <span id="roomId">載入中...</span></div>`;
             
-            /* MODIFICATION: 
-             - 按鈕 HTML 被移到這裡，動態產生
-             - 新增 'control-button-group' class
-             - 新增 'score-display-btn' 按鈕
-            */
             document.getElementById('controlPanel').innerHTML = `
                 <div class="control-button-group">
                     <button onclick="startFinalSequence()">🏆 結算排名</button>
@@ -534,11 +524,10 @@
         function copyShareUrl() { navigator.clipboard.writeText(document.getElementById('shareUrl').textContent); }
 
         function initializeApp() {
-            setupUI(); // MODIFICATION: 按鈕在這裡被創建成 HTML
+            setupUI(); 
             createClimbers(); 
             updateDisplay();
             
-            // MODIFICATION: 重新抓取在 setupUI 中創建的按鈕
             scoreDisplayBtn = document.getElementById('score-display-btn');
             
             const firebaseConfig = { apiKey: "AIzaSyD5ytWrUOI6UIUBIcKpF3fyODQR2pXFMmY", authDomain: "score-calculation-ef584.firebaseapp.com", databaseURL: "https://score-calculation-ef584-default-rtdb.firebaseio.com", projectId: "score-calculation-ef584" };
@@ -569,7 +558,7 @@
             nextStepBtn.addEventListener('click', handleNextStep);
             window.addEventListener('resize', updateDisplay);
 
-            scoreDisplayBtn.addEventListener('click', toggleScoreModal); // MODIFICATION: 監聽器現在可以正確綁定
+            scoreDisplayBtn.addEventListener('click', toggleScoreModal); 
             closeScoreModalBtn.addEventListener('click', toggleScoreModal);
             scoreModalOverlay.addEventListener('click', (event) => {
                 if (event.target === scoreModalOverlay) {
