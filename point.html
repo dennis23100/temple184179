@@ -49,7 +49,7 @@
         .climber {
             position: absolute; width: 10%; max-width: 120px;
             text-align: center; 
-            /* MODIFICATION: 將速度調慢為 5 秒 */
+            /* 速度已調慢為 5 秒 */
             transition: bottom 5s ease-in-out, left 1s, transform 1s;
             z-index: 1; display: flex; flex-direction: column; align-items: center;
         }
@@ -286,7 +286,6 @@
         const scoreList = document.getElementById('score-list');
         const closeScoreModalBtn = document.getElementById('close-score-modal-btn');
         
-        // MODIFICATION: 取得影片播放器
         const videoPlayer = document.getElementById('bg-video');
 
         // --- State Variables ---
@@ -303,7 +302,7 @@
             '#98FB98', '#7FFFD4', '#DDA0DD', '#FFA07A'
         ];
 
-        // --- MODIFICATION: 新增影片播放列表邏輯 ---
+        // --- 影片播放列表邏輯 ---
         const videoPlaylist = [
             'movies1.mp4',
             'movies2.mp4',
@@ -313,14 +312,11 @@
         let currentVideoIndex = 0;
 
         function playNextVideo() {
-            // 計算下一個影片的索引
-            currentVideoIndex = (currentVideoIndex + 1) % videoPlaylist.length; // % 符號確保播完會回到 0
-            
-            // 設定影片來源並播放
+            currentVideoIndex = (currentVideoIndex + 1) % videoPlaylist.length; 
             videoPlayer.src = videoPlaylist[currentVideoIndex];
             videoPlayer.play();
         }
-        // --- 結束 MODIFICATION ---
+        // --- 結束 ---
 
 
         // --- Functions ---
@@ -506,7 +502,13 @@
             document.getElementById('shareUrl').textContent = baseUrl;
             document.getElementById('connectionStatus').textContent = '🌐 已連線';
             
-            window.scoresRef = window.database.ref('rooms/'' + roomId + ''/scores');
+            // --- 
+            //
+            // MODIFICATION: 修正了這裡的打字錯誤
+            //
+            // ---
+            window.scoresRef = window.database.ref('rooms/' + roomId + '/scores');
+            
             window.scoresRef.on('value', (snapshot) => {
                 const data = snapshot.val();
                 if (data) { scores = data; updateDisplay(); }
@@ -527,17 +529,13 @@
                 }
             });
 
-            // --- MODIFICATION: 啟動影片播放邏輯 ---
-            // 設定要播放的第一個影片
+            // --- 啟動影片播放邏輯 ---
             videoPlayer.src = videoPlaylist[currentVideoIndex];
             videoPlayer.play().catch(error => {
                 console.log("影片自動播放被瀏覽器阻擋。");
-                // 許多瀏覽器會阻擋自動播放，直到使用者點擊頁面
-                // 我們增加一個備用方案：使用者點擊頁面任何地方時，就開始播放
                 document.body.addEventListener('click', () => videoPlayer.play(), { once: true });
             });
             
-            // 監聽 'ended' 事件，在影片播完時呼叫 playNextVideo
             videoPlayer.addEventListener('ended', playNextVideo);
         }
 
