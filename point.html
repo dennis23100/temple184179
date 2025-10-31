@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>營隊系統 - 攀爬控制台</title>
+    <style>
+        * { box-sizing: border-box; }
+        body { font-family: 'Arial', sans-serif; margin: 0; overflow: hidden; }
+        
+        /* MODIFICATION: 背景改為底部火焰、頂部天空 */
+        .climb-area {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -1;
+            background: linear-gradient(to top, #ff4e00 0%, #ff8c00 15%, #ffc107 30%, #87CEEB 70%, #4169E1 100%);
+        }
+        
+        .container {
+            max-width: 1200px; margin: 15px auto; background: rgba(255, 255, 255, 0.9);
+            border-radius: 20px; padding: 20px; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            position: relative; z-index: 20; transition: transform 0.5s ease-in-out, opacity 0.5s ease-in-out;
+        }
+        .container.hidden {
+            opacity: 0; transform: translateY(-120%); pointer-events: none;
+        }
+        #hide-panel-btn {
+            position: absolute; top: 15px; right: 20px; font-size: 24px;
+            cursor: pointer; opacity: 0.6; transition: opacity 0.2s;
+        }
+        #hide-panel-btn:hover { opacity: 1; }
+        #show-panel-btn {
+            position: fixed; top: 10px; left: 50%; transform: translateX(-50%); z-index: 19;
+            padding: 8px 16px; background-color: rgba(255, 255, 255, 0.8); border: none;
+            border-radius: 20px; cursor: pointer; font-weight: bold;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2); transition: opacity 0.5s, transform 0.5s;
+        }
+        #show-panel-btn.hidden { opacity: 0; transform: translate(-50%, -150%); pointer-events: none; }
+        h1 { text-align: center; color: #333; margin-bottom: 25px; font-size: 2.2em; }
+        .status-bar, .control-panel, .share-info { margin-bottom: 20px; }
+
+        /* MODIFICATION: ".rocket" 改為 ".climber" */
+        .climber {
+            position: absolute; width: 10%; max-width: 120px;
+            text-align: center; transition: bottom 2.5s ease-in-out, left 1s, transform 1s;
+            z-index: 1; display: flex; flex-direction: column; align-items: center;
+        }
+        
+        /* MODIFICATION: ".rocket-emoji" 改為 ".climber-emoji" 
+           並移除了 transform: rotate(-45deg); */
+        .climber-emoji {
+            font-size: 5.5vw; min-font-size: 35px; margin-bottom: 5px;
+            filter: drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.5));
+            transition: filter 0.5s, transform 0.5s;
+        }
+        
+        /* MODIFICATION: ".rocket-label" 改為 ".climber-label" */
+        .climber-label {
+            font-size: 14px; font-weight: bold; color: white;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8); background-color: rgba(0,0,0,0.3);
+            padding: 2px 5px; border-radius: 5px;
+        }
+
+        #fireworks-container {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            z-index: 50; pointer-events: none;
+        }
+        .particle {
+            position: absolute; width: 8px; height: 8px; border-radius: 50%;
+            transition: transform 1s ease-out, opacity 1s ease-out;
+        }
+        #final-podium-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(ellipse at center, #1e3c72 0%, #2a5298 50%, #0f1419 100%);
+            display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 40;
+            opacity: 0; transition: opacity 1s ease-in; pointer-events: none;
+        }
+        #final-podium-overlay.visible { opacity: 1; pointer-events: all; }
+        
+        #final-podium-overlay::before {
+            content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background-image: 
+                radial-gradient(2px 2px at 20px 30px, #eee, transparent),
+                radial-gradient(2px 2px at 40px 70px, rgba(255,255,255,0.8), transparent),
+                radial-gradient(1px 1px at 90px 40px, #fff, transparent),
+                radial-gradient(1px 1px at 130px 80px, rgba(255,255,255,0.6), transparent),
+                radial-gradient(2px 2px at 160px 30px, #fff, transparent);
+            background-repeat: repeat; background-size: 200px 100px;
+            animation: sparkle 3s linear infinite; z-index: -1;
+        }
+        
+        @keyframes sparkle { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+        #podium-container {
+            display: flex; justify-content: center; align-items: flex-end;
+            width: 80%; position: relative; transition: all 1s;
+        }
+        
+        .podium-place {
+            border-radius: 15px; box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            font-weight: bold; color: #333;
+            width: 200px; opacity: 0; transform: translateY(100px);
+            transition: all 0.8s cubic-bezier(0.25, 0.8, 0.25, 1);
+            position: relative; display: flex; flex-direction: column;
+            justify-content: center; align-items: center; gap: 8px; padding: 15px;
+        }
+        .podium-rank-medal { font-size: 50px; }
+        .podium-rank-name { font-size: 28px; }
+        .podium-team-name { font-size: 22px; font-weight: 500; }
+        .podium-place.show { opacity: 1; transform: translateY(0); }
+        .podium-place.first { background: linear-gradient(135deg, #ffd700, #ffed4e); height: 220px; }
+        .podium-place.second { background: linear-gradient(135deg, #c0c0c0, #e8e8e8); height: 180px; }
+        .podium-place.third { background: linear-gradient(135deg, #cd7f32, #daa520); height: 160px; }
+
+        #next-step-btn {
+            margin-top: 30px; padding: 12px 25px; font-size: 18px;
+            border-radius: 25px; border: none; cursor: pointer;
+            background: #fff; color: #333; box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            opacity: 0; transition: opacity 0.5s;
+        }
+        #next-step-btn.visible { opacity: 1; }
+        
+        #play-btn {
+            position: fixed; bottom: 30px; right: 30px; z-index: 50;
+            width: 60px; height: 60px; border-radius: 50%; border: none;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            color: white; font-size: 24px; cursor: pointer;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+            opacity: 0; transition: all 0.3s ease;
+            display: flex; align-items: center; justify-content: center;
+        }
+        #play-btn:hover { transform: scale(1.1); }
+        
+        /* MODIFICATION: ".big-rocket-display" 改為 ".big-climber-display" */
+        .big-climber-display {
+            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            z-index: 45; opacity: 0; transition: all 1.5s ease;
+            display: flex; flex-direction: column; align-items: center;
+        }
+        .big-climber-display.visible { opacity: 1; }
+        .big-climber-display .climber-emoji {
+            font-size: 15vw !important; min-font-size: 150px !important;
+            filter: drop-shadow(4px 4px 8px rgba(0, 0, 0, 0.7));
+            margin-bottom: 15px;
+        }
+        
+        .big-climber-display .climber-label {
+            font-size: 3vw !important; min-font-size: 30px !important;
+            padding: 10px 20px; border-radius: 15px; text-align: center;
+        }
+
+        .rank-display {
+            position: absolute; top: -150px; left: 50%;
+            transform: translateX(-50%); font-size: 5vw;
+            min-font-size: 40px; font-weight: bold; color: #ffd700;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+            white-space: nowrap; display: flex; align-items: center; gap: 15px;
+        }
+        
+        #score-display-btn {
+            position: fixed; bottom: 30px; 
+            left: 30px; /* <--- 📌 這就是 point.html 的不同之處 */
+            z-index: 60;
+            width: 50px; height: 50px; border-radius: 50%; border: none;
+            background: linear-gradient(45deg, #ffd700, #ffed4e);
+            color: #333; font-size: 20px; cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            transition: all 0.3s ease;
+            display: flex; align-items: center; justify-content: center;
+        }
+        #score-display-btn:hover { transform: scale(1.1); }
+        
+        /* 這是 point.html 使用的 "Modal" 樣式，我們保留它 */
+        #score-modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background-color: rgba(0, 0, 0, 0.7); z-index: 1000;
+            display: flex; justify-content: center; align-items: center;
+            opacity: 0; pointer-events: none; transition: opacity 0.3s ease-in-out;
+        }
+        #score-modal-overlay.visible {
+            opacity: 1; pointer-events: all;
+        }
+        #score-modal-content {
+            background: #fff; padding: 25px; border-radius: 15px;
+            width: 90%; max-width: 450px; position: relative;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+            transform: scale(0.9); transition: transform 0.3s ease-in-out;
+        }
+        #score-modal-overlay.visible #score-modal-content {
+            transform: scale(1);
+        }
+        #score-modal-content h4 {
+            margin: 0 0 15px 0; text-align: center; color: #333; font-size: 22px;
+        }
+        #close-score-modal-btn {
+            position: absolute; top: 10px; right: 15px; background: none; border: none;
+            font-size: 28px; line-height: 1; color: #aaa; cursor: pointer; transition: color 0.2s;
+        }
+        #close-score-modal-btn:hover { color: #333; }
+        #score-list-container { max-height: 60vh; overflow-y: auto; }
+        .score-item {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 10px 5px; border-bottom: 1px solid #f0f0f0; font-size: 18px;
+        }
+        .score-item:last-child { border-bottom: none; }
+        .team-name { font-weight: bold; color: #333; }
+        .team-score { font-weight: bold; color: #555; }
+    </style>
+</head>
+<body>
+    <div class="climb-area" id="climbArea"></div>
+    <div id="fireworks-container"></div>
+    <button id="show-panel-btn" class="hidden">🔼 顯示控制台</button>
+
+    <div class="container" id="mainContainer">
+        <div id="hide-panel-btn">🔽</div>
+        <h1>🏕️ 營隊系統 - 攀爬控制台 🧗</h1>
+        <div class="share-info" id="shareInfo"></div>
+        <div class="status-bar" id="statusBar"></div>
+        <div class="control-panel" id="controlPanel"></div>
+    </div>
+
+    <div id="final-podium-overlay">
+        <div id="podium-container"></div>
+        <button id="next-step-btn"></button>
+    </div>
+    
+    <button id="play-btn">▶</button>
+    
+    <button id="score-display-btn">🏆</button>
+    
+    <div id="score-modal-overlay">
+        <div id="score-modal-content">
+            <button id="close-score-modal-btn" title="關閉">✕</button>
+            <h4>📊 目前分數</h4>
+            <div id="score-list-container">
+                <div id="score-list"></div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script>
+
+    <script>
+        // --- DOM Elements ---
+        const mainContainer = document.getElementById('mainContainer');
+        const hidePanelBtn = document.getElementById('hide-panel-btn');
+        const showPanelBtn = document.getElementById('show-panel-btn');
+        const finalPodiumOverlay = document.getElementById('final-podium-overlay');
+        const fireworksContainer = document.getElementById('fireworks-container');
+        const podiumContainer = document.getElementById('podium-container');
+        const nextStepBtn = document.getElementById('next-step-btn');
+        const playBtn = document.getElementById('play-btn');
+        const scoreDisplayBtn = document.getElementById('score-display-btn');
+        
+        const scoreModalOverlay = document.getElementById('score-modal-overlay');
+        const scoreList = document.getElementById('score-list');
+        const closeScoreModalBtn = document.getElementById('close-score-modal-btn');
+        
+        // --- State Variables ---
+        let scores = {};
+        for (let i = 1; i <= 9; i++) scores[i] = 0;
+        let fireworksInterval;
+        let finalRanking = [];
+        let currentStep = 0;
+        // MODIFICATION: "currentBigRocket" 改為 "currentBigClimber"
+        let currentBigClimber = null;
+
+        // --- Constants ---
+        const rocketColors = [
+            '#FF6B6B', '#4ECDC4', '#45B7D1', '#FED766', '#F0E68C',
+            '#98FB98', '#7FFFD4', '#DDA0DD', '#FFA07A'
+        ];
+        // MODIFICATION: "rocketHueRotations" 不再需要，因為攀爬者 emoji 顏色豐富
+        // const rocketHueRotations = [0, 45, 90, 135, 180, 225, 270, 315, 360];
+
+        // --- Functions ---
+        function togglePanel() {
+            mainContainer.classList.toggle('hidden');
+            showPanelBtn.classList.toggle('hidden');
+        }
+
+        function toggleScoreModal() {
+            const isVisible = scoreModalOverlay.classList.contains('visible');
+            if (!isVisible) {
+                updateScoreList(); 
+            }
+            scoreModalOverlay.classList.toggle('visible');
+        }
+        
+        function updateScoreList() {
+            const sortedScores = [];
+            for (let i = 1; i <= 9; i++) {
+                sortedScores.push({ team: i, score: scores[i] || 0 });
+            }
+            sortedScores.sort((a, b) => b.score - a.score);
+            
+            scoreList.innerHTML = '';
+            sortedScores.forEach((item) => {
+                const scoreItem = document.createElement('div');
+                scoreItem.className = 'score-item';
+                scoreItem.innerHTML = `
+                    <span class="team-name" style="color: ${rocketColors[item.team-1]};">第${item.team}組</span>
+                    <span class="team-score">${item.score}分</span>
+                `;
+                scoreList.appendChild(scoreItem);
+            });
+        }
+
+        function updateDisplay() {
+            const maxScore = Math.max(1, ...Object.values(scores));
+            const travelRange = window.innerHeight * 0.8;
+            const baseBottom = window.innerHeight * 0.05;
+            for (let i = 1; i <= 9; i++) {
+                // MODIFICATION: "rocket" 改為 "climber"
+                const climber = document.getElementById(`climber-${i}`);
+                if (climber) {
+                    const scoreRatio = (scores[i] || 0) / maxScore;
+                    const scoreHeight = scoreRatio * travelRange;
+                    climber.style.bottom = `${baseBottom + scoreHeight}px`;
+                }
+            }
+        }
+        
+        function launchFireworks() {
+            const colors = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#fed766', '#f0e68c', '#98fb98', '#7fffd4', '#dda0dd', '#ffa07a'];
+            function createFirework(x, y) {
+                const particleCount = 15;
+                for (let i = 0; i < particleCount; i++) {
+                    const p = document.createElement('div');
+                    p.className = 'particle'; p.style.left = x + 'px'; p.style.top = y + 'px';
+                    p.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                    const angle = (i / particleCount) * 2 * Math.PI, velocity = 50 + Math.random() * 50;
+                    const deltaX = Math.cos(angle) * velocity, deltaY = Math.sin(angle) * velocity;
+                    fireworksContainer.appendChild(p);
+                    setTimeout(() => { p.style.transform = `translate(${deltaX}px, ${deltaY}px)`; p.style.opacity = '0'; }, 10);
+                    setTimeout(() => { if (p.parentNode) p.parentNode.removeChild(p); }, 1000);
+                }
+            }
+            for (let i = 0; i < 8; i++) { setTimeout(() => createFirework(Math.random() * window.innerWidth, Math.random() * window.innerHeight * 0.6), i * 200); }
+        }
+        
+        // MODIFICATION: 函數 "createRockets" 改為 "createClimbers"
+        function createClimbers() {
+            // MODIFICATION: "rocketArea" 改為 "climbArea"
+            const climbArea = document.getElementById('climbArea');
+            climbArea.innerHTML = '';
+            for (let i = 1; i <= 9; i++) {
+                // MODIFICATION: "rocket" 改為 "climber"
+                const climber = document.createElement('div');
+                climber.className = 'climber'; climber.id = `climber-${i}`;
+                climber.style.left = `${(i - 1) * 11 + 1}%`;
+                const emojiDiv = document.createElement('div');
+                // MODIFICATION: class 和 emoji 更改
+                emojiDiv.className = 'climber-emoji'; emojiDiv.textContent = '🧗';
+                // MODIFICATION: 移除 hue-rotate
+                emojiDiv.style.filter = `drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.5)) saturate(1.2) brightness(1.1)`;
+                const labelDiv = document.createElement('div');
+                // MODIFICATION: class 更改
+                labelDiv.className = 'climber-label'; labelDiv.textContent = `第${i}組`;
+                labelDiv.style.backgroundColor = rocketColors[i-1];
+                climber.appendChild(emojiDiv); climber.appendChild(labelDiv);
+                climbArea.appendChild(climber);
+            }
+        }
+
+        async function startFinalSequence() {
+            mainContainer.classList.add('hidden');
+            showPanelBtn.classList.add('hidden');
+            finalPodiumOverlay.classList.add('visible');
+            finalRanking = [];
+            for (let i = 1; i <= 9; i++) { finalRanking.push({ team: i, score: scores[i] || 0 }); }
+            finalRanking.sort((a, b) => b.score - a.score);
+            launchFireworks();
+            fireworksInterval = setInterval(launchFireworks, 3000);
+            for (let i = 1; i <= 9; i++) {
+                // MODIFICATION: "rocket" 改為 "climber"
+                const climber = document.getElementById(`climber-${i}`);
+                if (climber) { climber.style.transition = 'all 2s ease-out'; climber.style.bottom = '120vh'; climber.style.transform = 'rotate(0deg)'; }
+            }
+            setTimeout(() => { currentStep = 0; showBigClimber(2); }, 2000);
+        }
+
+        // MODIFICATION: 函數 "showBigRocket" 改為 "showBigClimber"
+        function showBigClimber(rankIndex) {
+            if (rankIndex >= finalRanking.length) return;
+            const winner = finalRanking[rankIndex], rankNames = ['第一名', '第二名', '第三名'], rankEmojis = ['🥇', '🥈', '🥉'];
+            // MODIFICATION: "currentBigRocket" 改為 "currentBigClimber"
+            currentBigClimber = document.createElement('div'); currentBigClimber.className = 'big-climber-display';
+            
+            // MODIFICATION: 更新 innerHTML 的 class 和 emoji
+            currentBigClimber.innerHTML = `
+                <div class="rank-display">${rankEmojis[rankIndex]} ${rankNames[rankIndex]}</div>
+                <div class="climber-emoji" style="filter: drop-shadow(4px 4px 8px rgba(0, 0, 0, 0.7));">🧗</div>
+                <div class="climber-label" style="background-color: ${rocketColors[winner.team-1]};">第${winner.team}組</div>
+            `;
+            finalPodiumOverlay.appendChild(currentBigClimber);
+            currentBigClimber.style.transform = 'translate(-50%, 150%)';
+            setTimeout(() => { currentBigClimber.classList.add('visible'); currentBigClimber.style.transform = 'translate(-50%, -50%)'; }, 100);
+            setTimeout(() => { playBtn.classList.add('visible'); }, 1500);
+        }
+
+        function handlePlayButton() {
+            // MODIFICATION: "currentBigRocket" 改為 "currentBigClimber"
+            if (!currentBigClimber) return;
+            playBtn.classList.remove('visible');
+            currentBigClimber.style.transform = 'translate(-50%, -150%)'; currentBigClimber.style.opacity = '0';
+            setTimeout(() => {
+                if (currentBigClimber && currentBigClimber.parentNode) { currentBigClimber.parentNode.removeChild(currentBigClimber); }
+                currentBigClimber = null; currentStep++;
+                if (currentStep === 1) { showBigClimber(1); } else if (currentStep === 2) { showBigClimber(0); } 
+                else if (currentStep === 3) { nextStepBtn.textContent = '最後結算'; nextStepBtn.classList.add('visible'); }
+            }, 1000);
+        }
+
+        function handleNextStep() {
+            if (currentStep === 3) { nextStepBtn.classList.remove('visible'); clearInterval(fireworksInterval); finalizePodium(); }
+        }
+
+        function finalizePodium() {
+            fireworksContainer.innerHTML = ''; podiumContainer.innerHTML = '';
+            for (let i = 0; i < 3 && i < finalRanking.length; i++) {
+                const winner = finalRanking[i], place = ['first', 'second', 'third'][i], emoji = ['🥇', '🥈', '🥉'][i], rankName = ['第一名', '第二名', '第三名'][i];
+                const podiumEl = document.createElement('div'); podiumEl.className = `podium-place ${place}`;
+                podiumEl.innerHTML = `<div class="podium-rank-medal">${emoji}</div><div class="podium-rank-name">${rankName}</div><div class="podium-team-name">第${winner.team}組</div>`;
+                podiumContainer.appendChild(podiumEl);
+                setTimeout(() => { podiumEl.classList.add('show'); }, i * 500);
+            }
+        }
+
+        async function resetScores() {
+            if (confirm('確定要重置所有隊伍的進度嗎？')) {
+                finalPodiumOverlay.classList.remove('visible'); podiumContainer.innerHTML = '';
+                nextStepBtn.classList.remove('visible'); playBtn.classList.remove('visible');
+                fireworksContainer.innerHTML = '';
+                scoreModalOverlay.classList.remove('visible');
+                // MODIFICATION: "currentBigRocket" 改為 "currentBigClimber"
+                if (currentBigClimber && currentBigClimber.parentNode) { currentBigClimber.parentNode.removeChild(currentBigClimber); }
+                currentBigClimber = null;
+                if (fireworksInterval) { clearInterval(fireworksInterval); fireworksInterval = null; }
+                currentStep = 0;
+                if(mainContainer.classList.contains('hidden')) togglePanel();
+                for (let i = 1; i <= 9; i++) scores[i] = 0;
+                if (window.scoresRef) await window.scoresRef.set(scores);
+                // MODIFICATION: 呼叫 createClimbers
+                createClimbers(); updateDisplay();
+            }
+        }
+        
+        function setupUI() {
+            document.getElementById('shareInfo').innerHTML = `<h4>📱 分享填分網址給其他人：</h4><div style="font-size:12px; padding:8px; background:#eee; border-radius:5px; word-break:break-all;" id="shareUrl"></div><button onclick="copyShareUrl()">📋 複製網址</button>`;
+            document.getElementById('statusBar').innerHTML = `<div id="connectionStatus">🔄 連接中...</div><div>房間ID: <span id="roomId">載入中...</span></div>`;
+            document.getElementById('controlPanel').innerHTML = `<div><button onclick="startFinalSequence()">🏆 結算排名</button><button onclick="resetScores()">🔄 重置</button></div>`;
+        }
+        
+        function copyShareUrl() { navigator.clipboard.writeText(document.getElementById('shareUrl').textContent); }
+
+        function initializeApp() {
+            // MODIFICATION: 呼叫 createClimbers
+            setupUI(); createClimbers(); updateDisplay();
+            
+            const firebaseConfig = { apiKey: "AIzaSyD5ytWrUOI6UIUBIcKpF3fyODQR2pXFMmY", authDomain: "score-calculation-ef584.firebaseapp.com", databaseURL: "https://score-calculation-ef584-default-rtdb.firebaseio.com", projectId: "score-calculation-ef584" };
+            if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+            window.database = firebase.database();
+            
+            const urlParams = new URLSearchParams(window.location.search);
+            const roomId = urlParams.get('room') || 'camp_' + Math.random().toString(36).substr(2, 6);
+            if (!urlParams.get('room')) window.history.replaceState({}, '', `${window.location.pathname}?room=${roomId}`);
+            
+            document.getElementById('roomId').textContent = roomId;
+            // MODIFICATION: 確保 URL 替換是正確的
+            const baseUrl = window.location.href.replace('point.html', 'score_input_simple.html');
+            document.getElementById('shareUrl').textContent = baseUrl;
+            document.getElementById('connectionStatus').textContent = '🌐 已連線';
+            
+            window.scoresRef = window.database.ref('rooms/' + roomId + '/scores');
+            window.scoresRef.on('value', (snapshot) => {
+                const data = snapshot.val();
+                if (data) { scores = data; updateDisplay(); }
+            });
+
+            // --- Event Listeners ---
+            hidePanelBtn.addEventListener('click', togglePanel);
+            showPanelBtn.addEventListener('click', togglePanel);
+            playBtn.addEventListener('click', handlePlayButton);
+            nextStepBtn.addEventListener('click', handleNextStep);
+            window.addEventListener('resize', updateDisplay);
+
+            scoreDisplayBtn.addEventListener('click', toggleScoreModal);
+            closeScoreModalBtn.addEventListener('click', toggleScoreModal);
+            scoreModalOverlay.addEventListener('click', (event) => {
+                if (event.target === scoreModalOverlay) {
+                    toggleScoreModal();
+                }
+            });
+        }
+
+        window.addEventListener('load', initializeApp);
+    </script>
+</body>
+</html>
