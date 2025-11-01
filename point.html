@@ -42,34 +42,27 @@
         }
         #hide-panel-btn:hover { opacity: 1; }
         
-        /* MODIFICATION:
-         - 保持在右上角 (top: 10px; right: 15px;)
-         - 移除 padding，改用 flex 完美置中圖示
-        */
         #show-panel-btn {
             position: fixed; 
             top: 10px; 
-            right: 15px; /* 保持在右上角 */
-            transform: none; /* 移除 X 軸置中 */
+            right: 15px; 
+            transform: none; 
             z-index: 19;
-            
-            /* Flex 完美置中 */
             padding: 0;
             display: flex;
             align-items: center;
             justify-content: center;
-
             background-color: rgba(255, 255, 255, 0.8); border: none;
-            border-radius: 50%; /* 改成圓形 */
+            border-radius: 50%; 
             cursor: pointer; font-weight: bold;
             box-shadow: 0 2px 10px rgba(0,0,0,0.2); transition: opacity 0.5s, transform 0.5s;
-            width: 40px; /* 固定寬度 */
-            height: 40px; /* 固定高度 */
-            font-size: 20px; /* 箭頭放大 */
+            width: 40px; 
+            height: 40px;
+            font-size: 20px; 
         }
         #show-panel-btn.hidden { 
             opacity: 0; 
-            transform: translateY(-150%); /* 隱藏時只往上移 */
+            transform: translateY(-150%); 
             pointer-events: none; 
         }
         
@@ -95,7 +88,6 @@
         .control-panel .control-button-group button:hover {
             background: #ddd;
         }
-
 
         .climber {
             position: absolute; width: 10%; max-width: 120px;
@@ -136,7 +128,29 @@
             padding: 2px 5px; border-radius: 5px;
         }
 
-        /* --- 結算畫面和分數面板 (樣式不變) --- */
+        /* --- MODIFICATION: 新增蓮花按鈕樣式 --- */
+        #lotus-button {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.5); /* 預設縮小 */
+            font-size: 15vw; /* 超大圖示 */
+            min-font-size: 100px;
+            cursor: pointer;
+            z-index: 1001; /* 蓋過所有東西 */
+            opacity: 0;
+            pointer-events: none; /* 隱藏時點不到 */
+            transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            filter: drop-shadow(0 0 20px rgba(255, 255, 255, 0.7));
+        }
+        #lotus-button.visible {
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1); /* 放大出現 */
+            pointer-events: all; /* 顯示時可以點 */
+        }
+        /* --- 結束 MODIFICATION --- */
+
+
         #fireworks-container {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             z-index: 50; pointer-events: none;
@@ -272,6 +286,8 @@
     <video muted id="bg-video-a" class="video-player active"></video>
     <video muted id="bg-video-b" class="video-player"></video>
 
+    <div id="lotus-button">🪷</div>
+
     <div class="climb-area" id="climbArea"></div>
     <div id="fireworks-container"></div>
     
@@ -324,6 +340,9 @@
         
         const videoA = document.getElementById('bg-video-a');
         const videoB = document.getElementById('bg-video-b');
+        
+        // MODIFICATION: 新增蓮花按鈕 DOM
+        const lotusButton = document.getElementById('lotus-button');
 
         // --- State Variables ---
         let scores = {};
@@ -333,19 +352,37 @@
         let currentStep = 0;
         let currentBigClimber = null;
 
+        // MODIFICATION: 新增蓮花事件相關變數
+        let oldPositions = {}; // 儲存舊位置
+        let isEventTriggered = false; // JS 內的狀態旗標
+        let eventRef; // Firebase 的狀態參考
+
         // --- Constants ---
         const rocketColors = [
             '#FF6B6B', '#4ECDC4', '#45B7D1', '#FED766', '#F0E68C',
             '#98FB98', '#7FFFD4', '#DDA0DD', '#FFA07A'
         ];
 
-        // --- "雙播放器" 影片播放列表邏輯 ---
-        const videoPlaylist = [
+        // "雙播放列表" 邏輯
+        const lavaPlaylist = [
             'movies1.mp4',
             'movies2.mp4',
             'movies3.mp4',
             'movies4.mp4'
         ];
+        const safePlaylist = [
+            'movies5.mp4',
+            'movies6.mp4',
+            'movies7.mp4',
+            'movies8.mp4'
+        ];
+        
+        // MODIFICATION: 新增花朵列表
+        const flowerPlaylist = [
+            '🌷', '🌸', '🌺', '🏵️', '🌻', '🌼', '💐', '🪻', '💮'
+        ];
+        
+        let currentPlaylist = lavaPlaylist; // 預設為岩漿列表
         let currentVideoIndex = 0; 
         // --- 結束 ---
 
@@ -415,6 +452,7 @@
             for (let i = 0; i < 8; i++) { setTimeout(() => createFirework(Math.random() * window.innerWidth, Math.random() * window.innerHeight * 0.6), i * 200); }
         }
         
+        // MODIFICATION: createClimbers 現在會檢查 isEventTriggered
         function createClimbers() {
             const climbArea = document.getElementById('climbArea');
             climbArea.innerHTML = '';
@@ -423,7 +461,15 @@
                 climber.className = 'climber'; climber.id = `climber-${i}`;
                 climber.style.left = `${(i - 1) * 11 + 1}%`;
                 const emojiDiv = document.createElement('div');
-                emojiDiv.className = 'climber-emoji'; emojiDiv.textContent = '🧗';
+                emojiDiv.className = 'climber-emoji'; 
+                
+                // 根據是否觸發事件，決定圖示
+                if (isEventTriggered) {
+                    emojiDiv.textContent = flowerPlaylist[i-1];
+                } else {
+                    emojiDiv.textContent = '🧗';
+                }
+                
                 emojiDiv.style.filter = `drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.5)) saturate(1.2) brightness(1.1)`;
                 const labelDiv = document.createElement('div');
                 labelDiv.className = 'climber-label'; labelDiv.textContent = `第${i}組`;
@@ -449,14 +495,18 @@
             setTimeout(() => { currentStep = 0; showBigClimber(2); }, 2000);
         }
 
+        // MODIFICATION: 結算畫面的圖示也需要判斷
         function showBigClimber(rankIndex) {
             if (rankIndex >= finalRanking.length) return;
             const winner = finalRanking[rankIndex], rankNames = ['第一名', '第二名', '第三名'], rankEmojis = ['🥇', '🥈', '🥉'];
             currentBigClimber = document.createElement('div'); currentBigClimber.className = 'big-climber-display';
             
+            // 判斷該顯示 🧗 還是 🌷
+            const finalEmoji = isEventTriggered ? flowerPlaylist[winner.team-1] : '🧗';
+
             currentBigClimber.innerHTML = `
                 <div class="rank-display">${rankEmojis[rankIndex]} ${rankNames[rankIndex]}</div>
-                <div class="climber-emoji" style="filter: drop-shadow(4px 4px 8px rgba(0, 0, 0, 0.7));">🧗</div>
+                <div class="climber-emoji" style="filter: drop-shadow(4px 4px 8px rgba(0, 0, 0, 0.7));">${finalEmoji}</div>
                 <div class="climber-label" style="background-color: ${rocketColors[winner.team-1]};">第${winner.team}組</div>
             `;
             finalPodiumOverlay.appendChild(currentBigClimber);
@@ -492,8 +542,66 @@
             }
         }
 
+        // MODIFICATION: 新增蓮花事件的處理
+        function handleLotusClick() {
+            console.log("Lotus clicked! Firing event.");
+            
+            // 1. 儲存狀態到 Firebase，這會觸發 listener 並隱藏按鈕
+            if (eventRef) {
+                eventRef.set(true);
+            }
+
+            // 2. 儲存所有人的舊位置
+            oldPositions = {};
+            for (let i = 1; i <= 9; i++) {
+                const climber = document.getElementById(`climber-${i}`);
+                if (climber) {
+                    oldPositions[i] = climber.style.bottom;
+                }
+            }
+
+            // 3. 讓所有攀爬者 (🧗) 往上飛走
+            for (let i = 1; i <= 9; i++) {
+                const climber = document.getElementById(`climber-${i}`);
+                if (climber) {
+                    climber.style.bottom = '120vh'; 
+                }
+            }
+
+            // 4. (影片切換邏輯已在 eventRef listener 中處理，這裡不用重複)
+
+            // 5. 等待 5.5 秒 (5秒動畫 + 0.5秒緩衝)，然後重生花朵
+            setTimeout(() => {
+                console.log("Respawning as flowers...");
+                for (let i = 1; i <= 9; i++) {
+                    const climber = document.getElementById(`climber-${i}`);
+                    if (climber) {
+                        // a. 改變圖示
+                        const emojiDiv = climber.querySelector('.climber-emoji');
+                        if (emojiDiv) {
+                            emojiDiv.textContent = flowerPlaylist[i-1];
+                        }
+
+                        // b. 瞬間移動到螢幕頂端 (無動畫)
+                        climber.style.transition = 'none';
+                        climber.style.bottom = '120vh';
+                        
+                        // c. 下一幀，讓它們 "掉落" 回舊位置 (有動畫)
+                        (function(climber, oldPos) { // 使用閉包鎖定變數
+                            setTimeout(() => {
+                                climber.style.transition = 'bottom 5s ease-in-out, left 1s, transform 1s';
+                                climber.style.bottom = oldPos;
+                            }, 50); // 50ms 延遲確保下一幀
+                        })(climber, oldPositions[i]);
+                    }
+                }
+            }, 5500); // 5秒動畫 + 0.5秒緩衝
+        }
+        
+        // MODIFICATION: Reset 要重設更多東西
         async function resetScores() {
             if (confirm('確定要重置所有隊伍的進度嗎？')) {
+                // ... 其他重置 ...
                 finalPodiumOverlay.classList.remove('visible'); podiumContainer.innerHTML = '';
                 nextStepBtn.classList.remove('visible'); playBtn.classList.remove('visible');
                 fireworksContainer.innerHTML = '';
@@ -503,9 +611,34 @@
                 if (fireworksInterval) { clearInterval(fireworksInterval); fireworksInterval = null; }
                 currentStep = 0;
                 if(mainContainer.classList.contains('hidden')) togglePanel();
+                
+                // 1. 重設分數 (JS 變數)
                 for (let i = 1; i <= 9; i++) scores[i] = 0;
+                
+                // 2. 重設 Firebase 上的分數
                 if (window.scoresRef) await window.scoresRef.set(scores);
-                createClimbers(); updateDisplay();
+                
+                // 3. 重設 Firebase 上的事件狀態 (這會觸發 listener)
+                if (eventRef) await eventRef.set(false);
+                
+                // 4. 隱藏蓮花按鈕
+                lotusButton.classList.remove('visible');
+
+                // 5. 切換回岩漿影片
+                if (currentPlaylist !== lavaPlaylist) {
+                    console.log("Resetting playlist to LAVA.");
+                    currentPlaylist = lavaPlaylist;
+                    currentVideoIndex = 0;
+                    videoA.src = currentPlaylist[0];
+                    videoB.src = currentPlaylist[1];
+                    videoA.classList.add('active');
+                    videoB.classList.remove('active');
+                    videoA.play().catch(e => console.log("Autoplay blocked."));
+                }
+                
+                // 6. 重新創建攀爬者 (因為 isEventTriggered = false, 會變回 🧗)
+                createClimbers(); 
+                updateDisplay();
             }
         }
         
@@ -543,12 +676,55 @@
             document.getElementById('shareUrl').textContent = baseUrl;
             document.getElementById('connectionStatus').textContent = '🌐 已連線';
             
-            // 修正了 Firebase 路徑
             window.scoresRef = window.database.ref('rooms/' + roomId + '/scores');
             
+            // MODIFICATION: 新增 Firebase 狀態監聽
+            eventRef = window.database.ref('rooms/' + roomId + '/isEventTriggered');
+
+            eventRef.on('value', (snapshot) => {
+                const triggered = snapshot.val();
+                if (triggered === true) {
+                    console.log("Firebase state: Event is Triggered.");
+                    isEventTriggered = true;
+                    lotusButton.classList.remove('visible'); 
+                    
+                    if (currentPlaylist !== safePlaylist) {
+                        console.log("Setting playlist to SAFE on load.");
+                        currentPlaylist = safePlaylist;
+                        currentVideoIndex = 0;
+                        videoA.src = currentPlaylist[0];
+                        videoB.src = currentPlaylist[1];
+                        videoA.classList.add('active');
+                        videoB.classList.remove('active');
+                        videoA.play().catch(e => console.log("Autoplay blocked."));
+                    }
+                    
+                    createClimbers(); // 重建為花朵
+                    updateDisplay(); // 更新到正確位置
+                    
+                } else {
+                    console.log("Firebase state: Event is NOT Triggered.");
+                    isEventTriggered = false;
+                }
+            });
+
+            // MODIFICATION: 分數監聽器現在會觸發蓮花按鈕
             window.scoresRef.on('value', (snapshot) => {
                 const data = snapshot.val();
-                if (data) { scores = data; updateDisplay(); }
+                if (data) { 
+                    scores = data; 
+                    updateDisplay(); // 更新攀爬者位置
+                
+                    const maxScore = (scores && Object.keys(scores).length > 0) ? Math.max(...Object.values(scores)) : 0;
+                    
+                    // 如果分數 > 1100 且 事件尚未觸發
+                    if (maxScore >= 1100 && !isEventTriggered) {
+                        if (!lotusButton.classList.contains('visible')) {
+                            console.log("SCORE THRESHOLD 1100 REACHED! Showing Lotus.");
+                            lotusButton.classList.add('visible');
+                        }
+                    }
+                }
             });
 
             // --- Event Listeners ---
@@ -565,6 +741,9 @@
                     toggleScoreModal();
                 }
             });
+            
+            // MODIFICATION: 監聽蓮花按鈕點擊
+            lotusButton.addEventListener('click', handleLotusClick);
 
             // --- "雙播放器" 啟動邏輯 ---
             
@@ -573,10 +752,9 @@
                 videoA.classList.remove('active');
                 videoB.play();
                 
-                currentVideoIndex = (currentVideoIndex + 1) % videoPlaylist.length;
-                
-                let nextIndex = (currentVideoIndex + 1) % videoPlaylist.length;
-                videoA.src = videoPlaylist[nextIndex];
+                currentVideoIndex = (currentVideoIndex + 1) % currentPlaylist.length;
+                let nextIndex = (currentVideoIndex + 1) % currentPlaylist.length;
+                videoA.src = currentPlaylist[nextIndex];
             });
 
             videoB.addEventListener('ended', () => {
@@ -584,15 +762,14 @@
                 videoB.classList.remove('active');
                 videoA.play();
 
-                currentVideoIndex = (currentVideoIndex + 1) % videoPlaylist.length;
-                
-                let nextIndex = (currentVideoIndex + 1) % videoPlaylist.length;
-                videoB.src = videoPlaylist[nextIndex];
+                currentVideoIndex = (currentVideoIndex + 1) % currentPlaylist.length;
+                let nextIndex = (currentVideoIndex + 1) % currentPlaylist.length;
+                videoB.src = currentPlaylist[nextIndex];
             });
 
             // 啟動！
-            videoA.src = videoPlaylist[0]; // 'movies1.mp4'
-            videoB.src = videoPlaylist[1]; // 'movies2.mp4' // 修正了 videoPitch 錯誤
+            videoA.src = currentPlaylist[0]; // 'movies1.mp4' (或 'movies5.mp4' 如果 event 已觸發)
+            videoB.src = currentPlaylist[1]; // 'movies2.mp4' (或 'movies6.mp4' 如果 event 已觸發)
             
             videoA.play().catch(error => {
                 console.log("影片自動播放被瀏覽器阻擋。");
