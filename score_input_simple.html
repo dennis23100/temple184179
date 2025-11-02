@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🔥「追」🔥</title>
+    <title>營隊加分系統</title>
     <style>
         * {
             box-sizing: border-box;
@@ -196,8 +196,8 @@
 </head>
 <body>
     <div class="container">
-        <div class="logo">🪷</div>
-        <h1>🔥「追」🔥</h1>
+        <div class="logo">🔥</div>
+        <h1>🔥 追 🔥</h1>
         
         <div class="status-bar">
             <div class="connection-status connecting" id="connectionStatus">🔄 連接中...</div>
@@ -223,11 +223,11 @@
             
             <div class="form-group">
                 <label for="scoreInput">⭐ 加分數：</label>
-                <input type="number" id="scoreInput" min="1" max="1000" value="10" required placeholder="輸入分數">
+                <input type="number" id="scoreInput" min="1" max="10000" value="10" required placeholder="輸入分數">
             </div>
             
             <button type="submit" class="add-button" id="addButton" disabled>
-                🔥 送出加分
+                🚀 送出加分
             </button>
         </form>
         
@@ -373,8 +373,9 @@
             const team = parseInt(teamSelect.value);
             const points = parseInt(scoreInput.value);
             
-            if (!team || points <= 0) {
-                showNotification('請選擇組別並輸入有效分數', 'error');
+            // MODIFICATION: 更新驗證
+            if (!team || points <= 0 || points > 10000) { 
+                showNotification('請選擇組別並輸入 1 到 10000 之間的分數', 'error');
                 return;
             }
             
@@ -420,6 +421,4 @@
         });
     </script>
 </body>
-
 </html>
-
