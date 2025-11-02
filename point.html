@@ -591,7 +591,6 @@
                 };
             };
         }
-        // --- END OF FIX ---
         
         function respawnAsFlowers() {
             console.log("Respawning as flowers...");
@@ -701,7 +700,12 @@
             document.getElementById('shareUrl').textContent = baseUrl;
             document.getElementById('connectionStatus').textContent = '🌐 已連線';
             
-            window.scoresRef = window.database.ref('rooms/'' + roomId + ''/scores');
+            // --- 
+            //
+            // MODIFICATION: 這裡的打字錯誤已經 100% 修正了
+            //
+            // ---
+            window.scoresRef = window.database.ref('rooms/' + roomId + '/scores');
             eventRef = window.database.ref('rooms/' + roomId + '/isEventTriggered');
 
             // --- 步驟 1: 取得 "初始" 狀態 ---
@@ -745,14 +749,12 @@
 
             // --- 步驟 6: 附加 "持續" 監聽器 ---
             
-            // 監聽 "事件" (只處理 "LIVE" 觸發)
             eventRef.on('value', (snapshot) => {
                 const triggered = snapshot.val();
                 
-                // 只有當 "isEventTriggered" 從 false 變成 true 時才觸發
                 if (triggered === true && isEventTriggered === false) {
                     console.log("LIVE EVENT DETECTED: Starting transition.");
-                    isEventTriggered = true; // 更新本地狀態
+                    isEventTriggered = true; 
                     lotusButton.classList.remove('visible'); 
                     
                     oldPositions = {};
@@ -760,14 +762,13 @@
                         const climber = document.getElementById(`climber-${i}`);
                         if (climber) {
                             oldPositions[i] = climber.style.bottom;
-                            climber.style.bottom = '120vh'; // 飛走
+                            climber.style.bottom = '120vh'; 
                         }
                     }
                     
                     playTransitionVideos();
                 }
                 
-                // 處理 "重置"
                 if (triggered === false && isEventTriggered === true) {
                     console.log("RESET DETECTED: Resetting to lava.");
                     isEventTriggered = false;
@@ -783,14 +784,13 @@
                     videoA.play().catch(e => console.log("Autoplay blocked."));
                     addMainListeners(); 
                     
-                    createClimbers(); // 重建為攀爬者
+                    createClimbers(); 
                     isPageLoading = true;
                     updateDisplay();
                     isPageLoading = false;
                 }
             });
 
-            // 監聽 "分數"
             window.scoresRef.on('value', (snapshot) => {
                 const data = snapshot.val();
                 if (data) { 
