@@ -287,7 +287,7 @@
     <video muted id="bg-video-a" class="video-player active"></video>
     <video muted id="bg-video-b" class="video-player"></video>
 
-    <div id="lotus-button">🌸</div>
+    <div id="lotus-button">🪷</div>
 
     <div class="climb-area" id="climbArea"></div>
     <div id="fireworks-container"></div>
@@ -296,7 +296,7 @@
 
     <div class="container" id="mainContainer">
         <div id="hide-panel-btn">🔽</div>
-        <h1>🏕️ 追 🧗</h1>
+        <h1>🏕️ 營隊系統 - 攀爬控制台 🧗</h1>
         <div class="share-info" id="shareInfo"></div>
         <div class="status-bar" id="statusBar"></div>
         <div class="control-panel" id="controlPanel"></div>
@@ -377,7 +377,7 @@
         ];
         
         const flowerPlaylist = [
-            '🌷', '🌸', '🌺', '🏵️', '🌻', '🌼', '💐', '🌹', '💮'
+            '🌷', '🌸', '🌺', '🏵️', '🌻', '🌼', '💐', '🪻', '💮'
         ];
         
         let currentPlaylist = lavaPlaylist; 
@@ -417,7 +417,6 @@
         }
 
         function updateDisplay() {
-            // 只有在 "非" 頁面載入時才更新位置，防止 "飛走" 動畫被 "更新位置" 蓋掉
             if (isPageLoading) {
                 const maxScore = Math.max(1, ...Object.values(scores));
                 const travelRange = window.innerHeight * 0.8;
@@ -547,6 +546,7 @@
             }
         }
         
+        // MODIFICATION: 修正轉場卡頓問題
         function playTransitionVideos() {
             console.log("Playing transition video 1 (movies9.mp4)");
             let activePlayer = videoA.classList.contains('active') ? videoA : videoB;
@@ -555,32 +555,43 @@
             videoA.removeEventListener('ended', onVideoAEnded);
             videoB.removeEventListener('ended', onVideoBEnded);
             
+            // ** THE FIX **
+            // 預載 movies10 到 "即將隱藏" 的播放器
+            activePlayer.src = 'movies10.mp4'; 
+            
+            // 載入並播放 movies9 到 "即將顯示" 的播放器
             inactivePlayer.src = 'movies9.mp4';
             
             inactivePlayer.classList.add('active');
             activePlayer.classList.remove('active');
             inactivePlayer.play();
             
+            // 當 movies9 播完
             inactivePlayer.onended = () => {
                 console.log("Playing transition video 2 (movies10.mp4)");
-                inactivePlayer.src = 'movies10.mp4';
-                inactivePlayer.play();
                 
-                inactivePlayer.onended = () => {
+                // 無縫切換到已經預載好的 "activePlayer"
+                activePlayer.classList.add('active');
+                inactivePlayer.classList.remove('active');
+                activePlayer.play();
+                
+                // 當 movies10 播完
+                activePlayer.onended = () => {
                     console.log("Transition finished. Respawning flowers.");
                     
                     respawnAsFlowers();
                     
                     currentPlaylist = safePlaylist;
                     currentVideoIndex = 0;
-                    inactivePlayer.src = currentPlaylist[0]; // movies5
-                    activePlayer.src = currentPlaylist[1]; // movies6
-                    inactivePlayer.play();
+                    activePlayer.src = currentPlaylist[0]; // movies5
+                    inactivePlayer.src = currentPlaylist[1]; // movies6
+                    activePlayer.play();
                     
                     addMainListeners();
                 };
             };
         }
+        // --- END OF FIX ---
         
         function respawnAsFlowers() {
             console.log("Respawning as flowers...");
@@ -623,7 +634,7 @@
                 for (let i = 1; i <= 9; i++) scores[i] = 0;
                 
                 if (window.scoresRef) await window.scoresRef.set(scores);
-                if (eventRef) await eventRef.set(false); // 這會觸發 listener
+                if (eventRef) await eventRef.set(false); 
                 
                 lotusButton.classList.remove('visible');
             }
@@ -690,7 +701,7 @@
             document.getElementById('shareUrl').textContent = baseUrl;
             document.getElementById('connectionStatus').textContent = '🌐 已連線';
             
-            window.scoresRef = window.database.ref('rooms/' + roomId + '/scores');
+            window.scoresRef = window.database.ref('rooms/'' + roomId + ''/scores');
             eventRef = window.database.ref('rooms/' + roomId + '/isEventTriggered');
 
             // --- 步驟 1: 取得 "初始" 狀態 ---
@@ -701,11 +712,10 @@
             // --- 步驟 2: 根據初始狀態設定場景 ---
             if (isEventTriggered) {
                 currentPlaylist = safePlaylist;
-                currentVideoIndex = 0;
             } else {
                 currentPlaylist = lavaPlaylist;
-                currentVideoIndex = 0;
             }
+            currentVideoIndex = 0;
             
             // --- 步驟 3: 建立 "正確" 的圖示 ---
             createClimbers(); // 現在 isEventTriggered 是正確的
@@ -716,9 +726,9 @@
             for (let i = 1; i <= 9; i++) {
                 if (!scores[i]) scores[i] = 0;
             }
-            isPageLoading = true; // 設為 true，讓 updateDisplay 執行
+            isPageLoading = true; 
             updateDisplay();
-            isPageLoading = false; // 恢復正常
+            isPageLoading = false; 
 
             // --- 步驟 5: 啟動 "正確" 的影片 ---
             videoA.src = currentPlaylist[currentVideoIndex];
@@ -745,7 +755,6 @@
                     isEventTriggered = true; // 更新本地狀態
                     lotusButton.classList.remove('visible'); 
                     
-                    // 1. 儲存位置並飛走
                     oldPositions = {};
                     for (let i = 1; i <= 9; i++) {
                         const climber = document.getElementById(`climber-${i}`);
@@ -755,7 +764,6 @@
                         }
                     }
                     
-                    // 2. 播放轉場影片 (9 -> 10 -> 重生 -> 循環 5-8)
                     playTransitionVideos();
                 }
                 
@@ -776,7 +784,9 @@
                     addMainListeners(); 
                     
                     createClimbers(); // 重建為攀爬者
+                    isPageLoading = true;
                     updateDisplay();
+                    isPageLoading = false;
                 }
             });
 
@@ -785,7 +795,7 @@
                 const data = snapshot.val();
                 if (data) { 
                     scores = data; 
-                    isPageLoading = true; // 允許 updateDisplay 執行
+                    isPageLoading = true; 
                     updateDisplay(); 
                     isPageLoading = false;
                 
