@@ -8,81 +8,46 @@
         * { box-sizing: border-box; }
         body { font-family: 'Arial', sans-serif; margin: 0; overflow: hidden; background-color: #000; }
         
-        /* --- 新增：登入畫面樣式 --- */
+        /* --- 登入畫面樣式 --- */
         #login-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            background-color: #1a1a1a;
-            z-index: 9999; /* 確保在最上層 */
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background-color: #1a1a1a; z-index: 9999;
+            display: flex; justify-content: center; align-items: center;
             transition: opacity 0.5s ease;
         }
         .login-box {
-            background: white;
-            padding: 40px;
-            border-radius: 15px;
-            text-align: center;
-            box-shadow: 0 0 20px rgba(0,0,0,0.5);
-            width: 300px;
+            background: white; padding: 40px; border-radius: 15px;
+            text-align: center; box-shadow: 0 0 20px rgba(0,0,0,0.5); width: 300px;
         }
         .login-box h2 { margin-top: 0; color: #333; }
         .login-box input {
-            width: 100%;
-            padding: 10px;
-            margin: 15px 0;
-            font-size: 18px;
-            border: 2px solid #ddd;
-            border-radius: 5px;
-            text-align: center;
+            width: 100%; padding: 10px; margin: 15px 0; font-size: 18px;
+            border: 2px solid #ddd; border-radius: 5px; text-align: center;
         }
         .login-box button {
-            width: 100%;
-            padding: 10px;
-            background: #4ECDC4;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            font-size: 18px;
-            cursor: pointer;
-            transition: background 0.3s;
+            width: 100%; padding: 10px; background: #4ECDC4; color: white;
+            border: none; border-radius: 5px; font-size: 18px; cursor: pointer; transition: background 0.3s;
         }
         .login-box button:hover { background: #3dbbb3; }
         #login-error { color: #ff6b6b; margin-top: 10px; display: none; font-weight: bold; }
-        /* ----------------------- */
 
+        /* --- 影片背景 --- */
         .video-player {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            object-fit: cover; 
-            z-index: -2; 
-            filter: brightness(0.8);
-            opacity: 0;
-            transition: opacity 0.5s ease-in-out;
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            object-fit: cover; z-index: -2; filter: brightness(0.8);
+            opacity: 0; transition: opacity 0.5s ease-in-out;
         }
-        .video-player.active {
-            opacity: 1;
-        }
+        .video-player.active { opacity: 1; }
 
-        .climb-area {
-            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -1;
-        }
+        .climb-area { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -1; }
         
+        /* --- 主容器 --- */
         .container {
             max-width: 1200px; margin: 15px auto; background: rgba(255, 255, 255, 0.9);
             border-radius: 20px; padding: 20px; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
             position: relative; z-index: 20; transition: transform 0.5s ease-in-out, opacity 0.5s ease-in-out;
         }
-        .container.hidden {
-            opacity: 0; transform: translateY(-120%); pointer-events: none;
-        }
+        .container.hidden { opacity: 0; transform: translateY(-120%); pointer-events: none; }
         #hide-panel-btn {
             position: absolute; top: 15px; right: 20px; font-size: 24px;
             cursor: pointer; opacity: 0.6; transition: opacity 0.2s;
@@ -90,123 +55,82 @@
         #hide-panel-btn:hover { opacity: 1; }
         
         #show-panel-btn {
-            position: fixed; 
-            top: 10px; 
-            right: 15px; 
-            transform: none; 
-            z-index: 19;
-            padding: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background-color: rgba(255, 255, 255, 0.8); border: none;
-            border-radius: 50%; 
-            cursor: pointer; font-weight: bold;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.2); transition: opacity 0.5s, transform 0.5s;
-            width: 40px; 
-            height: 40px;
-            font-size: 20px; 
+            position: fixed; top: 10px; right: 15px; z-index: 19; padding: 0;
+            display: flex; align-items: center; justify-content: center;
+            background-color: rgba(255, 255, 255, 0.8); border: none; border-radius: 50%; 
+            cursor: pointer; font-weight: bold; box-shadow: 0 2px 10px rgba(0,0,0,0.2); 
+            transition: opacity 0.5s, transform 0.5s; width: 40px; height: 40px; font-size: 20px; 
         }
-        #show-panel-btn.hidden { 
-            opacity: 0; 
-            transform: translateY(-150%); 
-            pointer-events: none; 
-        }
+        #show-panel-btn.hidden { opacity: 0; transform: translateY(-150%); pointer-events: none; }
         
         h1 { text-align: center; color: #333; margin-bottom: 25px; font-size: 2.2em; }
         .status-bar, .control-panel, .share-info { margin-bottom: 20px; }
-
-        .control-panel .control-button-group {
-            display: flex;
-            gap: 10px;
-            justify-content: center;
-            flex-wrap: wrap; 
-        }
+        .control-panel .control-button-group { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
         .control-panel .control-button-group button {
-            padding: 10px 15px;
-            font-size: 16px;
-            border-radius: 8px;
-            border: none;
-            cursor: pointer;
-            background: #eee;
-            transition: background 0.2s;
-            font-weight: bold;
+            padding: 10px 15px; font-size: 16px; border-radius: 8px; border: none;
+            cursor: pointer; background: #eee; transition: background 0.2s; font-weight: bold;
         }
-        .control-panel .control-button-group button:hover {
-            background: #ddd;
-        }
+        .control-panel .control-button-group button:hover { background: #ddd; }
 
-
+        /* --- 隊伍顯示區域 --- */
         .climber {
-            position: absolute; width: 10%; max-width: 120px;
+            position: absolute; 
+            width: 12.5%; /* 100% / 8組 = 12.5% */
+            max-width: none;
             text-align: center; 
             transition: bottom 5s ease-in-out, left 1s, transform 1s;
             z-index: 1; display: flex; flex-direction: column; align-items: center;
         }
         
-        .climber:not(.is-flower)::before {
-            content: '';
-            position: absolute;
-            bottom: 50%; 
-            left: 50%;
-            transform: translateX(-50%);
-            width: 3px; 
-            height: 150vh; 
-            background: #6D4C41; 
-            z-index: -1; 
+        .climber::before {
+            content: ''; position: absolute; bottom: 50%; left: 50%; transform: translateX(-50%);
+            width: 3px; height: 150vh; background: #6D4C41; z-index: -1; 
             box-shadow: 0 0 5px rgba(0,0,0,0.5); 
         }
         
         @keyframes wiggle {
-            0%, 100% { transform: translateX(0); }
-            25% { transform: translateX(-3px); } 
-            75% { transform: translateX(3px); } 
+            0%, 100% { transform: rotate(0deg); }
+            25% { transform: rotate(-3deg); } 
+            75% { transform: rotate(3deg); } 
         }
 
-        .climber-emoji {
-            font-size: 5.5vw; min-font-size: 35px; margin-bottom: 5px;
-            filter: drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.5));
+        /* 照片樣式 (.png) */
+        .climber-photo {
+            width: 8.5vw;  /* 大小維持上次設定的 1.5倍左右 */
+            height: 8.5vw; 
+            min-width: 60px; min-height: 60px;
+            object-fit: cover; 
+            border-radius: 20px; 
+            border: 3px solid white;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.6);
+            margin-bottom: 5px;
             transition: filter 0.5s, transform 0.5s;
-        }
-        
-        .climber:not(.is-flower) .climber-emoji {
-            animation: wiggle 0.8s ease-in-out infinite;
+            background-color: #fff; 
+            animation: wiggle 2s ease-in-out infinite;
         }
         
         .climber-label {
-            font-size: 14px; font-weight: bold; color: white;
-            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8); background-color: rgba(0,0,0,0.3);
-            padding: 2px 5px; border-radius: 5px;
+            font-size: 16px; font-weight: bold; color: white;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8); background-color: rgba(0,0,0,0.6);
+            padding: 4px 10px; border-radius: 10px; z-index: 2;
         }
 
+        /* --- 觸發按鈕 (仍保留作為觸發事件用，但不是 icon) --- */
         #lotus-button {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%) scale(0.5); 
-            font-size: 15vw; 
-            min-font-size: 100px;
-            cursor: pointer;
-            z-index: 1001; 
-            opacity: 0;
-            pointer-events: none; 
-            transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0.5); 
+            font-size: 15vw; min-font-size: 100px; cursor: pointer; z-index: 1001; 
+            opacity: 0; pointer-events: none; transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             filter: drop-shadow(0 0 20px rgba(255, 255, 255, 0.7));
         }
-        #lotus-button.visible {
-            opacity: 1;
-            transform: translate(-50%, -50%) scale(1); 
-            pointer-events: all; 
-        }
+        #lotus-button.visible { opacity: 1; transform: translate(-50%, -50%) scale(1); pointer-events: all; }
 
-        #fireworks-container {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            z-index: 50; pointer-events: none;
-        }
+        #fireworks-container { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 50; pointer-events: none; }
         .particle {
             position: absolute; width: 8px; height: 8px; border-radius: 50%;
             transition: transform 1s ease-out, opacity 1s ease-out;
         }
+        
+        /* --- 結算畫面 --- */
         #final-podium-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: radial-gradient(ellipse at center, #1e3c72 0%, #2a5298 50%, #0f1419 100%);
@@ -214,7 +138,6 @@
             opacity: 0; transition: opacity 1s ease-in; pointer-events: none;
         }
         #final-podium-overlay.visible { opacity: 1; pointer-events: all; }
-        
         #final-podium-overlay::before {
             content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             background-image: 
@@ -226,17 +149,12 @@
             background-repeat: repeat; background-size: 200px 100px;
             animation: sparkle 3s linear infinite; z-index: -1;
         }
-        
         @keyframes sparkle { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
-        #podium-container {
-            display: flex; justify-content: center; align-items: flex-end;
-            width: 80%; position: relative; transition: all 1s;
-        }
         
+        #podium-container { display: flex; justify-content: center; align-items: flex-end; width: 80%; position: relative; transition: all 1s; }
         .podium-place {
             border-radius: 15px; box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-            font-weight: bold; color: #333;
-            width: 200px; opacity: 0; transform: translateY(100px);
+            font-weight: bold; color: #333; width: 200px; opacity: 0; transform: translateY(100px);
             transition: all 0.8s cubic-bezier(0.25, 0.8, 0.25, 1);
             position: relative; display: flex; flex-direction: column;
             justify-content: center; align-items: center; gap: 8px; padding: 15px;
@@ -274,11 +192,15 @@
             display: flex; flex-direction: column; align-items: center;
         }
         .big-climber-display.visible { opacity: 1; }
-        .big-climber-display .climber-emoji {
-            font-size: 15vw !important; min-font-size: 150px !important;
-            filter: drop-shadow(4px 4px 8px rgba(0, 0, 0, 0.7));
-            margin-bottom: 15px;
-            animation: none;
+        
+        /* 結算時的大頭照樣式 */
+        .big-climber-display .climber-photo {
+            width: 25vw !important; height: 25vw !important;
+            min-width: 200px !important; min-height: 200px !important;
+            border: 5px solid white;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.5);
+            margin-bottom: 20px;
+            animation: none; /* 結算時不搖晃 */
         }
         
         .big-climber-display .climber-label {
@@ -287,34 +209,29 @@
         }
 
         .rank-display {
-            position: absolute; top: -150px; left: 50%;
+            position: absolute; top: -100px; left: 50%;
             transform: translateX(-50%); font-size: 5vw;
             min-font-size: 40px; font-weight: bold; color: #ffd700;
             text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
             white-space: nowrap; display: flex; align-items: center; gap: 15px;
         }
         
+        /* --- 分數列表 Modal --- */
         #score-modal-overlay {
             position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
             background-color: rgba(0, 0, 0, 0.7); z-index: 1000;
             display: flex; justify-content: center; align-items: center;
             opacity: 0; pointer-events: none; transition: opacity 0.3s ease-in-out;
         }
-        #score-modal-overlay.visible {
-            opacity: 1; pointer-events: all;
-        }
+        #score-modal-overlay.visible { opacity: 1; pointer-events: all; }
         #score-modal-content {
             background: #fff; padding: 25px; border-radius: 15px;
             width: 90%; max-width: 450px; position: relative;
             box-shadow: 0 10px 40px rgba(0,0,0,0.4);
             transform: scale(0.9); transition: transform 0.3s ease-in-out;
         }
-        #score-modal-overlay.visible #score-modal-content {
-            transform: scale(1);
-        }
-        #score-modal-content h4 {
-            margin: 0 0 15px 0; text-align: center; color: #333; font-size: 22px;
-        }
+        #score-modal-overlay.visible #score-modal-content { transform: scale(1); }
+        #score-modal-content h4 { margin: 0 0 15px 0; text-align: center; color: #333; font-size: 22px; }
         #close-score-modal-btn {
             position: absolute; top: 10px; right: 15px; background: none; border: none;
             font-size: 28px; line-height: 1; color: #aaa; cursor: pointer; transition: color 0.2s;
@@ -339,6 +256,7 @@
             <div id="login-error">密碼錯誤，請重試</div>
         </div>
     </div>
+
     <video muted id="bg-video-a" class="video-player active"></video>
     <video muted id="bg-video-b" class="video-player"></video>
 
@@ -378,6 +296,9 @@
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script>
 
     <script>
+        // --- 1. 總隊伍數定義為 8 ---
+        const TOTAL_TEAMS = 8;
+
         // --- DOM Elements ---
         const mainContainer = document.getElementById('mainContainer');
         const hidePanelBtn = document.getElementById('hide-panel-btn');
@@ -401,7 +322,7 @@
 
         // --- State Variables ---
         let scores = {};
-        for (let i = 1; i <= 9; i++) scores[i] = 0;
+        for (let i = 1; i <= TOTAL_TEAMS; i++) scores[i] = 0; 
         let fireworksInterval;
         let finalRanking = [];
         let currentStep = 0;
@@ -419,21 +340,13 @@
         ];
 
         const lavaPlaylist = [
-            'movies1.mp4',
-            'movies2.mp4',
-            'movies3.mp4',
-            'movies4.mp4'
+            'movies1.mp4', 'movies2.mp4', 'movies3.mp4', 'movies4.mp4'
         ];
         const safePlaylist = [
-            'movies5.mp4',
-            'movies6.mp4',
-            'movies7.mp4',
-            'movies8.mp4'
+            'movies5.mp4', 'movies6.mp4', 'movies7.mp4', 'movies8.mp4'
         ];
         
-        const flowerPlaylist = [
-            '🌷', '🌸', '🌺', '🏵️', '🌻', '🌼', '💐', '🪻', '💮'
-        ];
+        // 已經不需要 flowerPlaylist，因為不會變成花了
         
         let currentPlaylist = lavaPlaylist; 
         let currentVideoIndex = 0; 
@@ -454,7 +367,7 @@
         
         function updateScoreList() {
             const sortedScores = [];
-            for (let i = 1; i <= 9; i++) {
+            for (let i = 1; i <= TOTAL_TEAMS; i++) {
                 sortedScores.push({ team: i, score: scores[i] || 0 });
             }
             sortedScores.sort((a, b) => b.score - a.score);
@@ -476,7 +389,7 @@
                 const maxScore = Math.max(1, ...Object.values(scores));
                 const travelRange = window.innerHeight * 0.8;
                 const baseBottom = window.innerHeight * 0.05;
-                for (let i = 1; i <= 9; i++) {
+                for (let i = 1; i <= TOTAL_TEAMS; i++) {
                     const climber = document.getElementById(`climber-${i}`);
                     if (climber) {
                         const scoreRatio = (scores[i] || 0) / maxScore;
@@ -505,28 +418,31 @@
             for (let i = 0; i < 8; i++) { setTimeout(() => createFirework(Math.random() * window.innerWidth, Math.random() * window.innerHeight * 0.6), i * 200); }
         }
         
+        // --- 2. 建立 1.png ~ 8.png 的照片 ---
         function createClimbers() {
             const climbArea = document.getElementById('climbArea');
             climbArea.innerHTML = '';
-            for (let i = 1; i <= 9; i++) {
+            
+            for (let i = 1; i <= TOTAL_TEAMS; i++) {
                 const climber = document.createElement('div');
-                climber.className = 'climber'; climber.id = `climber-${i}`;
-                climber.style.left = `${(i - 1) * 11 + 1}%`;
-                const emojiDiv = document.createElement('div');
-                emojiDiv.className = 'climber-emoji'; 
+                climber.className = 'climber'; 
+                climber.id = `climber-${i}`;
                 
-                if (isEventTriggered) {
-                    emojiDiv.textContent = flowerPlaylist[i-1];
-                    climber.classList.add('is-flower'); 
-                } else {
-                    emojiDiv.textContent = '🧗';
-                }
+                // 平均分配 (100% / 8 = 12.5%)
+                climber.style.left = `${(i - 1) * 12.5}%`; 
                 
-                emojiDiv.style.filter = `drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.5)) saturate(1.2) brightness(1.1)`;
+                // 建立圖片元件 (使用 .png)
+                const photoImg = document.createElement('img');
+                photoImg.className = 'climber-photo';
+                photoImg.src = `${i}.png`; // 這裡改成 .png
+                photoImg.alt = `第${i}組`;
+                
                 const labelDiv = document.createElement('div');
                 labelDiv.className = 'climber-label'; labelDiv.textContent = `第${i}組`;
                 labelDiv.style.backgroundColor = rocketColors[i-1];
-                climber.appendChild(emojiDiv); climber.appendChild(labelDiv);
+                
+                climber.appendChild(photoImg); 
+                climber.appendChild(labelDiv);
                 climbArea.appendChild(climber);
             }
         }
@@ -536,27 +452,26 @@
             showPanelBtn.classList.add('hidden');
             finalPodiumOverlay.classList.add('visible');
             finalRanking = [];
-            for (let i = 1; i <= 9; i++) { finalRanking.push({ team: i, score: scores[i] || 0 }); }
+            for (let i = 1; i <= TOTAL_TEAMS; i++) { finalRanking.push({ team: i, score: scores[i] || 0 }); }
             finalRanking.sort((a, b) => b.score - a.score);
             launchFireworks();
             fireworksInterval = setInterval(launchFireworks, 3000);
-            for (let i = 1; i <= 9; i++) {
+            for (let i = 1; i <= TOTAL_TEAMS; i++) {
                 const climber = document.getElementById(`climber-${i}`);
                 if (climber) { climber.style.transition = 'all 2s ease-out'; climber.style.bottom = '120vh'; climber.style.transform = 'rotate(0deg)'; }
             }
             setTimeout(() => { currentStep = 0; showBigClimber(2); }, 2000);
         }
 
+        // --- 3. 結算時使用 .png ---
         function showBigClimber(rankIndex) {
             if (rankIndex >= finalRanking.length) return;
             const winner = finalRanking[rankIndex], rankNames = ['第一名', '第二名', '第三名'], rankEmojis = ['🥇', '🥈', '🥉'];
             currentBigClimber = document.createElement('div'); currentBigClimber.className = 'big-climber-display';
             
-            const finalEmoji = isEventTriggered ? flowerPlaylist[winner.team-1] : '🧗';
-
             currentBigClimber.innerHTML = `
                 <div class="rank-display">${rankEmojis[rankIndex]} ${rankNames[rankIndex]}</div>
-                <div class="climber-emoji" style="filter: drop-shadow(4px 4px 8px rgba(0, 0, 0, 0.7));">${finalEmoji}</div>
+                <img src="${winner.team}.png" class="climber-photo" style="border-color: ${rocketColors[winner.team-1]};">
                 <div class="climber-label" style="background-color: ${rocketColors[winner.team-1]};">第${winner.team}組</div>
             `;
             finalPodiumOverlay.appendChild(currentBigClimber);
@@ -592,8 +507,6 @@
             }
         }
         
-        // --- 蓮花事件相關函數 (REBUILT) ---
-        
         function handleLotusClick() {
             console.log("Lotus clicked! Setting Firebase state.");
             if (eventRef) {
@@ -601,7 +514,6 @@
             }
         }
         
-        // MODIFICATION: 修正轉場卡頓問題
         function playTransitionVideos() {
             console.log("Playing transition video 1 (movies9.mp4)");
             let activePlayer = videoA.classList.contains('active') ? videoA : videoB;
@@ -610,36 +522,29 @@
             videoA.removeEventListener('ended', onVideoAEnded);
             videoB.removeEventListener('ended', onVideoBEnded);
             
-            // ** THE FIX **
-            // 預載 movies10 到 "即將隱藏" 的播放器
             activePlayer.src = 'movies10.mp4'; 
-            
-            // 載入並播放 movies9 到 "即將顯示" 的播放器
             inactivePlayer.src = 'movies9.mp4';
             
             inactivePlayer.classList.add('active');
             activePlayer.classList.remove('active');
             inactivePlayer.play();
             
-            // 當 movies9 播完
             inactivePlayer.onended = () => {
                 console.log("Playing transition video 2 (movies10.mp4)");
-                
-                // 無縫切換到已經預載好的 "activePlayer"
                 activePlayer.classList.add('active');
                 inactivePlayer.classList.remove('active');
                 activePlayer.play();
                 
-                // 當 movies10 播完
                 activePlayer.onended = () => {
-                    console.log("Transition finished. Respawning flowers.");
+                    console.log("Transition finished. Respawning climbers.");
                     
-                    respawnAsFlowers();
+                    // 呼叫重置位置函數
+                    respawnAfterTransition();
                     
                     currentPlaylist = safePlaylist;
                     currentVideoIndex = 0;
-                    activePlayer.src = currentPlaylist[0]; // movies5
-                    inactivePlayer.src = currentPlaylist[1]; // movies6
+                    activePlayer.src = currentPlaylist[0]; 
+                    inactivePlayer.src = currentPlaylist[1];
                     activePlayer.play();
                     
                     addMainListeners();
@@ -647,32 +552,25 @@
             };
         }
         
-        function respawnAsFlowers() {
-            console.log("Respawning as flowers...");
-            for (let i = 1; i <= 9; i++) {
+        // --- 4. 轉場後只重置位置，不做任何圖片變更 ---
+        function respawnAfterTransition() {
+            console.log("Respawning climbers (keeping pngs)...");
+            for (let i = 1; i <= TOTAL_TEAMS; i++) {
                 const climber = document.getElementById(`climber-${i}`);
                 if (climber) {
-                    climber.classList.add('is-flower'); 
-                    const emojiDiv = climber.querySelector('.climber-emoji');
-                    if (emojiDiv) {
-                        emojiDiv.textContent = flowerPlaylist[i-1];
-                    }
-
                     climber.style.transition = 'none';
-                    climber.style.bottom = '120vh';
+                    climber.style.bottom = '120vh'; // 先飛出去
                     
                     (function(climber, oldPos) { 
                         setTimeout(() => {
                             climber.style.transition = 'bottom 5s ease-in-out, left 1s, transform 1s';
-                            climber.style.bottom = oldPos;
+                            climber.style.bottom = oldPos; // 再飛回來
                         }, 50); 
                     })(climber, oldPositions[i]);
                 }
             }
         }
         
-        // --- 結束 ---
-
         async function resetScores() {
             if (confirm('確定要重置所有隊伍的進度嗎？')) {
                 finalPodiumOverlay.classList.remove('visible'); podiumContainer.innerHTML = '';
@@ -685,7 +583,7 @@
                 currentStep = 0;
                 if(mainContainer.classList.contains('hidden')) togglePanel();
                 
-                for (let i = 1; i <= 9; i++) scores[i] = 0;
+                for (let i = 1; i <= TOTAL_TEAMS; i++) scores[i] = 0;
                 
                 if (window.scoresRef) await window.scoresRef.set(scores);
                 if (eventRef) await eventRef.set(false); 
@@ -737,7 +635,6 @@
             videoB.onended = null;
         }
 
-        // --- MODIFICATION: 真正的主函數 (initializeApp) ---
         async function initializeApp() {
             setupUI(); 
             scoreDisplayBtn = document.getElementById('score-display-btn');
@@ -758,12 +655,10 @@
             window.scoresRef = window.database.ref('rooms/' + roomId + '/scores');
             eventRef = window.database.ref('rooms/' + roomId + '/isEventTriggered');
 
-            // --- 步驟 1: 取得 "初始" 狀態 ---
             const eventSnapshot = await eventRef.once('value');
             isEventTriggered = eventSnapshot.val() === true;
             console.log(`Initial load: isEventTriggered = ${isEventTriggered}`);
 
-            // --- 步驟 2: 根據初始狀態設定場景 ---
             if (isEventTriggered) {
                 currentPlaylist = safePlaylist;
             } else {
@@ -771,34 +666,27 @@
             }
             currentVideoIndex = 0;
             
-            // --- 步驟 3: 建立 "正確" 的圖示 ---
-            createClimbers(); // 現在 isEventTriggered 是正確的
+            createClimbers(); // 建立 1.png ~ 8.png 的照片
 
-            // --- 步驟 4: 取得 "初始" 分數並顯示 ---
             const scoreSnapshot = await window.scoresRef.once('value');
             scores = scoreSnapshot.val() || {};
-            for (let i = 1; i <= 9; i++) {
+            for (let i = 1; i <= TOTAL_TEAMS; i++) {
                 if (!scores[i]) scores[i] = 0;
             }
             isPageLoading = true; 
             updateDisplay();
             isPageLoading = false; 
 
-            // --- 步驟 5: 啟動 "正確" 的影片 ---
             videoA.src = currentPlaylist[currentVideoIndex];
             let nextIndex = (currentVideoIndex + 1) % currentPlaylist.length;
             videoB.src = currentPlaylist[nextIndex]; 
             
             videoA.play().catch(error => {
                 console.log("影片自動播放被瀏覽器阻擋。");
-                document.body.addEventListener('click', () => {
-                    videoA.play();
-                }, { once: true });
+                document.body.addEventListener('click', () => { videoA.play(); }, { once: true });
             });
             addMainListeners();
 
-            // --- 步驟 6: 附加 "持續" 監聽器 ---
-            
             eventRef.on('value', (snapshot) => {
                 const triggered = snapshot.val();
                 
@@ -808,7 +696,7 @@
                     lotusButton.classList.remove('visible'); 
                     
                     oldPositions = {};
-                    for (let i = 1; i <= 9; i++) {
+                    for (let i = 1; i <= TOTAL_TEAMS; i++) {
                         const climber = document.getElementById(`climber-${i}`);
                         if (climber) {
                             oldPositions[i] = climber.style.bottom;
@@ -853,14 +741,12 @@
                     
                     if (maxScore >= 1100 && !isEventTriggered) {
                         if (!lotusButton.classList.contains('visible')) {
-                            console.log("SCORE THRESHOLD 1100 REACHED! Showing Lotus.");
                             lotusButton.classList.add('visible');
                         }
                     }
                 }
             });
 
-            // --- 步驟 7: 附加 "UI" 監聽器 ---
             hidePanelBtn.addEventListener('click', togglePanel);
             showPanelBtn.addEventListener('click', togglePanel);
             playBtn.addEventListener('click', handlePlayButton);
@@ -878,45 +764,33 @@
             lotusButton.addEventListener('click', handleLotusClick);
         }
 
-        // --- 新增：登入驗證邏輯 ---
+        // --- 登入驗證邏輯 ---
         function attemptLogin() {
             const pwdInput = document.getElementById('login-password');
             const errorMsg = document.getElementById('login-error');
             const overlay = document.getElementById('login-overlay');
 
             if (pwdInput.value === '184179') {
-                // 密碼正確
                 errorMsg.style.display = 'none';
                 overlay.style.opacity = '0';
-                
-                // 等待淡出動畫結束後，移除遮罩並啟動系統
                 setTimeout(() => {
                     overlay.style.display = 'none';
-                    initializeApp(); // 啟動原本的初始化程序
+                    initializeApp();
                 }, 500);
             } else {
-                // 密碼錯誤
                 errorMsg.style.display = 'block';
                 pwdInput.value = '';
                 pwdInput.focus();
             }
         }
 
-        // 綁定事件
         window.addEventListener('load', () => {
             const loginBtn = document.getElementById('login-btn');
             const pwdInput = document.getElementById('login-password');
-
             loginBtn.addEventListener('click', attemptLogin);
-
-            // 支援按 Enter 鍵登入
             pwdInput.addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') {
-                    attemptLogin();
-                }
+                if (e.key === 'Enter') { attemptLogin(); }
             });
-            
-            // 聚焦輸入框
             pwdInput.focus();
         });
         
