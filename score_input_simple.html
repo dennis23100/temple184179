@@ -193,11 +193,127 @@
             }
         }
     </style>
+    <style>
+        body {
+            font-family: "Microsoft JhengHei", "Noto Sans TC", sans-serif;
+            background:
+                radial-gradient(circle at top, rgba(126, 169, 255, 0.32), transparent 34%),
+                radial-gradient(circle at bottom, rgba(255, 204, 111, 0.18), transparent 28%),
+                linear-gradient(135deg, #566ed8 0%, #6f57b7 45%, #8a4f8f 100%);
+        }
+
+        body::before,
+        body::after {
+            content: "";
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+        }
+
+        body::before {
+            background:
+                radial-gradient(circle at 20% 20%, rgba(255, 255, 255, 0.14), transparent 18%),
+                radial-gradient(circle at 80% 24%, rgba(255, 255, 255, 0.1), transparent 16%),
+                radial-gradient(circle at 50% 84%, rgba(255, 214, 145, 0.16), transparent 28%);
+            z-index: -1;
+        }
+
+        .container {
+            max-width: 560px;
+            padding: 34px 32px 30px;
+            border-radius: 32px;
+            background: rgba(255, 255, 255, 0.94);
+            box-shadow: 0 28px 70px rgba(35, 24, 79, 0.28);
+        }
+
+        .hero-badge {
+            display: inline-block;
+            padding: 7px 14px;
+            border-radius: 999px;
+            background: rgba(105, 121, 232, 0.12);
+            color: #5b63c9;
+            font-size: 12px;
+            font-weight: 800;
+            letter-spacing: 0.16em;
+            text-transform: uppercase;
+            margin-bottom: 14px;
+        }
+
+        .logo {
+            font-size: 3.6em;
+            margin-bottom: 14px;
+        }
+
+        h1 {
+            margin-bottom: 12px;
+            font-size: 2.3em;
+            line-height: 1.2;
+        }
+
+        .subtitle {
+            margin-bottom: 24px;
+            color: #5f6582;
+            font-size: 15px;
+            line-height: 1.7;
+        }
+
+        .status-bar {
+            background: rgba(246, 248, 255, 0.92);
+            border: 1px solid rgba(122, 137, 213, 0.18);
+            box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.5);
+        }
+
+        .form-group {
+            margin-bottom: 22px;
+        }
+
+        label {
+            color: #414862;
+            font-size: 1.05em;
+        }
+
+        select,
+        input {
+            border: 2px solid rgba(110, 120, 163, 0.24);
+            border-radius: 18px;
+        }
+
+        select:focus,
+        input:focus {
+            border-color: #687eeb;
+            box-shadow: 0 0 0 4px rgba(104, 126, 235, 0.12);
+        }
+
+        .add-button {
+            border-radius: 999px;
+            background: linear-gradient(135deg, #7a8bf2, #a16ccc);
+            box-shadow: 0 16px 30px rgba(104, 126, 235, 0.24);
+        }
+
+        .notification {
+            border-radius: 16px;
+            box-shadow: 0 16px 34px rgba(0, 0, 0, 0.22);
+        }
+
+        .footer {
+            color: #727893;
+            line-height: 1.8;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 28px 20px 24px;
+            }
+
+        }
+    </style>
 </head>
 <body>
     <div class="container">
-        <div class="logo">💪</div>
+        <div class="hero-badge">Awakening Dispatch</div>
+        <div class="logo">🛌⚡</div>
         <h1>🌑躺平是覺醒的前奏☀️</h1>
+        <p class="subtitle">每一筆加分都會推動舞台節奏，直到畫面進入下一段變身演出。</p>
         
         <div class="status-bar">
             <div class="connection-status connecting" id="connectionStatus">🔄 連接中...</div>
@@ -231,8 +347,8 @@
         </form>
         
         <div class="footer">
-            <p>💡 提示：選擇組別和分數後點擊送出</p>
-            <p>🔄 分數會即時同步到火箭顯示畫面</p>
+            <p>💡 只負責送出加分，不顯示即時排名或各組詳細比分。</p>
+            <p>⚡ 舞台端會依當前進度切換變身與最終衝刺演出。</p>
         </div>
     </div>
     
@@ -262,6 +378,7 @@
         let scores = {};
         let roomId = '';
         let isConnected = false;
+        let isSubmitting = false;
         
         // 初始化分數
         for (let i = 1; i <= 8; i++) {
@@ -310,12 +427,6 @@
                     }
                 });
                 
-                // 初始化分數到 Firebase（如果不存在）
-                scoresRef.once('value', (snapshot) => {
-                    if (!snapshot.exists()) {
-                        scoresRef.set(scores);
-                    }
-                });
             }
         }
         
@@ -329,7 +440,7 @@
                     statusElement.textContent = '🌐 已連線';
                     statusElement.className = 'connection-status connected';
                     isConnected = true;
-                    addButton.disabled = false;
+                    addButton.disabled = isSubmitting;
                     break;
                 case 'disconnected':
                     statusElement.textContent = '❌ 連線失敗';
@@ -361,13 +472,14 @@
         async function addScore(event) {
             event.preventDefault();
             
-            if (!isConnected) {
+            if (!isConnected || isSubmitting) {
                 showNotification('請等待連線完成', 'error');
                 return;
             }
             
             const teamSelect = document.getElementById('teamSelect');
             const scoreInput = document.getElementById('scoreInput');
+            const addButton = document.getElementById('addButton');
             
             const team = parseInt(teamSelect.value);
             const points = parseInt(scoreInput.value);
@@ -379,11 +491,32 @@
             }
             
             try {
-                // 更新本地分數
-                scores[team] = (scores[team] || 0) + points;
-                
-                // 保存到 Firebase
-                await scoresRef.set(scores);
+                isSubmitting = true;
+                addButton.disabled = true;
+
+                const teamRef = scoresRef.child(String(team));
+                const result = await new Promise((resolve, reject) => {
+                    teamRef.transaction(
+                        (currentValue) => (Number(currentValue) || 0) + points,
+                        (error, committed, snapshot) => {
+                            if (error) {
+                                reject(error);
+                                return;
+                            }
+
+                            resolve({
+                                committed,
+                                value: snapshot ? Number(snapshot.val() || 0) : 0
+                            });
+                        }
+                    );
+                });
+
+                if (!result.committed) {
+                    throw new Error('transaction_not_committed');
+                }
+
+                scores[team] = result.value;
                 
                 showNotification(`第${team}組 +${points}分！🎉`);
                 
@@ -394,21 +527,11 @@
             } catch (error) {
                 console.error('保存分數失敗:', error);
                 showNotification('保存失敗，請重試', 'error');
-                
-                // 回滾本地分數
-                scores[team] -= points;
+            } finally {
+                isSubmitting = false;
+                addButton.disabled = !isConnected;
             }
         }
-        
-        // 鍵盤快捷鍵
-        document.addEventListener('keydown', function(event) {
-            if (event.key === 'Enter' && isConnected) {
-                const form = document.querySelector('form');
-                if (form.checkValidity()) {
-                    addScore(event);
-                }
-            }
-        });
         
         // 初始化
         window.addEventListener('load', function() {

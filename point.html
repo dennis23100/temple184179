@@ -449,6 +449,1303 @@
             100% { opacity: 0; transform: translate(var(--tx), var(--ty)) scale(0); }
         }
     </style>
+    <style>
+        :root {
+            --text-main: #f6f7ff;
+            --text-soft: rgba(232, 238, 255, 0.76);
+            --panel-bg: rgba(7, 14, 30, 0.78);
+            --panel-border: rgba(255, 255, 255, 0.14);
+        }
+
+        html, body {
+            width: 100%;
+            height: 100%;
+        }
+
+        body {
+            font-family: "Microsoft JhengHei", "Noto Sans TC", sans-serif;
+            color: var(--text-main);
+            background:
+                radial-gradient(circle at 50% 16%, rgba(255, 230, 188, 0.46), transparent 34%),
+                radial-gradient(circle at 50% 70%, rgba(255, 209, 145, 0.18), transparent 32%),
+                linear-gradient(180deg, #98745e 0%, #6f5345 100%);
+        }
+
+        body::before,
+        body::after {
+            content: "";
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        body::before,
+        body::after {
+            display: none;
+        }
+
+        body.sprint-mode .video-player {
+            filter: brightness(1.02) saturate(1.06) contrast(1.02);
+        }
+
+        body.sprint-mode .stage-mode {
+            border-color: rgba(255, 196, 74, 0.68);
+            box-shadow: 0 0 0 1px rgba(255, 196, 74, 0.2), 0 12px 36px rgba(255, 168, 43, 0.24);
+        }
+
+        #login-overlay {
+            background:
+                radial-gradient(circle at top, rgba(92, 138, 255, 0.25), transparent 40%),
+                linear-gradient(135deg, #040612 0%, #0b1530 48%, #18172c 100%);
+        }
+
+        .login-box {
+            width: min(360px, calc(100vw - 36px));
+            background: rgba(9, 15, 31, 0.88);
+            color: var(--text-main);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 28px;
+            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.45);
+            backdrop-filter: blur(16px);
+        }
+
+        .login-box input {
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.14);
+            background: rgba(255, 255, 255, 0.08);
+            color: var(--text-main);
+        }
+
+        .login-box button {
+            border-radius: 999px;
+            color: #07101f;
+            background: linear-gradient(135deg, #c9e8ff, #ffcf6c);
+            box-shadow: 0 16px 28px rgba(255, 189, 77, 0.2);
+        }
+
+        .video-player {
+            z-index: -3;
+            filter: brightness(1) saturate(1.03) contrast(1.02);
+            transition: opacity 0.5s ease, filter 0.5s ease;
+        }
+
+        .stage-header {
+            display: none;
+        }
+
+        .stage-kicker {
+            padding: 6px 14px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            color: rgba(236, 240, 255, 0.78);
+            font-size: 12px;
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+        }
+
+        .stage-title-card {
+            padding: 18px 30px;
+            border-radius: 28px;
+            background: linear-gradient(180deg, rgba(14, 21, 42, 0.72), rgba(8, 13, 28, 0.82));
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            box-shadow: 0 18px 50px rgba(0, 0, 0, 0.28);
+            text-align: center;
+            backdrop-filter: blur(14px);
+        }
+
+        .stage-title-card h1 {
+            margin: 0;
+            font-size: clamp(30px, 3.2vw, 48px);
+            line-height: 1.1;
+            font-weight: 900;
+            letter-spacing: 0.02em;
+            color: var(--text-main);
+        }
+
+        .stage-title-card p {
+            margin: 10px 0 0;
+            color: var(--text-soft);
+            font-size: clamp(13px, 1.3vw, 16px);
+            letter-spacing: 0.08em;
+        }
+
+        .stage-mode {
+            min-width: 250px;
+            padding: 12px 18px;
+            border-radius: 20px;
+            text-align: center;
+            background: rgba(9, 14, 30, 0.82);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            box-shadow: 0 12px 34px rgba(0, 0, 0, 0.22);
+            backdrop-filter: blur(12px);
+        }
+
+        .stage-mode-title {
+            display: block;
+            font-size: 14px;
+            font-weight: 800;
+            letter-spacing: 0.14em;
+        }
+
+        .stage-mode-copy {
+            display: block;
+            margin-top: 6px;
+            color: var(--text-soft);
+            font-size: 12px;
+        }
+
+        #milestone-layer {
+            display: none;
+        }
+
+        .milestone-line {
+            position: absolute;
+            left: 5vw;
+            right: 5vw;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.14) 12%, rgba(255, 255, 255, 0.14) 88%, transparent);
+        }
+
+        .milestone-line.level-1 {
+            background: linear-gradient(90deg, transparent, rgba(116, 218, 176, 0.64) 12%, rgba(116, 218, 176, 0.64) 88%, transparent);
+        }
+
+        .milestone-line.level-2 {
+            background: linear-gradient(90deg, transparent, rgba(255, 198, 92, 0.82) 12%, rgba(255, 198, 92, 0.82) 88%, transparent);
+            box-shadow: 0 0 18px rgba(255, 191, 70, 0.2);
+        }
+
+        .milestone-chip {
+            position: absolute;
+            right: 5vw;
+            transform: translateY(-50%);
+            padding: 10px 14px;
+            border-radius: 16px;
+            background: rgba(9, 14, 30, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 10px 28px rgba(0, 0, 0, 0.18);
+            text-align: right;
+            backdrop-filter: blur(10px);
+        }
+
+        .milestone-chip strong {
+            display: block;
+            font-size: 13px;
+            letter-spacing: 0.12em;
+        }
+
+        .milestone-chip span {
+            display: block;
+            margin-top: 4px;
+            color: var(--text-soft);
+            font-size: 11px;
+        }
+
+        .sprint-chip {
+            opacity: 0;
+            transition: opacity 0.45s ease;
+        }
+
+        body.sprint-mode .sprint-chip {
+            opacity: 1;
+        }
+
+        .climb-area {
+            z-index: 3;
+        }
+
+        .climber {
+            width: clamp(112px, 10.8vw, 172px);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+            transform: translateX(-50%);
+            transition: bottom 1.8s cubic-bezier(0.2, 0.8, 0.2, 1), transform 0.45s ease, filter 0.45s ease;
+        }
+
+        .climber::before {
+            display: none;
+        }
+
+        .climber::after {
+            content: "";
+            position: absolute;
+            left: 50%;
+            bottom: -18px;
+            width: 78px;
+            height: 18px;
+            transform: translateX(-50%);
+            background: radial-gradient(circle, rgba(255, 219, 148, 0.36), transparent 70%);
+            filter: blur(7px);
+            opacity: 0.7;
+        }
+
+        .climber-frame {
+            position: relative;
+            width: 100%;
+            padding: 12px;
+            border-radius: 30px;
+            background: linear-gradient(180deg, rgba(15, 22, 44, 0.8), rgba(9, 14, 28, 0.92));
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            box-shadow: 0 20px 36px rgba(0, 0, 0, 0.26);
+            backdrop-filter: blur(10px);
+            overflow: hidden;
+        }
+
+        .climber-frame::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.16), transparent 35%, transparent 65%, rgba(255, 255, 255, 0.05));
+            pointer-events: none;
+        }
+
+        .climber-emoji {
+            position: relative;
+            margin: 0;
+            font-size: 0;
+        }
+
+        .climber-emoji img {
+            width: 100%;
+            aspect-ratio: 1;
+            object-fit: cover;
+            display: block;
+            border-radius: 22px;
+            border: 2px solid rgba(255, 255, 255, 0.12);
+            box-shadow: 0 8px 26px rgba(0, 0, 0, 0.24);
+        }
+
+        .climber-label {
+            padding: 6px 14px;
+            border-radius: 999px;
+            color: white;
+            font-size: 14px;
+            font-weight: 800;
+            letter-spacing: 0.05em;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.28);
+            background-color: transparent;
+        }
+
+        .climber-status {
+            display: none;
+        }
+
+        .climber-progress {
+            width: 100%;
+            height: 8px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.1);
+            overflow: hidden;
+            box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.06);
+        }
+
+        .climber-progress-fill {
+            width: 8%;
+            height: 100%;
+            border-radius: inherit;
+            background: linear-gradient(90deg, var(--team-color, #8dc8ff), rgba(255, 255, 255, 0.92));
+            box-shadow: 0 0 16px color-mix(in srgb, var(--team-color, #8dc8ff) 65%, white);
+            transition: width 0.6s ease, box-shadow 0.45s ease;
+        }
+
+        .climber.awakened .climber-frame {
+            box-shadow: 0 22px 42px rgba(46, 186, 145, 0.2);
+        }
+
+        .climber.final-awakened .climber-frame {
+            box-shadow: 0 22px 48px rgba(255, 184, 74, 0.28);
+            border-color: rgba(255, 203, 104, 0.38);
+        }
+
+        .climber.near-awaken .climber-frame,
+        .climber.near-final .climber-frame {
+            animation: transformWobble 0.28s ease-in-out infinite alternate;
+        }
+
+        .climber.near-final .climber-frame {
+            animation-duration: 0.18s;
+        }
+
+        .climber.near-awaken .climber-progress-fill,
+        .climber.near-final .climber-progress-fill {
+            box-shadow: 0 0 24px rgba(255, 255, 255, 0.75);
+        }
+
+        .climber.sprint-runner {
+            filter: saturate(1.18);
+        }
+
+        .climber.sprint-runner .climber-frame::after {
+            content: "";
+            position: absolute;
+            inset: auto -10px -20px -10px;
+            height: 42px;
+            background: linear-gradient(90deg, transparent, rgba(255, 210, 124, 0.4), transparent);
+            filter: blur(12px);
+        }
+
+        @keyframes transformWobble {
+            0% {
+                transform: translateX(-7px) rotate(-1.8deg);
+            }
+            100% {
+                transform: translateX(7px) rotate(1.8deg);
+            }
+        }
+
+        #transform-trigger {
+            background: rgba(4, 8, 18, 0.58);
+        }
+
+        .trigger-card {
+            padding: 28px 34px;
+            border-radius: 28px;
+            background: rgba(7, 12, 24, 0.78);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            box-shadow: 0 24px 70px rgba(0, 0, 0, 0.4);
+            text-align: center;
+            backdrop-filter: blur(16px);
+        }
+
+        .trigger-hint {
+            margin-bottom: 16px;
+            color: rgba(240, 244, 255, 0.78);
+            font-size: 14px;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+        }
+
+        .trigger-btn {
+            padding: 20px 46px;
+            border-radius: 24px;
+            border: 2px solid rgba(255, 255, 255, 0.7);
+            background: rgba(255, 255, 255, 0.06);
+            font-size: clamp(34px, 4vw, 64px);
+            font-weight: 900;
+            text-shadow: 0 0 16px rgba(255, 0, 222, 0.7), 0 0 34px rgba(255, 0, 222, 0.4);
+        }
+
+        .trigger-btn.level2 {
+            border-color: rgba(255, 199, 94, 0.78);
+            text-shadow: 0 0 16px rgba(255, 209, 102, 0.78), 0 0 34px rgba(255, 115, 43, 0.48);
+        }
+
+        #transform-overlay.active {
+            background: rgba(20, 14, 32, 0.3);
+            backdrop-filter: blur(12px) saturate(1.04);
+        }
+
+        #transform-overlay.level1.active {
+            background:
+                radial-gradient(circle at 50% 50%, rgba(255, 244, 255, 0.18), transparent 18%),
+                radial-gradient(circle at 50% 50%, rgba(255, 144, 210, 0.24), transparent 34%),
+                radial-gradient(circle at 50% 50%, rgba(121, 215, 255, 0.18), transparent 52%),
+                rgba(8, 10, 22, 0.24);
+        }
+
+        #transform-overlay.level2.active {
+            background:
+                radial-gradient(circle at 50% 50%, rgba(255, 250, 219, 0.26), transparent 12%),
+                radial-gradient(circle at 50% 50%, rgba(255, 220, 140, 0.26), transparent 24%),
+                radial-gradient(circle at 50% 50%, rgba(255, 106, 43, 0.22), transparent 42%),
+                radial-gradient(circle at 50% 50%, rgba(125, 20, 255, 0.18), transparent 64%),
+                rgba(10, 8, 18, 0.28);
+        }
+
+        .transform-stage {
+            position: relative;
+            width: 100vw;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            padding: 7vh 0 6vh;
+            overflow: hidden;
+        }
+
+        .transform-stage::before,
+        .transform-stage::after {
+            content: "";
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+        }
+
+        .transform-stage::before {
+            width: min(36vw, 520px);
+            height: min(36vw, 520px);
+            border-radius: 50%;
+            background:
+                radial-gradient(circle, rgba(255, 255, 255, 0.22) 0%, rgba(167, 226, 255, 0.18) 22%, rgba(255, 145, 217, 0.1) 42%, transparent 72%);
+            filter: blur(16px);
+            animation: corePulse 1.1s ease-in-out infinite alternate;
+        }
+
+        .transform-stage::after {
+            width: min(78vw, 1120px);
+            height: min(78vw, 1120px);
+            border-radius: 50%;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            opacity: 0.55;
+            animation: haloSpin 10s linear infinite;
+        }
+
+        .transform-stage.level2::before {
+            width: min(42vw, 640px);
+            height: min(42vw, 640px);
+            background:
+                radial-gradient(circle, rgba(255, 252, 224, 0.34) 0%, rgba(255, 220, 110, 0.28) 24%, rgba(255, 125, 45, 0.18) 46%, rgba(118, 18, 255, 0.14) 62%, transparent 76%);
+            filter: blur(10px);
+            animation: corePulseLevel2 0.46s ease-in-out infinite alternate;
+        }
+
+        .transform-stage.level2::after {
+            width: min(90vw, 1280px);
+            height: min(90vw, 1280px);
+            border: none;
+            background:
+                repeating-conic-gradient(from 0deg, rgba(255, 224, 132, 0.24) 0deg 7deg, transparent 7deg 28deg),
+                radial-gradient(circle, transparent 0 33%, rgba(255, 156, 79, 0.18) 42%, transparent 56%);
+            filter: blur(6px);
+            opacity: 0.65;
+            animation: haloSpin 3.6s linear infinite;
+        }
+
+        .transform-rings,
+        .transform-shards {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+        }
+
+        .transform-rings span,
+        .transform-shards span {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .transform-rings span {
+            border-radius: 50%;
+            border: 2px solid rgba(178, 234, 255, 0.24);
+            animation: ringExpand 2.2s ease-out infinite;
+        }
+
+        .transform-rings span:nth-child(1) { width: min(20vw, 300px); height: min(20vw, 300px); animation-delay: 0s; }
+        .transform-rings span:nth-child(2) { width: min(30vw, 430px); height: min(30vw, 430px); animation-delay: 0.35s; }
+        .transform-rings span:nth-child(3) { width: min(40vw, 560px); height: min(40vw, 560px); animation-delay: 0.7s; }
+
+        .transform-stage.level2 .transform-rings span {
+            border-color: rgba(255, 215, 110, 0.26);
+            box-shadow: 0 0 40px rgba(255, 180, 80, 0.16);
+            animation-duration: 1.3s;
+        }
+
+        .transform-shards span {
+            width: 2px;
+            height: 64vh;
+            background: linear-gradient(180deg, transparent, rgba(255, 255, 255, 0.55), transparent);
+            opacity: 0.42;
+            animation: shardFlash 1.2s ease-in-out infinite;
+        }
+
+        .transform-shards span:nth-child(1) { transform: translate(-50%, -50%) rotate(-28deg); animation-delay: 0s; }
+        .transform-shards span:nth-child(2) { transform: translate(-50%, -50%) rotate(-10deg); animation-delay: 0.18s; }
+        .transform-shards span:nth-child(3) { transform: translate(-50%, -50%) rotate(12deg); animation-delay: 0.36s; }
+        .transform-shards span:nth-child(4) { transform: translate(-50%, -50%) rotate(29deg); animation-delay: 0.54s; }
+
+        .transform-stage.level2 .transform-shards span {
+            width: 3px;
+            height: 72vh;
+            background: linear-gradient(180deg, transparent, rgba(255, 241, 186, 0.8), rgba(255, 118, 53, 0.88), transparent);
+            opacity: 0.8;
+            filter: drop-shadow(0 0 14px rgba(255, 188, 92, 0.36));
+            animation-duration: 0.6s;
+        }
+
+        .transform-neon {
+            position: relative;
+            z-index: 2;
+            font-size: clamp(34px, 3.8vw, 58px);
+            font-weight: 900;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            text-shadow: 0 0 20px rgba(255, 255, 255, 0.4), 0 0 36px rgba(255, 115, 232, 0.36);
+        }
+
+        .transform-stage.level2 .transform-neon {
+            text-shadow: 0 0 26px rgba(255, 244, 201, 0.6), 0 0 46px rgba(255, 169, 72, 0.42), 0 0 70px rgba(255, 110, 43, 0.34);
+        }
+
+        .transform-subcopy {
+            position: relative;
+            z-index: 2;
+            color: rgba(246, 247, 255, 0.8);
+            font-size: 15px;
+            letter-spacing: 0.16em;
+            text-transform: uppercase;
+        }
+
+        .transform-cards-row {
+            --card-count: 1;
+            position: relative;
+            z-index: 2;
+            width: min(70vw, 1320px);
+            min-height: min(58vh, 720px);
+            display: grid;
+            grid-template-columns: repeat(var(--card-count), minmax(0, 1fr));
+            gap: clamp(14px, 1.5vw, 22px);
+            align-items: center;
+            justify-items: center;
+            transform-origin: center center;
+            animation: centerSpread 0.62s cubic-bezier(0.16, 0.84, 0.24, 1) both;
+            isolation: isolate;
+        }
+
+        .transform-cards-row[data-count="1"] {
+            width: min(46vw, 760px);
+            min-height: min(74vh, 820px);
+        }
+
+        .transform-cards-row::before,
+        .transform-cards-row::after {
+            content: "";
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .transform-cards-row::before {
+            width: 0;
+            height: min(48vh, 560px);
+            border-radius: 999px;
+            background:
+                linear-gradient(90deg, rgba(255, 255, 255, 0), rgba(241, 250, 255, 0.86) 50%, rgba(255, 255, 255, 0));
+            filter: blur(26px);
+            opacity: 0.86;
+            animation: seamSplit 0.76s cubic-bezier(0.16, 0.9, 0.2, 1) forwards;
+        }
+
+        .transform-cards-row::after {
+            width: min(18vw, 240px);
+            height: min(18vw, 240px);
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.92) 0%, rgba(154, 224, 255, 0.42) 36%, transparent 72%);
+            filter: blur(8px);
+            animation: shockwaveSweep 1.08s ease-out forwards;
+        }
+
+        .transform-stage.level2 .transform-cards-row::before {
+            height: min(54vh, 640px);
+            background:
+                linear-gradient(90deg, rgba(255, 232, 170, 0), rgba(255, 248, 225, 0.96) 18%, rgba(255, 197, 94, 0.94) 50%, rgba(255, 126, 52, 0.88) 78%, rgba(255, 232, 170, 0));
+            box-shadow: 0 0 60px rgba(255, 180, 68, 0.24);
+            filter: blur(22px);
+            animation-duration: 0.6s;
+        }
+
+        .transform-stage.level2 .transform-cards-row::after {
+            width: min(24vw, 320px);
+            height: min(24vw, 320px);
+            background: radial-gradient(circle, rgba(255, 254, 232, 0.96) 0%, rgba(255, 214, 108, 0.48) 30%, rgba(255, 114, 35, 0.28) 56%, transparent 78%);
+            animation: shockwaveSweepLevel2 1.26s cubic-bezier(0.16, 0.82, 0.2, 1) forwards;
+        }
+
+        .transform-single {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 18px;
+            opacity: 0;
+            transform: translate3d(var(--spread-offset, 0px), 0, 0) scale(0.74);
+            filter: blur(18px);
+            animation: cardSpreadIn 0.82s cubic-bezier(0.18, 0.82, 0.22, 1) forwards;
+            animation-delay: var(--spread-delay, 0.08s);
+        }
+
+        .transform-cards-row[data-count="1"] .transform-single {
+            width: min(46vw, 760px);
+            max-width: 100%;
+        }
+
+        .transform-card {
+            width: 100%;
+            max-width: 100%;
+            aspect-ratio: 1 / 1.08;
+            perspective: 1400px;
+        }
+
+        .transform-cards-row[data-count="1"] .transform-card {
+            width: min(46vw, 760px);
+            max-width: 100%;
+            height: min(70vh, 760px);
+            aspect-ratio: auto;
+        }
+
+        .transform-card-inner,
+        .transform-card-inner.size-1,
+        .transform-card-inner.size-2,
+        .transform-card-inner.size-3,
+        .transform-card-inner.size-4,
+        .transform-card-inner.size-many {
+            width: 100%;
+            height: 100%;
+        }
+
+        .transform-card-front,
+        .transform-card-back {
+            border-radius: 28px;
+            border: 1px solid rgba(255, 255, 255, 0.14);
+            box-shadow: 0 0 36px rgba(255, 143, 221, 0.24), 0 28px 60px rgba(0, 0, 0, 0.32);
+        }
+
+        .transform-card.level2 .transform-card-front,
+        .transform-card.level2 .transform-card-back {
+            box-shadow: 0 0 44px rgba(255, 220, 134, 0.34), 0 0 110px rgba(255, 117, 43, 0.16), 0 30px 70px rgba(0, 0, 0, 0.34);
+        }
+
+        .transform-card-front::after,
+        .transform-card-back::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(255,255,255,0.18), transparent 32%, transparent 68%, rgba(255,255,255,0.06));
+        }
+
+        .transform-cards-row[data-count="1"] .transform-card-front,
+        .transform-cards-row[data-count="1"] .transform-card-back {
+            background: linear-gradient(160deg, rgba(11, 15, 28, 0.86), rgba(25, 18, 36, 0.92));
+        }
+
+        .transform-cards-row[data-count="1"] .transform-card-front img,
+        .transform-cards-row[data-count="1"] .transform-card-back img {
+            object-fit: contain;
+            object-position: center center;
+            padding: 18px;
+            filter: drop-shadow(0 20px 40px rgba(0, 0, 0, 0.22));
+        }
+
+        .transform-team-label {
+            margin-top: 0;
+            padding: 10px 18px;
+            border-radius: 999px;
+            font-size: 24px;
+            font-weight: 900;
+            letter-spacing: 0.06em;
+            box-shadow: 0 14px 24px rgba(0, 0, 0, 0.2);
+        }
+
+        @keyframes corePulse {
+            from { transform: translate(-50%, -50%) scale(0.92); opacity: 0.6; }
+            to { transform: translate(-50%, -50%) scale(1.08); opacity: 0.96; }
+        }
+
+        @keyframes corePulseLevel2 {
+            from { transform: translate(-50%, -50%) scale(0.9); opacity: 0.62; }
+            to { transform: translate(-50%, -50%) scale(1.16); opacity: 1; }
+        }
+
+        @keyframes haloSpin {
+            from { transform: translate(-50%, -50%) rotate(0deg); }
+            to { transform: translate(-50%, -50%) rotate(360deg); }
+        }
+
+        @keyframes ringExpand {
+            0% { transform: translate(-50%, -50%) scale(0.82); opacity: 0.6; }
+            100% { transform: translate(-50%, -50%) scale(1.12); opacity: 0.08; }
+        }
+
+        @keyframes shardFlash {
+            0%, 100% { opacity: 0.18; }
+            50% { opacity: 0.86; }
+        }
+
+        @keyframes centerSpread {
+            0% { transform: scaleX(0.1) scaleY(0.82); opacity: 0; }
+            100% { transform: scaleX(1) scaleY(1); opacity: 1; }
+        }
+
+        @keyframes seamSplit {
+            0% { width: 0; opacity: 0.95; }
+            100% { width: calc(100% + clamp(42px, 6vw, 120px)); opacity: 0.22; }
+        }
+
+        @keyframes shockwaveSweep {
+            0% { opacity: 0.96; transform: translate(-50%, -50%) scale(0.2); }
+            100% { opacity: 0; transform: translate(-50%, -50%) scale(4.4); }
+        }
+
+        @keyframes shockwaveSweepLevel2 {
+            0% { opacity: 1; transform: translate(-50%, -50%) scale(0.16); }
+            50% { opacity: 0.92; }
+            100% { opacity: 0; transform: translate(-50%, -50%) scale(5.4); }
+        }
+
+        @keyframes cardSpreadIn {
+            0% {
+                opacity: 0;
+                transform: translate3d(var(--spread-offset, 0px), 0, 0) scale(0.72);
+                filter: blur(18px);
+            }
+            52% {
+                opacity: 1;
+            }
+            100% {
+                opacity: 1;
+                transform: translate3d(0, 0, 0) scale(1);
+                filter: blur(0);
+            }
+        }
+
+        @media (max-width: 900px) {
+            .transform-cards-row {
+                width: min(82vw, 1180px);
+                min-height: min(50vh, 620px);
+                gap: 12px;
+            }
+
+            .transform-cards-row[data-count="1"] {
+                width: min(78vw, 560px);
+                min-height: min(64vh, 620px);
+            }
+
+            .transform-cards-row[data-count="1"] .transform-single,
+            .transform-cards-row[data-count="1"] .transform-card {
+                width: min(78vw, 560px);
+            }
+
+            .transform-cards-row[data-count="1"] .transform-card {
+                height: min(58vh, 620px);
+            }
+
+            .transform-team-label {
+                font-size: 18px;
+                padding: 8px 14px;
+            }
+
+            .transform-subcopy {
+                font-size: 12px;
+                text-align: center;
+                letter-spacing: 0.08em;
+            }
+        }
+
+        #show-panel-btn {
+            top: 24px;
+            right: 20px;
+            z-index: 24;
+            width: 56px;
+            height: 56px;
+            border: none;
+            border-radius: 18px;
+            background: rgba(9, 14, 30, 0.86);
+            border: 1px solid rgba(255, 255, 255, 0.14);
+            color: white;
+            font-size: 24px;
+            box-shadow: 0 16px 34px rgba(0, 0, 0, 0.22);
+            backdrop-filter: blur(14px);
+        }
+
+        #show-panel-btn.hidden {
+            opacity: 0;
+            transform: translateX(18px);
+            pointer-events: none;
+        }
+
+        .container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 23;
+            width: min(360px, calc(100vw - 34px));
+            margin: 0;
+            padding: 22px;
+            border-radius: 30px;
+            background: var(--panel-bg);
+            border: 1px solid var(--panel-border);
+            box-shadow: 0 26px 70px rgba(0, 0, 0, 0.36);
+            backdrop-filter: blur(18px);
+        }
+
+        .container.hidden {
+            opacity: 0;
+            transform: translateX(calc(100% + 28px));
+            pointer-events: none;
+        }
+
+        #hide-panel-btn {
+            top: 14px;
+            right: 16px;
+            color: rgba(255, 255, 255, 0.82);
+        }
+
+        .panel-title {
+            padding-right: 28px;
+            margin-bottom: 18px;
+        }
+
+        .panel-title small {
+            display: block;
+            color: rgba(232, 239, 255, 0.56);
+            font-size: 12px;
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+        }
+
+        .panel-title h2 {
+            margin: 8px 0 0;
+            font-size: 28px;
+            line-height: 1.2;
+            color: var(--text-main);
+        }
+
+        .share-info,
+        .status-bar,
+        .control-panel {
+            margin-bottom: 14px;
+            padding: 16px;
+            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .panel-section-label {
+            display: block;
+            margin-bottom: 10px;
+            color: rgba(232, 239, 255, 0.72);
+            font-size: 12px;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+        }
+
+        .share-url {
+            padding: 12px;
+            border-radius: 14px;
+            background: rgba(0, 0, 0, 0.18);
+            color: #e6ecff;
+            font-size: 12px;
+            line-height: 1.5;
+            word-break: break-all;
+        }
+
+        .panel-note {
+            margin-top: 10px;
+            color: rgba(232, 239, 255, 0.54);
+            font-size: 12px;
+            line-height: 1.5;
+        }
+
+        .status-stack {
+            display: grid;
+            gap: 10px;
+        }
+
+        .status-pill {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 42px;
+            padding: 8px 14px;
+            border-radius: 999px;
+            font-weight: 800;
+            font-size: 15px;
+            color: #07101f;
+            background: linear-gradient(135deg, #d9ecff, #ffe296);
+        }
+
+        .status-room {
+            color: rgba(238, 243, 255, 0.88);
+            font-size: 15px;
+            line-height: 1.6;
+        }
+
+        .control-button-group {
+            display: grid;
+            gap: 10px;
+        }
+
+        .panel-btn {
+            width: 100%;
+            border: none;
+            border-radius: 16px;
+            padding: 14px 16px;
+            font-size: 15px;
+            font-weight: 800;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .panel-btn:hover {
+            transform: translateY(-1px);
+        }
+
+        .panel-btn.primary {
+            color: #07101f;
+            background: linear-gradient(135deg, #ffe296, #ffbe63);
+            box-shadow: 0 16px 30px rgba(255, 190, 83, 0.18);
+        }
+
+        .panel-btn.secondary {
+            color: #07101f;
+            background: rgba(255, 255, 255, 0.96);
+            border: 1px solid rgba(255, 255, 255, 0.38);
+            box-shadow: 0 14px 28px rgba(0, 0, 0, 0.08);
+        }
+
+        .panel-btn.ghost {
+            color: #dbe7ff;
+            background: rgba(115, 198, 255, 0.12);
+            border: 1px solid rgba(115, 198, 255, 0.18);
+        }
+
+        #score-modal-overlay {
+            background: rgba(5, 8, 18, 0.7);
+        }
+
+        #score-modal-content {
+            width: min(460px, calc(100vw - 28px));
+            background: rgba(8, 14, 28, 0.94);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 26px;
+            box-shadow: 0 26px 60px rgba(0, 0, 0, 0.4);
+        }
+
+        #score-modal-content h4 {
+            color: var(--text-main);
+        }
+
+        #close-score-modal-btn {
+            color: rgba(255, 255, 255, 0.68);
+        }
+
+        .score-item {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .team-name,
+        .team-score {
+            color: var(--text-main);
+        }
+
+        #final-podium-overlay {
+            gap: 26px;
+            background:
+                radial-gradient(circle at 50% 14%, rgba(99, 147, 255, 0.32), transparent 36%),
+                radial-gradient(circle at 50% 100%, rgba(255, 194, 89, 0.18), transparent 40%),
+                linear-gradient(180deg, #16284d 0%, #203f7e 44%, #0f1832 100%);
+        }
+
+        #final-podium-overlay::after {
+            content: "";
+            position: absolute;
+            left: 50%;
+            bottom: 7vh;
+            width: min(980px, 88vw);
+            height: 28vh;
+            transform: translateX(-50%);
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(255, 222, 147, 0.28), rgba(255, 222, 147, 0.04) 55%, transparent 72%);
+            filter: blur(20px);
+        }
+
+        .podium-heading {
+            position: relative;
+            z-index: 1;
+            text-align: center;
+        }
+
+        .podium-kicker {
+            color: rgba(235, 242, 255, 0.72);
+            font-size: 13px;
+            letter-spacing: 0.24em;
+            text-transform: uppercase;
+        }
+
+        .podium-heading h2 {
+            margin: 10px 0 8px;
+            font-size: clamp(38px, 5vw, 64px);
+            line-height: 1;
+            color: var(--text-main);
+        }
+
+        .podium-heading p {
+            margin: 0;
+            color: rgba(240, 244, 255, 0.78);
+            font-size: 15px;
+            letter-spacing: 0.1em;
+        }
+
+        #podium-container {
+            z-index: 1;
+            gap: 22px;
+            width: min(1100px, 92vw);
+        }
+
+        .podium-place {
+            width: min(260px, 30vw);
+            padding: 28px 18px 30px;
+            border-radius: 34px 34px 18px 18px;
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.28);
+            text-align: center;
+            transform: translateY(110px) scale(0.94);
+        }
+
+        .podium-place.show {
+            transform: translateY(0) scale(1);
+        }
+
+        .podium-place.first {
+            min-height: 410px;
+            background: linear-gradient(180deg, #ffe26b 0%, #ffc54f 100%);
+        }
+
+        .podium-place.second {
+            min-height: 360px;
+            background: linear-gradient(180deg, #eef2f9 0%, #cfd8ec 100%);
+        }
+
+        .podium-place.third {
+            min-height: 340px;
+            background: linear-gradient(180deg, #f0b970 0%, #cd8d49 100%);
+        }
+
+        .podium-rank-name {
+            margin-top: 8px;
+            font-size: 36px;
+            font-weight: 900;
+        }
+
+        .podium-photo {
+            width: 112px;
+            height: 112px;
+            margin: 12px auto;
+            border-radius: 24px;
+            overflow: hidden;
+            flex-shrink: 0;
+            border: 4px solid rgba(255, 255, 255, 0.58);
+            box-shadow: 0 18px 30px rgba(0, 0, 0, 0.16);
+        }
+
+        .podium-photo img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        .podium-team-name {
+            font-size: 26px;
+            font-weight: 900;
+        }
+
+        .podium-stage-title {
+            margin-top: 10px;
+            font-size: 20px;
+            font-weight: 900;
+        }
+
+        .podium-stage-copy {
+            margin-top: 8px;
+            color: rgba(36, 30, 15, 0.72);
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .big-climber-display {
+            width: min(640px, calc(100vw - 28px));
+            padding: 30px 26px 34px;
+            border-radius: 34px;
+            background: linear-gradient(180deg, rgba(9, 14, 29, 0.84), rgba(5, 8, 18, 0.92));
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            box-shadow: 0 36px 90px rgba(0, 0, 0, 0.42);
+            backdrop-filter: blur(18px);
+            gap: 16px;
+            overflow: visible;
+        }
+
+        .rank-display {
+            position: absolute;
+            left: 50%;
+            top: -16px;
+            transform: translate(-50%, -100%);
+            z-index: 2;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            min-width: min(72%, 280px);
+            padding: 16px 26px;
+            border-radius: 999px;
+            color: rgba(255, 246, 214, 0.98);
+            font-size: clamp(24px, 3.8vw, 40px);
+            font-weight: 900;
+            letter-spacing: 0.08em;
+            text-shadow: 0 10px 28px rgba(0, 0, 0, 0.34);
+            background: linear-gradient(135deg, rgba(16, 22, 40, 0.72), rgba(28, 19, 50, 0.66));
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.22);
+            backdrop-filter: blur(14px);
+            pointer-events: none;
+        }
+
+        .big-climber-display .climber-emoji {
+            width: min(260px, 42vw);
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .big-climber-display .climber-emoji img {
+            width: 100% !important;
+            min-width: 180px !important;
+            max-width: none;
+            border-radius: 28px;
+            border: 3px solid rgba(255, 255, 255, 0.14);
+        }
+
+        .hero-stage-title {
+            font-size: clamp(22px, 2.6vw, 34px);
+            font-weight: 900;
+        }
+
+        .hero-stage-copy {
+            max-width: 460px;
+            color: rgba(240, 244, 255, 0.74);
+            text-align: center;
+            font-size: 15px;
+            line-height: 1.7;
+        }
+
+        #play-btn {
+            padding: 16px 22px;
+            border-radius: 999px;
+            background: linear-gradient(135deg, #ffe192, #ffb05c);
+            color: #07101f;
+            font-size: 18px;
+            font-weight: 900;
+            box-shadow: 0 18px 38px rgba(255, 181, 76, 0.3);
+        }
+
+        #next-step-btn {
+            position: fixed;
+            left: 50%;
+            bottom: 6vh;
+            z-index: 52;
+            min-width: min(360px, calc(100vw - 32px));
+            padding: 18px 30px;
+            border: none;
+            border-radius: 999px;
+            background: linear-gradient(135deg, #ffe9a8, #ffba63);
+            color: #07101f;
+            font-size: clamp(19px, 2.3vw, 24px);
+            font-weight: 900;
+            letter-spacing: 0.06em;
+            box-shadow: 0 24px 50px rgba(255, 184, 74, 0.34);
+            transform: translate(-50%, 22px);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.28s ease, transform 0.28s ease, box-shadow 0.28s ease;
+        }
+
+        #next-step-btn.visible {
+            opacity: 1;
+            transform: translate(-50%, 0);
+            pointer-events: auto;
+        }
+
+        #next-step-btn:hover {
+            box-shadow: 0 30px 64px rgba(255, 184, 74, 0.42);
+        }
+
+        #next-step-btn::after {
+            content: " →";
+        }
+
+        @media (max-width: 900px) {
+            .stage-title-card {
+                width: calc(100vw - 28px);
+                padding: 16px 18px;
+            }
+
+            .stage-mode {
+                min-width: 0;
+                width: calc(100vw - 28px);
+            }
+
+            .container {
+                width: calc(100vw - 24px);
+                top: auto;
+                bottom: 18px;
+                right: 12px;
+            }
+
+            .container.hidden {
+                transform: translateY(calc(100% + 28px));
+            }
+
+            #show-panel-btn {
+                top: auto;
+                bottom: 20px;
+                right: 14px;
+            }
+
+            .climber {
+                width: clamp(76px, 13vw, 124px);
+            }
+
+            .climber-status {
+                font-size: 10px;
+            }
+
+            .milestone-line {
+                left: 3vw;
+                right: 3vw;
+            }
+
+            .milestone-chip {
+                right: 2vw;
+            }
+
+            #podium-container {
+                gap: 10px;
+                width: 96vw;
+            }
+
+            .podium-place {
+                width: 31vw;
+                padding: 22px 12px;
+            }
+
+            .rank-display {
+                min-width: min(82%, 240px);
+                padding: 14px 18px;
+                gap: 8px;
+                font-size: clamp(20px, 5vw, 30px);
+                top: -10px;
+            }
+
+            #next-step-btn {
+                min-width: min(92vw, 360px);
+                bottom: 4vh;
+                padding: 16px 18px;
+            }
+        }
+    </style>
 </head>
 <body>
     <div id="login-overlay">
@@ -459,24 +1756,47 @@
             <div id="login-error">密碼錯誤，請重試</div>
         </div>
     </div>
-    <video muted loop id="bg-video-a" class="video-player active"></video>
+    <video muted loop playsinline id="bg-video-a" class="video-player active"></video>
 
+    <div class="stage-header">
+        <div class="stage-kicker">Temple Ranking Stage</div>
+        <div class="stage-title-card">
+            <h1>🌑 躺平是覺醒的前奏 ☀️</h1>
+            <p>逐步變身 / 最終前三名</p>
+        </div>
+        <div class="stage-mode" id="stageMode"></div>
+    </div>
+
+    <div id="milestone-layer"></div>
     <div class="climb-area" id="climbArea"></div>
     <div id="fireworks-container"></div>
-    <div id="transform-trigger"><div class="trigger-btn" id="trigger-btn">⚡ 變身 ⚡</div></div>
+    <div id="transform-trigger">
+        <div class="trigger-card">
+            <div class="trigger-hint" id="triggerHint">能量已滿</div>
+            <div class="trigger-btn" id="trigger-btn">⚡ 變身 ⚡</div>
+        </div>
+    </div>
     <div id="transform-overlay"></div>
      
-    <button id="show-panel-btn" class="hidden">🔼</button>
+    <button id="show-panel-btn">☰</button>
 
     <div class="container" id="mainContainer">
-        <div id="hide-panel-btn">🔽</div>
-        <h1>🌑躺平是覺醒的前奏☀️</h1>
+        <div id="hide-panel-btn">✕</div>
+        <div class="panel-title">
+            <small>Host Control</small>
+            <h2>舞台控制台</h2>
+        </div>
         <div class="share-info" id="shareInfo"></div>
         <div class="status-bar" id="statusBar"></div>
         <div class="control-panel" id="controlPanel"></div>
     </div>
 
     <div id="final-podium-overlay">
+        <div class="podium-heading">
+            <div class="podium-kicker">Final Awakening</div>
+            <h2>覺醒殿堂</h2>
+            <p id="podiumSummary">前三名揭曉</p>
+        </div>
         <div id="podium-container"></div>
         <button id="next-step-btn"></button>
     </div>
@@ -504,6 +1824,7 @@
         const finalPodiumOverlay = document.getElementById('final-podium-overlay');
         const fireworksContainer = document.getElementById('fireworks-container');
         const podiumContainer = document.getElementById('podium-container');
+        const podiumSummary = document.getElementById('podiumSummary');
         const nextStepBtn = document.getElementById('next-step-btn');
         const playBtn = document.getElementById('play-btn');
         
@@ -514,6 +1835,9 @@
         const closeScoreModalBtn = document.getElementById('close-score-modal-btn');
         
         const videoA = document.getElementById('bg-video-a');
+        const stageMode = document.getElementById('stageMode');
+        const milestoneLayer = document.getElementById('milestone-layer');
+        const triggerHint = document.getElementById('triggerHint');
 
         // --- State Variables ---
         let scores = {};
@@ -522,6 +1846,7 @@
         let finalRanking = [];
         let currentStep = 0;
         let currentBigClimber = null;
+        let currentRevealRankIndex = null;
 
         let isPageLoading = true; 
         let prevLevels = {};
@@ -529,6 +1854,7 @@
         let isTransforming = false; // 正在播放動畫
         let isInCooldown = false;   // 動畫後的 5 秒冷卻
         let cooldownTimer = null;
+        let isSprintMode = false;
         for (let i = 1; i <= 8; i++) prevLevels[i] = 0;
 
         // --- Constants ---
@@ -536,6 +1862,9 @@
             '#FF6B6B', '#4ECDC4', '#45B7D1', '#FED766', '#F0E68C',
             '#98FB98', '#7FFFD4', '#DDA0DD'
         ];
+        const FIRST_THRESHOLD = 650;
+        const SECOND_THRESHOLD = 1300;
+        const TEAM_COUNT = 8;
         
         // --- 組別圖片設定 ---
         // 每組3張圖：(team-1)*3+1, (team-1)*3+2, (team-1)*3+3
@@ -628,19 +1957,22 @@
         // 點擊「變身」按鈕
         function onTriggerClick() {
             if (pendingTransforms.length === 0) return;
-            
-            // 隱藏觸發按鈕
             document.getElementById('transform-trigger').classList.remove('visible');
-            
-            // 取出所有待變身的組別
+
             const batch = [...pendingTransforms];
             pendingTransforms = [];
             isTransforming = true;
-            
+
             playBatchTransform(batch, () => {
                 isTransforming = false;
-                
-                // 如果動畫期間有新的待變身
+
+                if (batch.some((item) => item.level === 2) && !isSprintMode) {
+                    isSprintMode = true;
+                    updateStageMode();
+                    renderMilestones();
+                    updateDisplay();
+                }
+
                 if (pendingTransforms.length > 0) {
                     isInCooldown = true;
                     cooldownTimer = setTimeout(() => {
@@ -910,74 +2242,621 @@
         
         function copyShareUrl() { navigator.clipboard.writeText(document.getElementById('shareUrl').textContent); }
 
+        function createEmptyScores() {
+            const next = {};
+            for (let i = 1; i <= TEAM_COUNT; i++) {
+                next[i] = 0;
+            }
+            return next;
+        }
+
+        function ensureScoreMap(data) {
+            const next = createEmptyScores();
+            if (!data) return next;
+
+            for (let i = 1; i <= TEAM_COUNT; i++) {
+                next[i] = Number(data[i] || 0);
+            }
+
+            return next;
+        }
+
+        function getStageMeta(score) {
+            if (score >= SECOND_THRESHOLD) {
+                return {
+                    short: isSprintMode ? '完全覺醒・衝刺中' : '完全覺醒',
+                    title: '二次覺醒完成',
+                    copy: isSprintMode ? '門檻已破，正式進入高分追逐。' : '已突破第二次變身門檻。'
+                };
+            }
+
+            if (score >= FIRST_THRESHOLD) {
+                if (score >= 1180) {
+                    return {
+                        short: '二次覺醒臨界',
+                        title: '覺醒壓縮中',
+                        copy: '再一波能量，就會直接切進衝刺模式。'
+                    };
+                }
+
+                return {
+                    short: '初覺醒',
+                    title: '第一階段完成',
+                    copy: '已經離開躺平區，正在往最終覺醒衝。'
+                };
+            }
+
+            if (score >= 560) {
+                return {
+                    short: '初覺醒臨界',
+                    title: '快要醒了',
+                    copy: '距離第一次變身只差最後一口氣。'
+                };
+            }
+
+            return {
+                short: '蓄力中',
+                title: '躺平蓄能',
+                copy: '先躺穩，再把能量一路推上去。'
+            };
+        }
+
+        function getRankNarrative(rankIndex) {
+            const narratives = [
+                {
+                    revealTitle: '前奏結束，主角登場',
+                    revealCopy: '把躺平撐成最大的蓄力，把覺醒活成最終答案。今晚的榜首，不是醒來，是降臨。',
+                    podiumTitle: '躺平之王',
+                    podiumCopy: '前奏拉滿之後，冠軍只剩登場。'
+                },
+                {
+                    revealTitle: '差半步登頂',
+                    revealCopy: '一路追到最後一拍，沒有鬆手也沒有掉速，直接把第二名站成最燙的位置。',
+                    podiumTitle: '壓線最狠',
+                    podiumCopy: '沒拿走王座，但把全場逼到了最後一秒。'
+                },
+                {
+                    revealTitle: '穩躺進前三',
+                    revealCopy: '不亂衝、不空轉，節奏守到最後，穩穩把自己送上獎台。',
+                    podiumTitle: '穩醒代表',
+                    podiumCopy: '躺得夠穩，醒得夠準，前三先卡一席。'
+                }
+            ];
+
+            return narratives[rankIndex] || {
+                revealTitle: '覺醒登場',
+                revealCopy: '節奏到位，正式站上舞台中央。',
+                podiumTitle: '覺醒就位',
+                podiumCopy: '把節奏撐到最後，終於站上榜單。'
+            };
+        }
+
+        function getTrackMetrics() {
+            const viewportHeight = window.innerHeight;
+            const baseBottom = viewportHeight * 0.1;
+            const awakeningHeight = viewportHeight * 0.5;
+            const sprintHeight = viewportHeight * 0.18;
+
+            return {
+                baseBottom,
+                awakeningHeight,
+                sprintHeight,
+                firstThresholdBottom: baseBottom + (FIRST_THRESHOLD / SECOND_THRESHOLD) * awakeningHeight,
+                secondThresholdBottom: baseBottom + awakeningHeight
+            };
+        }
+
+        function getSprintMax() {
+            const extraScores = [];
+            for (let i = 1; i <= TEAM_COUNT; i++) {
+                extraScores.push(Math.max(0, (scores[i] || 0) - SECOND_THRESHOLD));
+            }
+
+            return Math.max(220, ...extraScores);
+        }
+
+        function getClimberBottom(score, metrics) {
+            if (!isSprintMode || score <= SECOND_THRESHOLD) {
+                const clamped = Math.min(score, SECOND_THRESHOLD);
+                return metrics.baseBottom + (clamped / SECOND_THRESHOLD) * metrics.awakeningHeight;
+            }
+
+            const extra = Math.max(0, score - SECOND_THRESHOLD);
+            return metrics.secondThresholdBottom + (extra / getSprintMax()) * metrics.sprintHeight;
+        }
+
+        function getProgressFill(score) {
+            if (score < FIRST_THRESHOLD) {
+                return Math.max(0.08, score / FIRST_THRESHOLD);
+            }
+
+            if (score < SECOND_THRESHOLD) {
+                return Math.max(0.08, (score - FIRST_THRESHOLD) / (SECOND_THRESHOLD - FIRST_THRESHOLD));
+            }
+
+            if (!isSprintMode) {
+                return 1;
+            }
+
+            return Math.max(0.12, Math.min(1, (score - SECOND_THRESHOLD) / getSprintMax()));
+        }
+
+        function updateStageMode() {
+            document.body.classList.toggle('sprint-mode', isSprintMode);
+            if (stageMode) stageMode.innerHTML = '';
+        }
+
+        function renderMilestones() {
+            if (milestoneLayer) milestoneLayer.innerHTML = '';
+        }
+
+        function togglePanel(forceOpen = null) {
+            const shouldOpen = forceOpen === null
+                ? mainContainer.classList.contains('hidden')
+                : forceOpen;
+
+            mainContainer.classList.toggle('hidden', !shouldOpen);
+            showPanelBtn.classList.toggle('hidden', shouldOpen);
+        }
+
+        function updateScoreList() {
+            const sortedScores = [];
+            for (let i = 1; i <= TEAM_COUNT; i++) {
+                sortedScores.push({ team: i, score: scores[i] || 0 });
+            }
+            sortedScores.sort((a, b) => b.score - a.score);
+
+            scoreList.innerHTML = '';
+            sortedScores.forEach((item) => {
+                const scoreItem = document.createElement('div');
+                scoreItem.className = 'score-item';
+                scoreItem.innerHTML = `
+                    <span class="team-name" style="color:${rocketColors[item.team - 1]};">第${item.team}組</span>
+                    <span class="team-score">${item.score} 分</span>
+                `;
+                scoreList.appendChild(scoreItem);
+            });
+        }
+
+        function tryShowTrigger() {
+            if (pendingTransforms.length === 0) return;
+            if (isTransforming || isInCooldown) return;
+
+            const trigger = document.getElementById('transform-trigger');
+            const btn = document.getElementById('trigger-btn');
+            const hasLevel2 = pendingTransforms.some((item) => item.level === 2);
+            const teamNames = pendingTransforms.map((item) => `第${item.team}組`).join('、');
+
+            btn.className = hasLevel2 ? 'trigger-btn level2' : 'trigger-btn';
+            btn.textContent = hasLevel2 ? '✦ 最終變身 ✦' : '⚡ 變身 ⚡';
+            triggerHint.textContent = hasLevel2
+                ? `${teamNames} 的能量已經拉滿`
+                : `${teamNames} 準備進入覺醒畫面`;
+            trigger.classList.add('visible');
+        }
+
+        function playBatchTransform(batch, callback) {
+            const overlay = document.getElementById('transform-overlay');
+            const hasLevel2 = batch.some((item) => item.level === 2);
+            const neonClass = hasLevel2 ? 'transform-neon level2' : 'transform-neon';
+            const neonText = hasLevel2 ? '✦ 二次覺醒 ✦' : '⚡ 一次覺醒 ⚡';
+            const subcopy = hasLevel2
+                ? '終局能量裂解'
+                : '形態重組啟動';
+
+            const count = batch.length;
+            const centerIndex = (count - 1) / 2;
+            let sizeClass = 'size-1';
+            if (count === 2) sizeClass = 'size-2';
+            else if (count === 3) sizeClass = 'size-3';
+            else if (count === 4) sizeClass = 'size-4';
+            else if (count >= 5) sizeClass = 'size-many';
+
+            let cardsHTML = '';
+            batch.forEach((item, idx) => {
+                const cardClass = item.level === 2 ? 'transform-card level2' : 'transform-card';
+                const spreadOffset = Math.round((centerIndex - idx) * 150);
+                const spreadDelay = (0.08 + Math.abs(idx - centerIndex) * 0.06).toFixed(2);
+                cardsHTML += `
+                    <div class="transform-single" style="--spread-offset:${spreadOffset}px; --spread-delay:${spreadDelay}s;">
+                        <div class="${cardClass}" id="tw-${idx}">
+                            <div class="transform-card-inner ${sizeClass}" id="tc-${idx}">
+                                <div class="transform-card-front"><img src="${item.oldSrc}" alt=""></div>
+                                <div class="transform-card-back"><img src="${item.newSrc}" alt=""></div>
+                            </div>
+                        </div>
+                        <div class="transform-team-label" style="background-color:${rocketColors[item.team - 1]};">第${item.team}組</div>
+                    </div>
+                `;
+            });
+
+            overlay.classList.remove('level1', 'level2');
+            overlay.innerHTML = `
+                <div class="transform-stage ${hasLevel2 ? 'level2' : 'level1'}">
+                    <div class="transform-rings"><span></span><span></span><span></span></div>
+                    <div class="transform-shards"><span></span><span></span><span></span><span></span></div>
+                    <div class="${neonClass}">${neonText}</div>
+                    <div class="transform-subcopy">${subcopy}</div>
+                    <div class="transform-cards-row" data-count="${count}" style="--card-count:${count};">${cardsHTML}</div>
+                </div>
+            `;
+
+            overlay.classList.add('active', hasLevel2 ? 'level2' : 'level1');
+
+            setTimeout(() => {
+                batch.forEach((item, idx) => {
+                    const cardInner = document.getElementById(`tc-${idx}`);
+                    if (cardInner) {
+                        cardInner.classList.add(item.level === 2 ? 'flipping-level2' : 'flipping');
+                    }
+
+                    const wrapper = document.getElementById(`tw-${idx}`);
+                    if (wrapper) {
+                        const colors = item.level === 2
+                            ? ['#ffd76b', '#ff9c3f', '#ff6447', '#fff6cf']
+                            : ['#93c9ff', '#8cf2d1', '#fff0b2', '#f4b8ff'];
+                        spawnTransformParticles(wrapper, item.level === 2 ? 24 : 18, colors);
+                        if (item.level === 2) {
+                            setTimeout(() => spawnTransformParticles(wrapper, 18, colors), 900);
+                            setTimeout(() => spawnTransformParticles(wrapper, 22, colors), 1700);
+                            setTimeout(() => spawnTransformParticles(wrapper, 24, colors), 2550);
+                        }
+                    }
+                });
+            }, 520);
+
+            setTimeout(() => {
+                batch.forEach((item) => {
+                    const imgEl = document.getElementById(`team-img-${item.team}`);
+                    if (imgEl) imgEl.src = item.newSrc;
+                });
+
+                overlay.classList.remove('active', 'level1', 'level2');
+                setTimeout(() => {
+                    overlay.innerHTML = '';
+                    if (callback) callback();
+                }, 420);
+            }, hasLevel2 ? 5200 : 4400);
+        }
+
+        function updateDisplay() {
+            const metrics = getTrackMetrics();
+
+            for (let i = 1; i <= TEAM_COUNT; i++) {
+                const climber = document.getElementById(`climber-${i}`);
+                if (!climber) continue;
+
+                const score = scores[i] || 0;
+                const fillRatio = getProgressFill(score);
+
+                climber.style.bottom = `${getClimberBottom(score, metrics)}px`;
+                climber.classList.toggle('near-awaken', score >= 450 && score < FIRST_THRESHOLD);
+                climber.classList.toggle('near-final', score >= 1100 && score < SECOND_THRESHOLD);
+                climber.classList.toggle('awakened', score >= FIRST_THRESHOLD);
+                climber.classList.toggle('final-awakened', score >= SECOND_THRESHOLD);
+                climber.classList.toggle('sprint-runner', isSprintMode && score >= SECOND_THRESHOLD);
+                const progressEl = document.getElementById(`team-progress-${i}`);
+                if (progressEl) progressEl.style.width = `${Math.min(100, Math.max(8, fillRatio * 100))}%`;
+            }
+
+            updateClimberImages();
+        }
+
+        function createClimbers() {
+            const climbArea = document.getElementById('climbArea');
+            climbArea.innerHTML = '';
+            const metrics = getTrackMetrics();
+
+            for (let i = 1; i <= TEAM_COUNT; i++) {
+                const climber = document.createElement('div');
+                const leftRatio = 7.5 + (i - 1) * 12;
+
+                climber.className = 'climber';
+                climber.id = `climber-${i}`;
+                climber.style.left = `${leftRatio}%`;
+                climber.style.bottom = `${metrics.baseBottom}px`;
+                climber.style.setProperty('--team-color', rocketColors[i - 1]);
+                climber.innerHTML = `
+                    <div class="climber-frame">
+                        <div class="climber-emoji">
+                            <img id="team-img-${i}" src="${getTeamImageFile(i, scores[i] || 0)}" alt="第${i}組">
+                        </div>
+                    </div>
+                    <div class="climber-label" style="background-color:${rocketColors[i - 1]};">第${i}組</div>
+                    <div class="climber-progress">
+                        <div class="climber-progress-fill" id="team-progress-${i}"></div>
+                    </div>
+                `;
+                climbArea.appendChild(climber);
+            }
+        }
+
+        async function startFinalSequence() {
+            togglePanel(false);
+            showPanelBtn.classList.add('hidden');
+            finalPodiumOverlay.classList.add('visible');
+            podiumSummary.textContent = '第三名、第二名、第一名將依序登場';
+            nextStepBtn.classList.remove('visible');
+            nextStepBtn.textContent = '';
+            playBtn.classList.remove('visible');
+            currentRevealRankIndex = null;
+            finalRanking = [];
+
+            for (let i = 1; i <= TEAM_COUNT; i++) {
+                finalRanking.push({ team: i, score: scores[i] || 0 });
+            }
+            finalRanking.sort((a, b) => b.score - a.score);
+
+            launchFireworks();
+            fireworksInterval = setInterval(launchFireworks, 3000);
+
+            for (let i = 1; i <= TEAM_COUNT; i++) {
+                const climber = document.getElementById(`climber-${i}`);
+                if (climber) {
+                    climber.style.transition = 'all 1.8s ease-out';
+                    climber.style.bottom = '120vh';
+                    climber.style.transform = 'translateX(-50%) scale(0.9)';
+                }
+            }
+
+            setTimeout(() => {
+                currentStep = 0;
+                showBigClimber(2);
+            }, 1700);
+        }
+
+        function showBigClimber(rankIndex) {
+            if (rankIndex >= finalRanking.length) return;
+
+            const winner = finalRanking[rankIndex];
+            const rankNames = ['第一名', '第二名', '第三名'];
+            const rankEmojis = ['🥇', '🥈', '🥉'];
+            const nextLabels = ['展開最終 podium', '揭曉第一名', '揭曉第二名'];
+            const narrative = getRankNarrative(rankIndex);
+            const finalImg = `<img src="picture/${(winner.team - 1) * 3 + 3}.png" alt="第${winner.team}組">`;
+            currentRevealRankIndex = rankIndex;
+
+            currentBigClimber = document.createElement('div');
+            currentBigClimber.className = 'big-climber-display';
+            currentBigClimber.innerHTML = `
+                <div class="rank-display">${rankEmojis[rankIndex]} ${rankNames[rankIndex]}</div>
+                <div class="climber-emoji">
+                    ${finalImg}
+                </div>
+                <div class="climber-label" style="background-color:${rocketColors[winner.team - 1]};">第${winner.team}組</div>
+                <div class="hero-stage-title">${narrative.revealTitle}</div>
+                <div class="hero-stage-copy">${narrative.revealCopy}</div>
+            `;
+
+            finalPodiumOverlay.appendChild(currentBigClimber);
+            currentBigClimber.style.transform = 'translate(-50%, 140%)';
+            setTimeout(() => {
+                currentBigClimber.classList.add('visible');
+                currentBigClimber.style.transform = 'translate(-50%, -50%)';
+            }, 60);
+
+            nextStepBtn.textContent = nextLabels[rankIndex];
+            setTimeout(() => nextStepBtn.classList.add('visible'), 1200);
+        }
+
+        function handlePlayButton() {
+            handleNextStep();
+        }
+
+        function handleNextStep() {
+            if (currentBigClimber) {
+                const outgoingRankIndex = currentRevealRankIndex;
+                nextStepBtn.classList.remove('visible');
+                playBtn.classList.remove('visible');
+                currentBigClimber.style.transform = 'translate(-50%, -160%)';
+                currentBigClimber.style.opacity = '0';
+
+                setTimeout(() => {
+                    if (currentBigClimber && currentBigClimber.parentNode) {
+                        currentBigClimber.parentNode.removeChild(currentBigClimber);
+                    }
+                    currentBigClimber = null;
+                    currentStep++;
+
+                    if (outgoingRankIndex === 2) {
+                        showBigClimber(1);
+                    } else if (outgoingRankIndex === 1) {
+                        showBigClimber(0);
+                    } else {
+                        currentRevealRankIndex = null;
+                        clearInterval(fireworksInterval);
+                        fireworksInterval = null;
+                        finalizePodium();
+                    }
+                }, 1000);
+                return;
+            }
+
+            if (currentStep !== 3) return;
+
+            nextStepBtn.classList.remove('visible');
+            clearInterval(fireworksInterval);
+            fireworksInterval = null;
+            finalizePodium();
+        }
+
+        function finalizePodium() {
+            fireworksContainer.innerHTML = '';
+            podiumContainer.innerHTML = '';
+            podiumSummary.textContent = '前三名已就位';
+
+            for (let i = 0; i < 3 && i < finalRanking.length; i++) {
+                const winner = finalRanking[i];
+                const place = ['first', 'second', 'third'][i];
+                const emoji = ['🥇', '🥈', '🥉'][i];
+                const rankName = ['第一名', '第二名', '第三名'][i];
+                const narrative = getRankNarrative(i);
+                const podiumEl = document.createElement('div');
+                podiumEl.className = `podium-place ${place}`;
+                podiumEl.innerHTML = `
+                    <div class="podium-rank-medal">${emoji}</div>
+                    <div class="podium-rank-name">${rankName}</div>
+                    <div class="podium-photo" style="width:112px;height:112px;">
+                        <img src="picture/${(winner.team - 1) * 3 + 3}.png" alt="第${winner.team}組" style="width:100%;height:100%;object-fit:cover;display:block;">
+                    </div>
+                    <div class="podium-team-name">第${winner.team}組</div>
+                    <div class="podium-stage-title">${narrative.podiumTitle}</div>
+                    <div class="podium-stage-copy">${narrative.podiumCopy}</div>
+                `;
+                podiumContainer.appendChild(podiumEl);
+                setTimeout(() => podiumEl.classList.add('show'), i * 320);
+            }
+
+            setTimeout(() => launchFireworks(), 900);
+        }
+
+        async function resetScores() {
+            if (!confirm('確定要重置所有隊伍的進度嗎？')) return;
+
+            finalPodiumOverlay.classList.remove('visible');
+            podiumContainer.innerHTML = '';
+            podiumSummary.textContent = '前三名揭曉';
+            nextStepBtn.classList.remove('visible');
+            playBtn.classList.remove('visible');
+            fireworksContainer.innerHTML = '';
+            scoreModalOverlay.classList.remove('visible');
+
+            if (currentBigClimber && currentBigClimber.parentNode) {
+                currentBigClimber.parentNode.removeChild(currentBigClimber);
+            }
+            currentBigClimber = null;
+            currentRevealRankIndex = null;
+
+            if (fireworksInterval) {
+                clearInterval(fireworksInterval);
+                fireworksInterval = null;
+            }
+
+            currentStep = 0;
+            scores = createEmptyScores();
+            prevLevels = createEmptyScores();
+            pendingTransforms = [];
+            isTransforming = false;
+            isInCooldown = false;
+            isSprintMode = false;
+            updateStageMode();
+            renderMilestones();
+
+            if (cooldownTimer) {
+                clearTimeout(cooldownTimer);
+                cooldownTimer = null;
+            }
+
+            document.getElementById('transform-trigger').classList.remove('visible');
+            document.getElementById('transform-overlay').classList.remove('active');
+            document.getElementById('transform-overlay').innerHTML = '';
+
+            createClimbers();
+            updateDisplay();
+            togglePanel(false);
+
+            if (window.scoresRef) {
+                await window.scoresRef.set(scores);
+            }
+        }
+
+        function setupUI() {
+            document.getElementById('shareInfo').innerHTML = `
+                <span class="panel-section-label">分享填分網址</span>
+                <div class="share-url" id="shareUrl"></div>
+                <button class="panel-btn ghost" onclick="copyShareUrl()">📋 複製網址</button>
+                <div class="panel-note">控制面板預設收起，舞台視角把注意力留給角色本身。</div>
+            `;
+
+            document.getElementById('statusBar').innerHTML = `
+                <span class="panel-section-label">連線狀態</span>
+                <div class="status-stack">
+                    <div class="status-pill" id="connectionStatus">🔄 連接中...</div>
+                    <div class="status-room">房間 ID：<span id="roomId">載入中...</span></div>
+                </div>
+            `;
+
+            document.getElementById('controlPanel').innerHTML = `
+                <span class="panel-section-label">舞台控制</span>
+                <div class="control-button-group">
+                    <button class="panel-btn primary" onclick="startFinalSequence()">🏆 結算排名</button>
+                    <button class="panel-btn secondary" id="score-display-btn">📊 查看即時分數</button>
+                    <button class="panel-btn secondary" onclick="resetScores()">🔄 重置進度</button>
+                </div>
+            `;
+        }
+
+        function copyShareUrl() {
+            const shareUrl = document.getElementById('shareUrl').textContent;
+            navigator.clipboard.writeText(shareUrl).catch(() => {});
+        }
+
         // --- 主函數 (initializeApp) ---
         async function initializeApp() {
-            setupUI(); 
+            setupUI();
             scoreDisplayBtn = document.getElementById('score-display-btn');
-            
-            const firebaseConfig = { apiKey: "AIzaSyD5ytWrUOI6UIUBIcKpF3fyODQR2pXFMmY", authDomain: "score-calculation-ef584.firebaseapp.com", databaseURL: "https://score-calculation-ef584-default-rtdb.firebaseio.com", projectId: "score-calculation-ef584" };
+
+            const firebaseConfig = {
+                apiKey: "AIzaSyD5ytWrUOI6UIUBIcKpF3fyODQR2pXFMmY",
+                authDomain: "score-calculation-ef584.firebaseapp.com",
+                databaseURL: "https://score-calculation-ef584-default-rtdb.firebaseio.com",
+                projectId: "score-calculation-ef584"
+            };
             if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
             window.database = firebase.database();
-            
+
             const urlParams = new URLSearchParams(window.location.search);
-            const roomId = urlParams.get('room') || 'camp_' + Math.random().toString(36).substr(2, 6);
+            const roomId = urlParams.get('room') || `camp_${Math.random().toString(36).substr(2, 6)}`;
             if (!urlParams.get('room')) window.history.replaceState({}, '', `${window.location.pathname}?room=${roomId}`);
-            
+
             document.getElementById('roomId').textContent = roomId;
             const baseUrl = window.location.href.replace('point.html', 'score_input_simple.html');
             document.getElementById('shareUrl').textContent = baseUrl;
             document.getElementById('connectionStatus').textContent = '🌐 已連線';
-            
-            window.scoresRef = window.database.ref('rooms/' + roomId + '/scores');
 
-            // --- 步驟 1: 建立圖示 ---
+            window.scoresRef = window.database.ref(`rooms/${roomId}/scores`);
+            scores = createEmptyScores();
+            prevLevels = createEmptyScores();
+            isSprintMode = false;
+
             createClimbers();
-
-            // --- 步驟 2: 取得初始分數並顯示 ---
-            const scoreSnapshot = await window.scoresRef.once('value');
-            scores = scoreSnapshot.val() || {};
-            for (let i = 1; i <= 8; i++) {
-                if (!scores[i]) scores[i] = 0;
-            }
-            isPageLoading = true; 
+            updateStageMode();
+            renderMilestones();
+            togglePanel(false);
             updateDisplay();
-            isPageLoading = false; 
+
+            const scoreSnapshot = await window.scoresRef.once('value');
+            scores = ensureScoreMap(scoreSnapshot.val());
+            updateDisplay();
             isFirstLoad = false;
 
-            // --- 步驟 3: 啟動背景影片 (單一 loop) ---
             videoA.src = 'movies1.mp4';
-            videoA.play().catch(error => {
-                console.log("影片自動播放被瀏覽器阻擋。");
+            videoA.play().catch(() => {
                 document.body.addEventListener('click', () => {
                     videoA.play();
                 }, { once: true });
             });
 
-            // --- 步驟 4: 監聽分數變化 ---
             window.scoresRef.on('value', (snapshot) => {
-                const data = snapshot.val();
-                if (data) { 
-                    scores = data; 
-                    isPageLoading = true; 
-                    updateDisplay(); 
-                    isPageLoading = false;
-                }
+                scores = ensureScoreMap(snapshot.val());
+                updateDisplay();
             });
 
-            // --- 步驟 5: UI 監聽器 ---
-            hidePanelBtn.addEventListener('click', togglePanel);
-            showPanelBtn.addEventListener('click', togglePanel);
+            hidePanelBtn.addEventListener('click', () => togglePanel(false));
+            showPanelBtn.addEventListener('click', () => togglePanel(true));
             playBtn.addEventListener('click', handlePlayButton);
             nextStepBtn.addEventListener('click', handleNextStep);
-            window.addEventListener('resize', updateDisplay);
-
-            scoreDisplayBtn.addEventListener('click', toggleScoreModal); 
+            scoreDisplayBtn.addEventListener('click', toggleScoreModal);
             closeScoreModalBtn.addEventListener('click', toggleScoreModal);
             document.getElementById('trigger-btn').addEventListener('click', onTriggerClick);
             scoreModalOverlay.addEventListener('click', (event) => {
                 if (event.target === scoreModalOverlay) {
                     toggleScoreModal();
                 }
+            });
+            window.addEventListener('resize', () => {
+                renderMilestones();
+                updateDisplay();
             });
         }
 
