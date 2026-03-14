@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>💪 躺平是覺醒的前奏</title>
+    <title>🌑躺平是覺醒的前奏☀️</title>
     <style>
         * { box-sizing: border-box; }
         body { font-family: 'Arial', sans-serif; margin: 0; overflow: hidden; background-color: #000; }
@@ -301,7 +301,45 @@
         .team-name { font-weight: bold; color: #333; }
         .team-score { font-weight: bold; color: #555; }
 
-        /* === 變身特效 === */
+        /* === 變身觸發按鈕 === */
+        #transform-trigger {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            z-index: 1500;
+            display: flex; justify-content: center; align-items: center;
+            background: rgba(0, 0, 0, 0.5);
+            opacity: 0; pointer-events: none;
+            transition: opacity 0.4s ease;
+        }
+        #transform-trigger.visible {
+            opacity: 1; pointer-events: all;
+        }
+        .trigger-btn {
+            font-size: 80px; font-weight: bold; color: white;
+            cursor: pointer; padding: 20px 60px;
+            border: 4px solid white; border-radius: 25px;
+            background: rgba(0,0,0,0.4);
+            text-shadow: 0 0 20px #ff00de, 0 0 40px #ff00de, 0 0 80px #ff00de;
+            animation: trigger-pulse 1s ease-in-out infinite alternate;
+            transition: transform 0.2s;
+            user-select: none;
+        }
+        .trigger-btn:hover { transform: scale(1.05); }
+        .trigger-btn:active { transform: scale(0.95); }
+        @keyframes trigger-pulse {
+            from { text-shadow: 0 0 20px #ff00de, 0 0 40px #ff00de, 0 0 80px #ff00de; border-color: rgba(255,255,255,0.8); }
+            to { text-shadow: 0 0 10px #fff, 0 0 30px #ff00de, 0 0 60px #ff00de, 0 0 100px #ff00de; border-color: #ff00de; }
+        }
+        .trigger-btn.level2 {
+            text-shadow: 0 0 20px #ffd700, 0 0 40px #ff6600, 0 0 80px #ff0000;
+            border-color: #ffd700;
+            animation: trigger-pulse-gold 0.6s ease-in-out infinite alternate;
+        }
+        @keyframes trigger-pulse-gold {
+            from { text-shadow: 0 0 20px #ffd700, 0 0 40px #ff6600, 0 0 80px #ff0000; border-color: #ffd700; }
+            to { text-shadow: 0 0 10px #fff, 0 0 30px #ffd700, 0 0 60px #ff6600, 0 0 100px #ff0000; border-color: #ff6600; }
+        }
+
+        /* === 變身動畫覆蓋層 === */
         #transform-overlay {
             position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
             background: rgba(0, 0, 0, 0); 
@@ -317,30 +355,17 @@
 
         .transform-neon {
             font-size: 48px;
-            margin-bottom: 20px;
-            text-shadow:
-                0 0 10px #fff,
-                0 0 20px #fff,
-                0 0 40px #ff00de,
-                0 0 80px #ff00de,
-                0 0 120px #ff00de;
+            margin-bottom: 25px;
+            text-shadow: 0 0 10px #fff, 0 0 20px #fff, 0 0 40px #ff00de, 0 0 80px #ff00de, 0 0 120px #ff00de;
             animation: neon-pulse 0.5s ease-in-out infinite alternate;
         }
         @keyframes neon-pulse {
             from { text-shadow: 0 0 10px #fff, 0 0 20px #fff, 0 0 40px #ff00de, 0 0 80px #ff00de; opacity: 1; }
             to { text-shadow: 0 0 5px #fff, 0 0 10px #fff, 0 0 20px #ff00de, 0 0 40px #ff00de; opacity: 0.8; }
         }
-
-        /* 第二次變身：金色霓虹 */
         .transform-neon.level2 {
             font-size: 56px;
-            text-shadow:
-                0 0 10px #fff,
-                0 0 20px #ffd700,
-                0 0 40px #ffd700,
-                0 0 80px #ff6600,
-                0 0 120px #ff6600,
-                0 0 200px #ff0000;
+            text-shadow: 0 0 10px #fff, 0 0 20px #ffd700, 0 0 40px #ffd700, 0 0 80px #ff6600, 0 0 120px #ff6600, 0 0 200px #ff0000;
             animation: neon-pulse-gold 0.3s ease-in-out infinite alternate;
         }
         @keyframes neon-pulse-gold {
@@ -348,39 +373,41 @@
             to { text-shadow: 0 0 5px #fff, 0 0 15px #ffd700, 0 0 30px #ff6600, 0 0 50px #ff0000; opacity: 0.85; }
         }
 
+        /* 多組同時顯示的容器 */
+        .transform-cards-row {
+            display: flex; justify-content: center; align-items: center;
+            gap: 30px; flex-wrap: wrap; max-width: 90vw;
+        }
+        .transform-single {
+            display: flex; flex-direction: column; align-items: center;
+        }
+
         .transform-card {
-            position: relative;
-            perspective: 1000px;
+            position: relative; perspective: 1000px;
         }
         .transform-card-inner {
-            width: 350px; height: 350px;
-            position: relative;
-            transform-style: preserve-3d;
+            position: relative; transform-style: preserve-3d;
         }
-        .transform-card-inner.flipping {
-            animation: card-flip 3s ease-in-out forwards;
-        }
-        /* 第二次變身：更瘋狂的翻轉 */
-        .transform-card-inner.flipping-level2 {
-            animation: card-flip-level2 3s ease-in-out forwards;
-        }
+        /* 依組數動態調整大小 (JS 控制)，預設單組大 */
+        .transform-card-inner.size-1 { width: 300px; height: 300px; }
+        .transform-card-inner.size-2 { width: 260px; height: 260px; }
+        .transform-card-inner.size-3 { width: 220px; height: 220px; }
+        .transform-card-inner.size-4 { width: 180px; height: 180px; }
+        .transform-card-inner.size-many { width: 150px; height: 150px; }
+
+        .transform-card-inner.flipping { animation: card-flip 3s ease-in-out forwards; }
+        .transform-card-inner.flipping-level2 { animation: card-flip-level2 3s ease-in-out forwards; }
+
         .transform-card-front,
         .transform-card-back {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            backface-visibility: hidden;
-            border-radius: 16px;
-            overflow: hidden;
+            backface-visibility: hidden; border-radius: 16px; overflow: hidden;
             box-shadow: 0 0 30px rgba(255, 0, 222, 0.6), 0 0 60px rgba(255, 0, 222, 0.3);
         }
         .transform-card-front img,
-        .transform-card-back img {
-            width: 100%; height: 100%; object-fit: cover;
-        }
-        .transform-card-back {
-            transform: rotateY(180deg);
-        }
+        .transform-card-back img { width: 100%; height: 100%; object-fit: cover; }
+        .transform-card-back { transform: rotateY(180deg); }
 
-        /* 第二次變身的卡片光暈 */
         .transform-card.level2 .transform-card-front,
         .transform-card.level2 .transform-card-back {
             box-shadow: 0 0 40px rgba(255, 215, 0, 0.8), 0 0 80px rgba(255, 100, 0, 0.5), 0 0 120px rgba(255, 0, 0, 0.3);
@@ -393,7 +420,6 @@
             75%  { transform: rotateY(1620deg) scale(1.05); }
             100% { transform: rotateY(1800deg) scale(1.15); }
         }
-
         @keyframes card-flip-level2 {
             0%   { transform: rotateY(0deg) scale(1); }
             15%  { transform: rotateY(720deg) scale(1.1); }
@@ -405,19 +431,15 @@
         }
 
         .transform-team-label {
-            margin-top: 20px;
-            font-size: 28px; font-weight: bold; color: white;
+            margin-top: 15px;
+            font-size: 22px; font-weight: bold; color: white;
             text-shadow: 0 0 10px rgba(255,255,255,0.8);
-            padding: 8px 25px; border-radius: 12px;
+            padding: 6px 20px; border-radius: 12px;
         }
 
-        /* 第二次變身的粒子爆發 */
         .transform-particle {
-            position: absolute;
-            width: 6px; height: 6px;
-            border-radius: 50%;
-            pointer-events: none;
-            opacity: 0;
+            position: absolute; width: 6px; height: 6px; border-radius: 50%;
+            pointer-events: none; opacity: 0;
         }
         .transform-particle.burst {
             animation: particle-burst 1.5s ease-out forwards;
@@ -441,13 +463,14 @@
 
     <div class="climb-area" id="climbArea"></div>
     <div id="fireworks-container"></div>
+    <div id="transform-trigger"><div class="trigger-btn" id="trigger-btn">⚡ 變身 ⚡</div></div>
     <div id="transform-overlay"></div>
      
     <button id="show-panel-btn" class="hidden">🔼</button>
 
     <div class="container" id="mainContainer">
         <div id="hide-panel-btn">🔽</div>
-        <h1>💪 躺平是覺醒的前奏 💪</h1>
+        <h1>🌑躺平是覺醒的前奏☀️</h1>
         <div class="share-info" id="shareInfo"></div>
         <div class="status-bar" id="statusBar"></div>
         <div class="control-panel" id="controlPanel"></div>
@@ -501,9 +524,11 @@
         let currentBigClimber = null;
 
         let isPageLoading = true; 
-        let prevLevels = {}; // 追蹤每組的圖片等級 (0, 1, 2)
-        let transformQueue = []; // 變身動畫隊列
-        let isTransforming = false; // 是否正在播放變身動畫
+        let prevLevels = {};
+        let pendingTransforms = []; // 等待變身的組別
+        let isTransforming = false; // 正在播放動畫
+        let isInCooldown = false;   // 動畫後的 5 秒冷卻
+        let cooldownTimer = null;
         for (let i = 1; i <= 8; i++) prevLevels[i] = 0;
 
         // --- Constants ---
@@ -569,30 +594,60 @@
                 const oldLevel = prevLevels[i];
                 
                 if (newLevel !== oldLevel) {
-                    const oldSrc = getTeamImageFile(i, oldLevel === 0 ? 0 : (oldLevel === 1 ? 500 : 1000));
+                    const oldSrc = getTeamImageFile(i, oldLevel === 0 ? 0 : (oldLevel === 1 ? 650 : 1300));
                     const newSrc = getTeamImageFile(i, score);
-                    console.log(`Team ${i}: level ${oldLevel} → ${newLevel}, ${oldSrc} → ${newSrc}`);
+                    console.log(`Team ${i}: level ${oldLevel} → ${newLevel}`);
                     prevLevels[i] = newLevel;
                     
-                    // 頁面載入時直接換圖，不播動畫
                     if (isFirstLoad) {
                         const imgEl = document.getElementById(`team-img-${i}`);
                         if (imgEl) imgEl.src = newSrc;
                     } else {
-                        transformQueue.push({ team: i, oldSrc: oldSrc, newSrc: newSrc, level: newLevel });
-                        processTransformQueue();
+                        // 加入等待清單
+                        pendingTransforms.push({ team: i, oldSrc, newSrc, level: newLevel });
+                        tryShowTrigger();
                     }
                 }
             }
         }
 
-        function processTransformQueue() {
-            if (isTransforming || transformQueue.length === 0) return;
+        // 嘗試顯示「變身」按鈕
+        function tryShowTrigger() {
+            if (pendingTransforms.length === 0) return;
+            if (isTransforming || isInCooldown) return; // 動畫中或冷卻中，先不顯示
+            
+            const trigger = document.getElementById('transform-trigger');
+            const btn = document.getElementById('trigger-btn');
+            const hasLevel2 = pendingTransforms.some(t => t.level === 2);
+            
+            btn.className = hasLevel2 ? 'trigger-btn level2' : 'trigger-btn';
+            btn.textContent = hasLevel2 ? '🔥 究極變身 🔥' : '⚡ 變身 ⚡';
+            trigger.classList.add('visible');
+        }
+
+        // 點擊「變身」按鈕
+        function onTriggerClick() {
+            if (pendingTransforms.length === 0) return;
+            
+            // 隱藏觸發按鈕
+            document.getElementById('transform-trigger').classList.remove('visible');
+            
+            // 取出所有待變身的組別
+            const batch = [...pendingTransforms];
+            pendingTransforms = [];
             isTransforming = true;
-            const item = transformQueue.shift();
-            playTransformAnimation(item.team, item.oldSrc, item.newSrc, item.level, () => {
+            
+            playBatchTransform(batch, () => {
                 isTransforming = false;
-                processTransformQueue();
+                
+                // 如果動畫期間有新的待變身
+                if (pendingTransforms.length > 0) {
+                    isInCooldown = true;
+                    cooldownTimer = setTimeout(() => {
+                        isInCooldown = false;
+                        tryShowTrigger();
+                    }, 5000);
+                }
             });
         }
 
@@ -601,7 +656,7 @@
                 const p = document.createElement('div');
                 p.className = 'transform-particle';
                 const angle = (i / count) * Math.PI * 2;
-                const dist = 120 + Math.random() * 100;
+                const dist = 80 + Math.random() * 80;
                 p.style.setProperty('--tx', `${Math.cos(angle) * dist}px`);
                 p.style.setProperty('--ty', `${Math.sin(angle) * dist}px`);
                 p.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
@@ -613,53 +668,74 @@
             }
         }
 
-        function playTransformAnimation(team, oldSrc, newSrc, level, callback) {
+        // 多組同時變身動畫
+        function playBatchTransform(batch, callback) {
             const overlay = document.getElementById('transform-overlay');
-            const isLevel2 = (level === 2);
+            const hasLevel2 = batch.some(t => t.level === 2);
+            const neonClass = hasLevel2 ? 'transform-neon level2' : 'transform-neon';
+            const neonText = hasLevel2 ? '🔥 究極覺醒 🔥' : '⚡ 覺醒 ⚡';
             
-            const neonClass = isLevel2 ? 'transform-neon level2' : 'transform-neon';
-            const cardClass = isLevel2 ? 'transform-card level2' : 'transform-card';
-            const neonText = isLevel2 ? '🔥 究極覺醒 🔥' : '⚡ 覺醒 ⚡';
+            // 根據組數決定卡片大小
+            const count = batch.length;
+            let sizeClass = 'size-1';
+            if (count === 2) sizeClass = 'size-2';
+            else if (count === 3) sizeClass = 'size-3';
+            else if (count === 4) sizeClass = 'size-4';
+            else if (count >= 5) sizeClass = 'size-many';
+            
+            // 建立所有卡片 HTML
+            let cardsHTML = '';
+            batch.forEach((item, idx) => {
+                const cardClass = item.level === 2 ? 'transform-card level2' : 'transform-card';
+                cardsHTML += `
+                    <div class="transform-single">
+                        <div class="${cardClass}" id="tw-${idx}">
+                            <div class="transform-card-inner ${sizeClass}" id="tc-${idx}">
+                                <div class="transform-card-front"><img src="${item.oldSrc}"></div>
+                                <div class="transform-card-back"><img src="${item.newSrc}"></div>
+                            </div>
+                        </div>
+                        <div class="transform-team-label" style="background-color: ${rocketColors[item.team-1]};">第${item.team}組</div>
+                    </div>
+                `;
+            });
             
             overlay.innerHTML = `
                 <div class="${neonClass}">${neonText}</div>
-                <div class="${cardClass}" id="transform-card-wrapper">
-                    <div class="transform-card-inner" id="transform-card-inner">
-                        <div class="transform-card-front"><img src="${oldSrc}"></div>
-                        <div class="transform-card-back"><img src="${newSrc}"></div>
-                    </div>
-                </div>
-                <div class="transform-team-label" style="background-color: ${rocketColors[team-1]};">第${team}組</div>
+                <div class="transform-cards-row">${cardsHTML}</div>
             `;
             
             // Step 1: 畫面變暗
             overlay.classList.add('active');
             
-            // Step 2: 開始翻轉
+            // Step 2: 全部同時翻轉
             setTimeout(() => {
-                const cardInner = document.getElementById('transform-card-inner');
-                if (cardInner) {
-                    cardInner.classList.add(isLevel2 ? 'flipping-level2' : 'flipping');
-                }
-                // Level 2: 翻轉時持續噴射粒子
-                if (isLevel2) {
-                    const wrapper = document.getElementById('transform-card-wrapper');
-                    if (wrapper) {
-                        const goldColors = ['#ffd700', '#ff6600', '#ff0000', '#ffaa00', '#fff'];
-                        spawnTransformParticles(wrapper, 30, goldColors);
-                        setTimeout(() => spawnTransformParticles(wrapper, 25, goldColors), 800);
-                        setTimeout(() => spawnTransformParticles(wrapper, 35, goldColors), 1600);
+                batch.forEach((item, idx) => {
+                    const cardInner = document.getElementById(`tc-${idx}`);
+                    if (cardInner) {
+                        cardInner.classList.add(item.level === 2 ? 'flipping-level2' : 'flipping');
                     }
-                }
+                    if (item.level === 2) {
+                        const wrapper = document.getElementById(`tw-${idx}`);
+                        if (wrapper) {
+                            const goldColors = ['#ffd700', '#ff6600', '#ff0000', '#ffaa00', '#fff'];
+                            spawnTransformParticles(wrapper, 20, goldColors);
+                            setTimeout(() => spawnTransformParticles(wrapper, 15, goldColors), 800);
+                            setTimeout(() => spawnTransformParticles(wrapper, 20, goldColors), 1600);
+                        }
+                    }
+                });
             }, 600);
             
-            // Step 3: 動畫結束 (0.6s等待 + 3s翻轉 + 0.8s展示)
+            // Step 3: 動畫結束
             setTimeout(() => {
-                const imgEl = document.getElementById(`team-img-${team}`);
-                if (imgEl) imgEl.src = newSrc;
+                // 更新所有實際 climber 圖片
+                batch.forEach(item => {
+                    const imgEl = document.getElementById(`team-img-${item.team}`);
+                    if (imgEl) imgEl.src = item.newSrc;
+                });
                 
                 overlay.classList.remove('active');
-                
                 setTimeout(() => {
                     overlay.innerHTML = '';
                     if (callback) callback();
@@ -808,8 +884,11 @@
                 
                 for (let i = 1; i <= 8; i++) scores[i] = 0;
                 for (let i = 1; i <= 8; i++) prevLevels[i] = 0;
-                transformQueue = [];
+                pendingTransforms = [];
                 isTransforming = false;
+                isInCooldown = false;
+                if (cooldownTimer) { clearTimeout(cooldownTimer); cooldownTimer = null; }
+                document.getElementById('transform-trigger').classList.remove('visible');
                 document.getElementById('transform-overlay').classList.remove('active');
                 document.getElementById('transform-overlay').innerHTML = '';
                 
@@ -894,6 +973,7 @@
 
             scoreDisplayBtn.addEventListener('click', toggleScoreModal); 
             closeScoreModalBtn.addEventListener('click', toggleScoreModal);
+            document.getElementById('trigger-btn').addEventListener('click', onTriggerClick);
             scoreModalOverlay.addEventListener('click', (event) => {
                 if (event.target === scoreModalOverlay) {
                     toggleScoreModal();
