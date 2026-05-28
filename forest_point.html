@@ -1,0 +1,827 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>森息光環抽獎</title>
+    <style>
+        @import url("https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@500;700&family=Zen+Kurenaido&display=swap");
+
+        :root {
+            --ink: #f4f2e9;
+            --muted: rgba(244, 242, 233, 0.68);
+            --line: rgba(244, 242, 233, 0.16);
+            --panel: rgba(22, 31, 24, 0.54);
+            --panel-strong: rgba(13, 22, 17, 0.74);
+            --gold: #ead8a4;
+            --moss: #6f886b;
+            --night: #07100c;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            min-height: 100%;
+            margin: 0;
+        }
+
+        body {
+            overflow-x: hidden;
+            color: var(--ink);
+            font-family: "Noto Serif TC", "Microsoft JhengHei", serif;
+            background:
+                radial-gradient(circle at 50% 10%, rgba(232, 219, 186, 0.22), transparent 28rem),
+                radial-gradient(circle at 18% 78%, rgba(123, 151, 108, 0.18), transparent 20rem),
+                linear-gradient(180deg, #111b15 0%, #08110d 52%, #050806 100%);
+        }
+
+        body::before,
+        body::after {
+            content: "";
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+        }
+
+        body::before {
+            z-index: -3;
+            background:
+                linear-gradient(90deg, transparent 0 4%, rgba(10, 17, 12, 0.62) 4.2% 4.6%, transparent 4.8% 12%),
+                linear-gradient(90deg, transparent 0 17%, rgba(16, 29, 19, 0.72) 17.2% 17.7%, transparent 18% 30%),
+                linear-gradient(90deg, transparent 0 39%, rgba(9, 16, 12, 0.7) 39.1% 39.55%, transparent 39.9% 54%),
+                linear-gradient(90deg, transparent 0 68%, rgba(13, 24, 17, 0.7) 68.2% 68.75%, transparent 69% 82%),
+                linear-gradient(90deg, transparent 0 91%, rgba(8, 15, 11, 0.72) 91.2% 91.7%, transparent 92%);
+            opacity: 0.9;
+        }
+
+        body::after {
+            z-index: -2;
+            background:
+                radial-gradient(ellipse at 50% 35%, rgba(235, 231, 207, 0.13), transparent 42%),
+                linear-gradient(180deg, rgba(225, 219, 196, 0.11), transparent 34%, rgba(3, 7, 5, 0.52) 100%);
+            mix-blend-mode: screen;
+        }
+
+        button,
+        input,
+        select {
+            font: inherit;
+        }
+
+        button {
+            color: inherit;
+        }
+
+        .page-shell {
+            position: relative;
+            min-height: 100vh;
+            padding: clamp(18px, 2vw, 28px);
+            display: grid;
+            grid-template-rows: auto 1fr;
+            gap: 18px;
+        }
+
+        .topbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            position: relative;
+            z-index: 10;
+        }
+
+        .brand {
+            display: grid;
+            gap: 6px;
+        }
+
+        .eyebrow {
+            color: var(--muted);
+            font-family: "Zen Kurenaido", "Noto Serif TC", serif;
+            letter-spacing: 0.26em;
+            text-transform: uppercase;
+            font-size: 12px;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: clamp(28px, 4vw, 58px);
+            line-height: 1;
+            letter-spacing: 0.04em;
+            font-weight: 700;
+        }
+
+        .toolbar {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .pill,
+        .ghost-button {
+            min-height: 38px;
+            border: 1px solid var(--line);
+            border-radius: 999px;
+            background: rgba(7, 13, 9, 0.42);
+            backdrop-filter: blur(14px);
+            box-shadow: 0 16px 48px rgba(0, 0, 0, 0.18);
+        }
+
+        .pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 0 14px;
+            color: var(--muted);
+            font-size: 13px;
+        }
+
+        .status-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: #b6c4ad;
+            box-shadow: 0 0 18px rgba(213, 239, 187, 0.72);
+        }
+
+        .status-dot.is-offline {
+            background: #bf8d7d;
+            box-shadow: 0 0 18px rgba(224, 137, 110, 0.6);
+        }
+
+        .ghost-button {
+            padding: 0 16px;
+            cursor: pointer;
+            color: rgba(244, 242, 233, 0.84);
+            transition: transform 180ms ease, background 180ms ease, border-color 180ms ease;
+        }
+
+        .ghost-button:hover {
+            transform: translateY(-1px);
+            border-color: rgba(234, 216, 164, 0.42);
+            background: rgba(234, 216, 164, 0.1);
+        }
+
+        .stage-wrap {
+            min-height: 0;
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) minmax(280px, 360px);
+            gap: clamp(16px, 2vw, 24px);
+            align-items: stretch;
+        }
+
+        .forest-stage {
+            position: relative;
+            min-height: min(720px, calc(100vh - 138px));
+            border: 1px solid rgba(244, 242, 233, 0.1);
+            border-radius: clamp(26px, 3vw, 46px);
+            overflow: hidden;
+            background:
+                radial-gradient(circle at 50% 30%, rgba(250, 244, 220, 0.22), transparent 16rem),
+                radial-gradient(ellipse at 50% 76%, rgba(196, 177, 126, 0.18), transparent 27rem),
+                linear-gradient(180deg, rgba(15, 28, 20, 0.5), rgba(5, 9, 7, 0.94));
+            box-shadow:
+                inset 0 0 0 1px rgba(255, 255, 255, 0.04),
+                0 30px 90px rgba(0, 0, 0, 0.32);
+        }
+
+        .moon {
+            position: absolute;
+            width: clamp(210px, 28vw, 420px);
+            aspect-ratio: 1;
+            left: 50%;
+            top: 45%;
+            transform: translate(-50%, -50%);
+            border-radius: 50%;
+            background:
+                radial-gradient(circle at 44% 42%, #fffdf2 0 36%, rgba(255, 253, 242, 0.82) 55%, rgba(255, 253, 242, 0.08) 72%, transparent 73%);
+            filter: blur(0.2px);
+            opacity: 0.66;
+            box-shadow: 0 0 120px rgba(255, 246, 219, 0.22);
+        }
+
+        .mist {
+            position: absolute;
+            inset: auto -8% 0;
+            height: 42%;
+            background:
+                radial-gradient(ellipse at 20% 52%, rgba(232, 231, 212, 0.14), transparent 36%),
+                radial-gradient(ellipse at 68% 46%, rgba(232, 231, 212, 0.16), transparent 42%),
+                linear-gradient(180deg, transparent, rgba(219, 219, 198, 0.09) 42%, rgba(5, 8, 6, 0.34));
+            filter: blur(12px);
+            opacity: 0.9;
+        }
+
+        .ground {
+            position: absolute;
+            left: 50%;
+            bottom: 7%;
+            width: min(74vw, 860px);
+            height: 18%;
+            transform: translateX(-50%);
+            border-radius: 50%;
+            background:
+                radial-gradient(ellipse at 50% 48%, rgba(170, 154, 113, 0.24), rgba(44, 55, 38, 0.28) 48%, transparent 70%);
+            filter: blur(1px);
+        }
+
+        .people-layer {
+            position: absolute;
+            inset: 0;
+        }
+
+        .meditator {
+            --halo: 44px;
+            --aura-alpha: 0.18;
+            --scale: 1;
+            position: absolute;
+            left: var(--x);
+            top: var(--y);
+            width: 118px;
+            height: 146px;
+            transform: translate(-50%, -50%) scale(calc(var(--scale) * var(--responsive-scale, 1)));
+            transform-origin: center bottom;
+            display: grid;
+            place-items: center;
+            transition: filter 600ms ease;
+        }
+
+        .meditator::after {
+            content: "";
+            position: absolute;
+            left: 50%;
+            bottom: 13px;
+            width: 92px;
+            height: 15px;
+            transform: translateX(-50%);
+            border-radius: 50%;
+            background: rgba(0, 0, 0, 0.26);
+            filter: blur(10px);
+        }
+
+        .aura {
+            position: absolute;
+            left: 50%;
+            top: 52%;
+            width: var(--halo);
+            height: var(--halo);
+            transform: translate(-50%, -50%);
+            border-radius: 50%;
+            opacity: var(--aura-alpha);
+            background:
+                radial-gradient(circle, rgba(255, 255, 248, 0.96) 0 34%, rgba(246, 231, 185, 0.28) 54%, rgba(230, 216, 171, 0.08) 72%, transparent 73%);
+            box-shadow:
+                0 0 calc(var(--halo) * 0.2) rgba(255, 251, 230, 0.32),
+                0 0 calc(var(--halo) * 0.48) rgba(232, 217, 176, 0.22);
+            transition: width 900ms cubic-bezier(0.2, 0.8, 0.2, 1), height 900ms cubic-bezier(0.2, 0.8, 0.2, 1), opacity 600ms ease;
+        }
+
+        .aura::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            border: 1px solid rgba(255, 252, 228, 0.28);
+            border-radius: inherit;
+            box-shadow: inset 0 0 26px rgba(255, 252, 228, 0.16);
+        }
+
+        .figure {
+            position: relative;
+            z-index: 2;
+            width: 86px;
+            height: 108px;
+            margin-top: 18px;
+        }
+
+        .head {
+            position: absolute;
+            left: 50%;
+            top: 10px;
+            width: 17px;
+            height: 22px;
+            transform: translateX(-50%);
+            border-radius: 50% 50% 44% 44%;
+            background: linear-gradient(180deg, #1e211d, #070907);
+            box-shadow: inset -3px -2px 0 rgba(255, 255, 255, 0.04);
+        }
+
+        .body {
+            position: absolute;
+            left: 50%;
+            top: 31px;
+            width: 36px;
+            height: 48px;
+            transform: translateX(-50%);
+            border-radius: 16px 16px 12px 12px;
+            background: linear-gradient(180deg, #272b24, #0b0d0a);
+        }
+
+        .arms {
+            position: absolute;
+            left: 50%;
+            top: 51px;
+            width: 58px;
+            height: 35px;
+            transform: translateX(-50%);
+            border: 7px solid rgba(9, 11, 8, 0.94);
+            border-top: 0;
+            border-radius: 0 0 34px 34px;
+        }
+
+        .legs {
+            position: absolute;
+            left: 50%;
+            bottom: 7px;
+            width: 76px;
+            height: 34px;
+            transform: translateX(-50%);
+        }
+
+        .legs::before,
+        .legs::after {
+            content: "";
+            position: absolute;
+            bottom: 4px;
+            width: 46px;
+            height: 16px;
+            border-radius: 50%;
+            background: linear-gradient(180deg, #181b16, #070907);
+        }
+
+        .legs::before {
+            left: 4px;
+            transform: rotate(-10deg);
+        }
+
+        .legs::after {
+            right: 4px;
+            transform: rotate(10deg);
+        }
+
+        .name-tag {
+            position: absolute;
+            z-index: 3;
+            left: 50%;
+            bottom: -2px;
+            transform: translateX(-50%);
+            padding: 4px 9px;
+            border: 1px solid rgba(244, 242, 233, 0.12);
+            border-radius: 999px;
+            color: rgba(244, 242, 233, 0.7);
+            background: rgba(5, 9, 7, 0.38);
+            backdrop-filter: blur(10px);
+            font-size: 11px;
+            letter-spacing: 0.1em;
+            white-space: nowrap;
+        }
+
+        .meditator.is-pulsing .aura {
+            animation: aura-breath 1100ms ease-out;
+        }
+
+        @keyframes aura-breath {
+            0% {
+                filter: brightness(1);
+                transform: translate(-50%, -50%) scale(0.96);
+            }
+            42% {
+                filter: brightness(1.42);
+                transform: translate(-50%, -50%) scale(1.08);
+            }
+            100% {
+                filter: brightness(1);
+                transform: translate(-50%, -50%) scale(1);
+            }
+        }
+
+        .side-panel {
+            align-self: stretch;
+            min-height: 420px;
+            padding: 24px;
+            border: 1px solid var(--line);
+            border-radius: 34px;
+            background: var(--panel);
+            backdrop-filter: blur(22px);
+            box-shadow: 0 24px 70px rgba(0, 0, 0, 0.22);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            gap: 24px;
+        }
+
+        .panel-copy {
+            display: grid;
+            gap: 14px;
+        }
+
+        .panel-copy h2 {
+            margin: 0;
+            font-size: clamp(23px, 2vw, 32px);
+            line-height: 1.25;
+        }
+
+        .panel-copy p {
+            margin: 0;
+            color: var(--muted);
+            line-height: 1.8;
+            font-size: 15px;
+        }
+
+        .share-card {
+            display: grid;
+            gap: 10px;
+            padding: 16px;
+            border: 1px solid rgba(244, 242, 233, 0.1);
+            border-radius: 24px;
+            background: var(--panel-strong);
+        }
+
+        .share-label {
+            color: rgba(234, 216, 164, 0.86);
+            font-size: 12px;
+            letter-spacing: 0.18em;
+        }
+
+        .share-url {
+            overflow-wrap: anywhere;
+            color: rgba(244, 242, 233, 0.76);
+            font-family: "Zen Kurenaido", "Noto Serif TC", serif;
+            line-height: 1.5;
+        }
+
+        .panel-actions {
+            display: grid;
+            gap: 10px;
+        }
+
+        .primary-button,
+        .quiet-button {
+            width: 100%;
+            min-height: 48px;
+            border-radius: 999px;
+            cursor: pointer;
+            transition: transform 180ms ease, border-color 180ms ease, background 180ms ease;
+        }
+
+        .primary-button {
+            border: 1px solid rgba(234, 216, 164, 0.45);
+            background: linear-gradient(135deg, rgba(234, 216, 164, 0.92), rgba(172, 190, 139, 0.86));
+            color: #142014;
+            box-shadow: 0 18px 42px rgba(201, 184, 127, 0.18);
+            font-weight: 700;
+        }
+
+        .quiet-button {
+            border: 1px solid rgba(244, 242, 233, 0.12);
+            background: rgba(244, 242, 233, 0.04);
+            color: rgba(244, 242, 233, 0.72);
+        }
+
+        .primary-button:hover,
+        .quiet-button:hover {
+            transform: translateY(-1px);
+        }
+
+        .toast {
+            position: fixed;
+            left: 50%;
+            bottom: 24px;
+            z-index: 20;
+            max-width: min(420px, calc(100vw - 36px));
+            padding: 12px 16px;
+            border: 1px solid rgba(244, 242, 233, 0.14);
+            border-radius: 999px;
+            background: rgba(6, 12, 8, 0.72);
+            color: rgba(244, 242, 233, 0.82);
+            backdrop-filter: blur(16px);
+            box-shadow: 0 18px 48px rgba(0, 0, 0, 0.28);
+            transform: translate(-50%, 20px);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 220ms ease, transform 220ms ease;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translate(-50%, 0);
+        }
+
+        @media (max-width: 980px) {
+            body {
+                overflow: auto;
+            }
+
+            .topbar {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+
+            .toolbar {
+                justify-content: flex-start;
+            }
+
+            .stage-wrap {
+                grid-template-columns: 1fr;
+            }
+
+            .forest-stage {
+                min-height: 650px;
+            }
+
+            .side-panel {
+                min-height: auto;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .page-shell {
+                padding: 14px;
+            }
+
+            .forest-stage {
+                min-height: 560px;
+                border-radius: 28px;
+            }
+
+            .meditator {
+                width: 98px;
+                height: 130px;
+                --responsive-scale: 0.8;
+            }
+
+            .toolbar {
+                width: 100%;
+            }
+
+            .pill,
+            .ghost-button {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <main class="page-shell">
+        <header class="topbar">
+            <div class="brand">
+                <div class="eyebrow">Forest Aura Draw</div>
+                <h1>森息光環</h1>
+            </div>
+            <div class="toolbar">
+                <div class="pill" aria-live="polite">
+                    <span class="status-dot is-offline" id="statusDot"></span>
+                    <span id="connectionStatus">連線中</span>
+                </div>
+                <div class="pill">房間 <span id="roomId">讀取中</span></div>
+                <button class="ghost-button" id="copyTopButton" type="button">複製加分連結</button>
+            </div>
+        </header>
+
+        <section class="stage-wrap">
+            <div class="forest-stage" aria-label="十二位靜坐者的森林光圈舞台">
+                <div class="moon" aria-hidden="true"></div>
+                <div class="ground" aria-hidden="true"></div>
+                <div class="mist" aria-hidden="true"></div>
+                <div class="people-layer" id="peopleLayer"></div>
+            </div>
+
+            <aside class="side-panel">
+                <div class="panel-copy">
+                    <div class="eyebrow">Quiet, not plain</div>
+                    <h2>分數不露出，只讓光自己長大。</h2>
+                    <p>十二位靜坐者在同一片森林裡呼吸。加分時，對應人物背後的光圈會依分數線性放大；舞台端保留安靜、克制的視覺，不做吵雜排行榜。</p>
+                </div>
+
+                <div class="share-card">
+                    <div class="share-label">加分端網址</div>
+                    <div class="share-url" id="shareUrl">產生中</div>
+                </div>
+
+                <div class="panel-actions">
+                    <button class="primary-button" id="copyButton" type="button">複製加分連結</button>
+                    <button class="quiet-button" id="resetButton" type="button">重置這個森林房間</button>
+                </div>
+            </aside>
+        </section>
+    </main>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script>
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyD5ytWrUOI6UIUBIcKpF3fyODQR2pXFMmY",
+            authDomain: "score-calculation-ef584.firebaseapp.com",
+            databaseURL: "https://score-calculation-ef584-default-rtdb.firebaseio.com",
+            projectId: "score-calculation-ef584",
+            storageBucket: "score-calculation-ef584.firebasestorage.app",
+            messagingSenderId: "634074718336",
+            appId: "1:634074718336:web:38960860ad796197a50665",
+            measurementId: "G-R6NT2QJQSC"
+        };
+
+        const PARTICIPANT_COUNT = 12;
+        const peopleLayer = document.getElementById("peopleLayer");
+        const roomIdEl = document.getElementById("roomId");
+        const shareUrlEl = document.getElementById("shareUrl");
+        const connectionStatusEl = document.getElementById("connectionStatus");
+        const statusDotEl = document.getElementById("statusDot");
+        const toastEl = document.getElementById("toast");
+
+        const placements = [
+            { x: 17, y: 45, scale: 0.72 },
+            { x: 32, y: 39, scale: 0.76 },
+            { x: 48, y: 36, scale: 0.78 },
+            { x: 64, y: 39, scale: 0.76 },
+            { x: 81, y: 45, scale: 0.72 },
+            { x: 22, y: 63, scale: 0.9 },
+            { x: 39, y: 57, scale: 0.95 },
+            { x: 58, y: 57, scale: 0.95 },
+            { x: 76, y: 63, scale: 0.9 },
+            { x: 30, y: 78, scale: 1.12 },
+            { x: 50, y: 73, scale: 1.18 },
+            { x: 70, y: 78, scale: 1.12 }
+        ];
+
+        let database;
+        let scoresRef;
+        let roomId = "";
+        let scores = createEmptyScores();
+        let previousScores = createEmptyScores();
+        let toastTimer = null;
+
+        function createEmptyScores() {
+            const base = {};
+            for (let i = 1; i <= PARTICIPANT_COUNT; i += 1) {
+                base[i] = 0;
+            }
+            return base;
+        }
+
+        function ensureScores(value) {
+            const next = createEmptyScores();
+            Object.keys(value || {}).forEach((key) => {
+                const numeric = Number(value[key]);
+                if (Number.isFinite(numeric)) {
+                    next[key] = Math.max(0, numeric);
+                }
+            });
+            return next;
+        }
+
+        function haloMetrics(score) {
+            const diameter = Math.min(320, Math.max(44, 44 + score * 0.32));
+            const alpha = Math.min(0.9, Math.max(0.18, 0.18 + score / 720));
+            return { diameter, alpha };
+        }
+
+        function renderPeople() {
+            peopleLayer.innerHTML = "";
+
+            placements.forEach((place, index) => {
+                const personNumber = index + 1;
+                const meditator = document.createElement("article");
+                meditator.className = "meditator";
+                meditator.id = `meditator-${personNumber}`;
+                meditator.style.setProperty("--x", `${place.x}%`);
+                meditator.style.setProperty("--y", `${place.y}%`);
+                meditator.style.setProperty("--scale", place.scale);
+                meditator.setAttribute("aria-label", `靜坐者 ${String(personNumber).padStart(2, "0")}`);
+                meditator.innerHTML = `
+                    <div class="aura" aria-hidden="true"></div>
+                    <div class="figure" aria-hidden="true">
+                        <div class="head"></div>
+                        <div class="body"></div>
+                        <div class="arms"></div>
+                        <div class="legs"></div>
+                    </div>
+                    <div class="name-tag">第 ${String(personNumber).padStart(2, "0")} 位</div>
+                `;
+                peopleLayer.appendChild(meditator);
+            });
+        }
+
+        function updatePeople() {
+            for (let i = 1; i <= PARTICIPANT_COUNT; i += 1) {
+                const meditator = document.getElementById(`meditator-${i}`);
+                if (!meditator) continue;
+
+                const score = Number(scores[i] || 0);
+                const previous = Number(previousScores[i] || 0);
+                const { diameter, alpha } = haloMetrics(score);
+                meditator.style.setProperty("--halo", `${diameter}px`);
+                meditator.style.setProperty("--aura-alpha", alpha.toFixed(3));
+
+                if (score > previous) {
+                    meditator.classList.remove("is-pulsing");
+                    void meditator.offsetWidth;
+                    meditator.classList.add("is-pulsing");
+                    window.setTimeout(() => meditator.classList.remove("is-pulsing"), 1200);
+                }
+            }
+
+            previousScores = { ...scores };
+        }
+
+        function setConnection(connected, message) {
+            connectionStatusEl.textContent = message;
+            statusDotEl.classList.toggle("is-offline", !connected);
+        }
+
+        function showToast(message) {
+            toastEl.textContent = message;
+            toastEl.classList.add("show");
+            window.clearTimeout(toastTimer);
+            toastTimer = window.setTimeout(() => toastEl.classList.remove("show"), 2600);
+        }
+
+        function getRoomId() {
+            const params = new URLSearchParams(window.location.search);
+            const fromUrl = params.get("room");
+            if (fromUrl) return fromUrl;
+
+            const generated = `forest_${Math.random().toString(36).slice(2, 8)}`;
+            params.set("room", generated);
+            window.history.replaceState({}, "", `${window.location.pathname}?${params.toString()}`);
+            return generated;
+        }
+
+        function getScoreInputUrl() {
+            const url = new URL(window.location.href);
+            url.pathname = url.pathname.replace(/forest_point\.html$/, "forest_score_input.html");
+            url.searchParams.set("room", roomId);
+            return url.toString();
+        }
+
+        async function copyShareUrl() {
+            const url = getScoreInputUrl();
+            try {
+                await navigator.clipboard.writeText(url);
+                showToast("加分連結已複製");
+            } catch (error) {
+                showToast("瀏覽器無法自動複製，請手動複製右側網址");
+            }
+        }
+
+        async function resetScores() {
+            const confirmed = window.confirm("確定要把這個森林房間的 12 位光圈都重置嗎？");
+            if (!confirmed || !scoresRef) return;
+
+            await scoresRef.set(createEmptyScores());
+            showToast("森林房間已重置");
+        }
+
+        function bindControls() {
+            document.getElementById("copyButton").addEventListener("click", copyShareUrl);
+            document.getElementById("copyTopButton").addEventListener("click", copyShareUrl);
+            document.getElementById("resetButton").addEventListener("click", resetScores);
+        }
+
+        async function initializeApp() {
+            renderPeople();
+            bindControls();
+
+            try {
+                if (!firebase.apps.length) {
+                    firebase.initializeApp(firebaseConfig);
+                }
+
+                database = firebase.database();
+                roomId = getRoomId();
+                roomIdEl.textContent = roomId;
+                shareUrlEl.textContent = getScoreInputUrl();
+                scoresRef = database.ref(`rooms/${roomId}/forestScores`);
+
+                setConnection(true, "已連線");
+                updatePeople();
+
+                const snapshot = await scoresRef.once("value");
+                if (!snapshot.exists()) {
+                    await scoresRef.set(createEmptyScores());
+                } else {
+                    scores = ensureScores(snapshot.val());
+                    updatePeople();
+                }
+
+                scoresRef.on("value", (scoreSnapshot) => {
+                    scores = ensureScores(scoreSnapshot.val());
+                    updatePeople();
+                });
+            } catch (error) {
+                console.error("Forest stage initialization failed:", error);
+                setConnection(false, "連線失敗");
+                showToast("Firebase 連線失敗，請稍後再試");
+            }
+        }
+
+        window.addEventListener("load", initializeApp);
+    </script>
+</body>
+</html>
