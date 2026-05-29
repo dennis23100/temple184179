@@ -1,1007 +1,446 @@
-<!DOCTYPE html>
-<html lang="zh-TW">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>默</title>
-    <link rel="preload" href="assets/meditator.svg" as="image">
-    <link rel="preload" href="assets/silent-desert.mp4" as="video" type="video/mp4">
-    <style>
-        @import url("https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@500;700&family=Zen+Kurenaido&display=swap");
-
-        :root {
-            --ink: #22231d;
-            --soft-ink: rgba(34, 35, 29, 0.66);
-            --muted: rgba(34, 35, 29, 0.54);
-            --line: rgba(58, 55, 43, 0.15);
-            --paper: rgba(255, 255, 255, 0.72);
-            --paper-strong: rgba(255, 255, 255, 0.9);
-            --sand: #eee5d5;
-            --warm: #c5ae73;
-            --shadow: rgba(104, 91, 64, 0.16);
-        }
-
-        * {
-            box-sizing: border-box;
-        }
-
-        html,
-        body {
-            min-height: 100%;
-            margin: 0;
-        }
-
-        body {
-            overflow-x: hidden;
-            color: var(--ink);
-            font-family: "Noto Serif TC", "Microsoft JhengHei", serif;
-            background:
-                radial-gradient(circle at 52% 4%, rgba(255, 255, 255, 0.98) 0 12rem, transparent 32rem),
-                linear-gradient(180deg, #ffffff 0%, #fbfaf6 42%, #ece3d2 100%);
-        }
-
-        body::before,
-        body::after {
-            content: "";
-            position: fixed;
-            inset: 0;
-            pointer-events: none;
-        }
-
-        body::before {
-            z-index: -3;
-            background:
-                radial-gradient(ellipse 92% 20% at 42% 84%, rgba(221, 209, 184, 0.48) 0 42%, transparent 43%),
-                radial-gradient(ellipse 76% 16% at 75% 78%, rgba(235, 226, 207, 0.68) 0 48%, transparent 49%),
-                radial-gradient(ellipse 68% 12% at 13% 73%, rgba(242, 236, 224, 0.88) 0 52%, transparent 53%),
-                linear-gradient(180deg, rgba(255, 255, 255, 0.24), rgba(236, 228, 211, 0.2));
-        }
-
-        body::after {
-            z-index: -2;
-            background:
-                repeating-linear-gradient(173deg, rgba(167, 151, 112, 0.08) 0 1px, transparent 1px 18px),
-                radial-gradient(ellipse at 50% 18%, rgba(255, 255, 255, 0.74), transparent 48%);
-            opacity: 0.42;
-            mix-blend-mode: multiply;
-        }
-
-        button,
-        input,
-        select {
-            font: inherit;
-        }
-
-        button {
-            color: inherit;
-        }
-
-        [hidden] {
-            display: none !important;
-        }
-
-        .page-shell {
-            position: relative;
-            min-height: 100vh;
-            padding: clamp(18px, 2vw, 30px);
-            display: grid;
-            grid-template-rows: auto 1fr;
-            gap: 18px;
-        }
-
-        .topbar {
-            position: relative;
-            z-index: 12;
-            display: grid;
-            grid-template-columns: minmax(180px, 1fr) auto minmax(260px, 1fr);
-            align-items: center;
-            gap: 16px;
-        }
-
-        .brand {
-            grid-column: 2;
-            display: grid;
-            justify-items: center;
-            gap: 8px;
-            transform: translateX(-5vw);
-        }
-
-        .eyebrow {
-            color: var(--muted);
-            font-family: "Zen Kurenaido", "Noto Serif TC", serif;
-            letter-spacing: 0.26em;
-            text-transform: uppercase;
-            font-size: 12px;
-        }
-
-        h1 {
-            margin: 0;
-            font-size: clamp(52px, 7vw, 112px);
-            line-height: 0.86;
-            letter-spacing: 0.08em;
-            font-weight: 700;
-        }
-
-        .toolbar {
-            grid-column: 3;
-            display: flex;
-            align-items: center;
-            justify-content: flex-end;
-            flex-wrap: wrap;
-            gap: 10px;
-        }
-
-        .pill,
-        .ghost-button {
-            min-height: 38px;
-            border: 1px solid var(--line);
-            border-radius: 999px;
-            background: rgba(255, 255, 255, 0.56);
-            backdrop-filter: blur(14px);
-            box-shadow: 0 14px 34px rgba(112, 96, 61, 0.08);
-        }
-
-        .pill {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            padding: 0 14px;
-            color: var(--soft-ink);
-            font-size: 13px;
-        }
-
-        .status-dot {
-            width: 7px;
-            height: 7px;
-            border-radius: 50%;
-            background: #7c8a68;
-            box-shadow: 0 0 18px rgba(124, 138, 104, 0.54);
-        }
-
-        .status-dot.is-offline {
-            background: #be8a75;
-            box-shadow: 0 0 18px rgba(190, 138, 117, 0.5);
-        }
-
-        .ghost-button {
-            padding: 0 16px;
-            cursor: pointer;
-            color: rgba(34, 35, 29, 0.78);
-            transition: transform 180ms ease, background 180ms ease, border-color 180ms ease;
-        }
-
-        .ghost-button:hover,
-        .ghost-button.is-active {
-            transform: translateY(-1px);
-            border-color: rgba(197, 174, 115, 0.38);
-            background: rgba(255, 255, 255, 0.82);
-        }
-
-        .stage-wrap {
-            min-height: 0;
-            display: block;
-        }
-
-        .forest-stage {
-            position: relative;
-            min-height: min(740px, calc(100vh - 140px));
-            border: 1px solid rgba(88, 80, 58, 0.12);
-            border-radius: clamp(26px, 3vw, 48px);
-            overflow: hidden;
-            background:
-                radial-gradient(circle at 50% 30%, rgba(255, 255, 255, 0.92) 0 16rem, transparent 31rem),
-                radial-gradient(ellipse at 50% 86%, rgba(207, 193, 160, 0.42), transparent 42rem),
-                linear-gradient(180deg, rgba(255, 255, 255, 0.72), rgba(246, 241, 231, 0.88));
-            box-shadow:
-                inset 0 0 0 1px rgba(255, 255, 255, 0.66),
-                0 34px 100px rgba(134, 116, 75, 0.16);
-            isolation: isolate;
-        }
-
-        .desert-video {
-            position: absolute;
-            inset: 0;
-            z-index: -4;
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            transform: scale(1.02);
-            filter: saturate(0.62) contrast(0.92) brightness(1.16);
-        }
-
-        .video-veil {
-            position: absolute;
-            inset: 0;
-            z-index: -3;
-            background:
-                radial-gradient(circle at 50% 22%, rgba(255, 255, 255, 0.5), transparent 35%),
-                radial-gradient(ellipse at 50% 94%, rgba(239, 226, 195, 0.46), transparent 56%),
-                linear-gradient(180deg, rgba(255, 255, 255, 0.45), rgba(255, 251, 241, 0.2) 46%, rgba(218, 197, 151, 0.2));
-        }
-
-        .video-veil::after {
-            content: "";
-            position: absolute;
-            inset: -1px;
-            background:
-                repeating-linear-gradient(173deg, rgba(255, 255, 255, 0.08) 0 1px, transparent 1px 17px),
-                linear-gradient(90deg, rgba(255, 255, 255, 0.18), transparent 24%, transparent 76%, rgba(255, 255, 255, 0.24));
-            opacity: 0.7;
-            mix-blend-mode: screen;
-        }
-
-        .desert-haze {
-            position: absolute;
-            inset: auto -12% -4%;
-            z-index: -2;
-            height: 42%;
-            background:
-                radial-gradient(ellipse at 24% 70%, rgba(255, 255, 255, 0.52), transparent 38%),
-                radial-gradient(ellipse at 68% 60%, rgba(240, 228, 202, 0.54), transparent 44%),
-                linear-gradient(180deg, transparent, rgba(225, 204, 158, 0.28));
-            filter: blur(20px);
-            opacity: 0.86;
-        }
-
-        .aura-layer,
-        .people-layer {
-            position: absolute;
-            inset: 0;
-        }
-
-        .aura-layer {
-            z-index: 0;
-            pointer-events: none;
-        }
-
-        .people-layer {
-            z-index: 1;
-        }
-
-        .aura-spot,
-        .meditator {
-            --scale: 1;
-            position: absolute;
-            left: var(--x);
-            top: var(--y);
-            width: 150px;
-            height: 148px;
-            transform: translate(-50%, -50%) scale(calc(var(--scale) * var(--responsive-scale, 1)));
-            transform-origin: center bottom;
-        }
-
-        .aura-spot {
-            --halo: 234px;
-            --aura-alpha: 0.46;
-            transform: translate(-50%, -50%) scale(var(--responsive-scale, 1));
-        }
-
-        .meditator {
-            display: grid;
-            place-items: center;
-            transition: filter 600ms ease;
-        }
-
-        .meditator::after {
-            content: "";
-            position: absolute;
-            left: 50%;
-            bottom: 22px;
-            z-index: 1;
-            width: 112px;
-            height: 18px;
-            transform: translateX(-50%);
-            border-radius: 50%;
-            background: rgba(95, 84, 60, 0.22);
-            filter: blur(12px);
-        }
-
-        .aura {
-            position: absolute;
-            left: 50%;
-            top: 48%;
-            width: var(--halo);
-            height: var(--halo);
-            transform: translate(-50%, -50%);
-            border-radius: 50%;
-            opacity: var(--aura-alpha);
-            background:
-                radial-gradient(circle, rgba(255, 255, 255, 1) 0 29%, rgba(255, 251, 226, 0.95) 43%, rgba(255, 255, 255, 0.7) 55%, rgba(236, 199, 105, 0.34) 66%, rgba(116, 88, 34, 0.16) 73%, transparent 82%);
-            box-shadow:
-                inset 0 0 calc(var(--halo) * 0.14) rgba(255, 255, 255, 0.84),
-                0 0 18px rgba(255, 255, 255, 0.76),
-                0 12px 30px rgba(92, 70, 24, 0.16);
-            transition:
-                width 900ms cubic-bezier(0.2, 0.8, 0.2, 1),
-                height 900ms cubic-bezier(0.2, 0.8, 0.2, 1),
-                opacity 600ms ease;
-            overflow: visible;
-        }
-
-        .aura::before {
-            content: "";
-            position: absolute;
-            inset: -8%;
-            z-index: 0;
-            border-radius: inherit;
-            background: radial-gradient(circle, transparent 0 49%, rgba(85, 66, 28, 0.26) 63%, rgba(180, 142, 54, 0.15) 72%, transparent 84%);
-            filter: blur(4px);
-        }
-
-        .aura::after {
-            content: "";
-            position: absolute;
-            inset: 0;
-            z-index: 1;
-            border: 1px solid rgba(254, 246, 209, 0.72);
-            border-radius: inherit;
-            box-shadow:
-                inset 0 0 30px rgba(255, 255, 255, 0.58),
-                inset 0 0 calc(var(--halo) * 0.18) rgba(255, 244, 202, 0.42),
-                0 0 0 1px rgba(126, 98, 38, 0.16);
-        }
-
-        .figure {
-            position: relative;
-            z-index: 2;
-            width: 118px;
-            height: 114px;
-            margin-top: 22px;
-            display: grid;
-            place-items: center;
-        }
-
-        .figure img {
-            width: 100%;
-            height: 100%;
-            object-fit: contain;
-            filter:
-                grayscale(0.12)
-                contrast(1.04)
-                drop-shadow(0 12px 12px rgba(56, 49, 37, 0.22));
-            user-select: none;
-            -webkit-user-drag: none;
-        }
-
-        .name-tag {
-            position: absolute;
-            z-index: 3;
-            left: 50%;
-            bottom: 0;
-            transform: translateX(-50%);
-            padding: 5px 11px;
-            border: 1px solid rgba(62, 56, 42, 0.12);
-            border-radius: 999px;
-            color: rgba(39, 38, 31, 0.72);
-            background: rgba(255, 255, 255, 0.66);
-            backdrop-filter: blur(10px);
-            box-shadow: 0 8px 24px rgba(106, 91, 60, 0.12);
-            font-size: 12px;
-            letter-spacing: 0.12em;
-            white-space: nowrap;
-        }
-
-        .aura-spot.is-pulsing .aura {
-            animation: aura-breath 1100ms ease-out;
-        }
-
-        @keyframes aura-breath {
-            0% {
-                transform: translate(-50%, -50%) scale(0.96);
-                opacity: calc(var(--aura-alpha) * 0.86);
-            }
-            42% {
-                transform: translate(-50%, -50%) scale(1.08);
-                opacity: 1;
-            }
-            100% {
-                transform: translate(-50%, -50%) scale(1);
-                opacity: var(--aura-alpha);
-            }
-        }
-
-        .panel-backdrop {
-            position: fixed;
-            inset: 0;
-            z-index: 24;
-            background: rgba(92, 78, 49, 0.14);
-            backdrop-filter: blur(3px);
-            opacity: 0;
-            transition: opacity 220ms ease;
-        }
-
-        .panel-backdrop.is-visible {
-            opacity: 1;
-        }
-
-        .side-panel {
-            position: fixed;
-            z-index: 30;
-            top: clamp(80px, 8vw, 104px);
-            right: clamp(14px, 2vw, 28px);
-            bottom: clamp(14px, 2vw, 28px);
-            width: min(390px, calc(100vw - 28px));
-            padding: 24px;
-            border: 1px solid var(--line);
-            border-radius: 34px;
-            background: var(--paper);
-            backdrop-filter: blur(24px);
-            box-shadow: 0 28px 80px rgba(97, 82, 51, 0.2);
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            gap: 24px;
-            transform: translateX(calc(100% + 34px));
-            opacity: 0;
-            pointer-events: none;
-            transition: transform 260ms cubic-bezier(0.2, 0.8, 0.2, 1), opacity 220ms ease;
-        }
-
-        .side-panel.is-open {
-            transform: translateX(0);
-            opacity: 1;
-            pointer-events: auto;
-        }
-
-        .panel-head {
-            display: flex;
-            justify-content: space-between;
-            align-items: start;
-            gap: 16px;
-        }
-
-        .panel-close {
-            width: 38px;
-            height: 38px;
-            border: 1px solid var(--line);
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.58);
-            cursor: pointer;
-            color: rgba(34, 35, 29, 0.72);
-        }
-
-        .panel-copy {
-            display: grid;
-            gap: 14px;
-        }
-
-        .panel-copy h2 {
-            margin: 0;
-            font-size: clamp(23px, 2vw, 32px);
-            line-height: 1.28;
-        }
-
-        .panel-copy p {
-            margin: 0;
-            color: var(--soft-ink);
-            line-height: 1.85;
-            font-size: 15px;
-        }
-
-        .share-card {
-            display: grid;
-            gap: 10px;
-            padding: 16px;
-            border: 1px solid rgba(58, 55, 43, 0.12);
-            border-radius: 24px;
-            background: var(--paper-strong);
-        }
-
-        .share-label {
-            color: rgba(126, 103, 48, 0.82);
-            font-size: 12px;
-            letter-spacing: 0.18em;
-        }
-
-        .share-url {
-            overflow-wrap: anywhere;
-            color: rgba(34, 35, 29, 0.7);
-            font-family: "Zen Kurenaido", "Noto Serif TC", serif;
-            line-height: 1.5;
-        }
-
-        .panel-actions {
-            display: grid;
-            gap: 10px;
-        }
-
-        .primary-button,
-        .quiet-button {
-            width: 100%;
-            min-height: 48px;
-            border-radius: 999px;
-            cursor: pointer;
-            transition: transform 180ms ease, border-color 180ms ease, background 180ms ease;
-        }
-
-        .primary-button {
-            border: 1px solid rgba(174, 150, 86, 0.36);
-            background: linear-gradient(135deg, #d8c78f, #efe4bd);
-            color: #242015;
-            box-shadow: 0 18px 42px rgba(177, 151, 83, 0.18);
-            font-weight: 700;
-        }
-
-        .quiet-button {
-            border: 1px solid rgba(58, 55, 43, 0.13);
-            background: rgba(255, 255, 255, 0.42);
-            color: rgba(34, 35, 29, 0.66);
-        }
-
-        .primary-button:hover,
-        .quiet-button:hover,
-        .panel-close:hover {
-            transform: translateY(-1px);
-        }
-
-        .toast {
-            position: fixed;
-            left: 50%;
-            bottom: 24px;
-            z-index: 40;
-            max-width: min(420px, calc(100vw - 36px));
-            padding: 12px 16px;
-            border: 1px solid rgba(58, 55, 43, 0.14);
-            border-radius: 999px;
-            background: rgba(255, 255, 255, 0.78);
-            color: rgba(34, 35, 29, 0.82);
-            backdrop-filter: blur(16px);
-            box-shadow: 0 18px 48px rgba(114, 94, 55, 0.18);
-            transform: translate(-50%, 20px);
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 220ms ease, transform 220ms ease;
-        }
-
-        .toast.show {
-            opacity: 1;
-            transform: translate(-50%, 0);
-        }
-
-        @media (max-width: 980px) {
-            .topbar {
-                grid-template-columns: 1fr;
-                align-items: start;
-            }
-
-            .brand,
-            .toolbar {
-                grid-column: 1;
-            }
-
-            .brand {
-                justify-items: start;
-                transform: none;
-            }
-
-            .toolbar {
-                justify-content: flex-start;
-            }
-
-            .forest-stage {
-                min-height: 650px;
-            }
-        }
-
-        @media (max-width: 640px) {
-            .page-shell {
-                padding: 14px;
-            }
-
-            .forest-stage {
-                min-height: 590px;
-                border-radius: 28px;
-            }
-
-            .aura-spot,
-            .meditator {
-                --responsive-scale: 0.72;
-            }
-
-            .meditator {
-                width: 136px;
-                height: 134px;
-            }
-
-            .toolbar {
-                width: 100%;
-            }
-
-            .pill,
-            .ghost-button {
-                width: 100%;
-                justify-content: center;
-            }
-
-            .side-panel {
-                top: 86px;
-                width: calc(100vw - 28px);
-                padding: 20px;
-                border-radius: 28px;
-            }
-        }
-
-        @media (prefers-reduced-motion: reduce) {
-            *,
-            *::before,
-            *::after {
-                scroll-behavior: auto !important;
-                animation-duration: 0.01ms !important;
-                animation-iteration-count: 1 !important;
-                transition-duration: 0.01ms !important;
-            }
-        }
-    </style>
-</head>
-<body>
-    <main class="page-shell">
-        <header class="topbar">
-            <div class="brand">
-                <div class="eyebrow">Silent Desert Draw</div>
-                <h1>默</h1>
-            </div>
-            <div class="toolbar">
-                <div class="pill" aria-live="polite">
-                    <span class="status-dot is-offline" id="statusDot"></span>
-                    <span id="connectionStatus">連線中</span>
-                </div>
-                <div class="pill">房間 <span id="roomId">讀取中</span></div>
-                <button class="ghost-button" id="copyTopButton" type="button">複製加分連結</button>
-                <button class="ghost-button" id="panelToggle" type="button" aria-expanded="false" aria-controls="sidePanel">說明欄</button>
-            </div>
-        </header>
-
-        <section class="stage-wrap">
-            <div class="forest-stage" aria-label="十二組在全白沙漠中的光圈舞台">
-                <video class="desert-video" autoplay muted loop playsinline preload="auto" aria-hidden="true">
-                    <source src="assets/silent-desert.mp4" type="video/mp4">
-                </video>
-                <div class="video-veil" aria-hidden="true"></div>
-                <div class="desert-haze" aria-hidden="true"></div>
-                <div class="aura-layer" id="auraLayer" aria-hidden="true"></div>
-                <div class="people-layer" id="peopleLayer"></div>
-            </div>
-
-            <aside class="side-panel" id="sidePanel" aria-hidden="true">
-                <div class="panel-copy">
-                    <div class="panel-head">
-                        <div>
-                            <div class="eyebrow">Quiet, not empty</div>
-                            <h2>不顯示分數，只讓光在沙裡長大。</h2>
-                        </div>
-                        <button class="panel-close" id="panelClose" type="button" aria-label="收起說明欄">收</button>
-                    </div>
-                    <p>十二組人物坐在流動的白色沙漠裡。光圈依同房間分數相對放大；最高分最亮最大，最低分也保留約一半面積的光，不會黯淡消失。</p>
-                </div>
-
-                <div class="share-card">
-                    <div class="share-label">加分端網址</div>
-                    <div class="share-url" id="shareUrl">產生中</div>
-                </div>
-
-                <div class="panel-actions">
-                    <button class="primary-button" id="copyButton" type="button">複製加分連結</button>
-                    <button class="quiet-button" id="resetButton" type="button">重置這個默房間</button>
-                </div>
-            </aside>
-        </section>
-    </main>
-
-    <div class="panel-backdrop" id="panelBackdrop" hidden></div>
-    <div class="toast" id="toast" role="status" aria-live="polite"></div>
-
-    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script>
-    <script>
-        const firebaseConfig = {
-            apiKey: "AIzaSyD5ytWrUOI6UIUBIcKpF3fyODQR2pXFMmY",
-            authDomain: "score-calculation-ef584.firebaseapp.com",
-            databaseURL: "https://score-calculation-ef584-default-rtdb.firebaseio.com",
-            projectId: "score-calculation-ef584",
-            storageBucket: "score-calculation-ef584.firebasestorage.app",
-            messagingSenderId: "634074718336",
-            appId: "1:634074718336:web:38960860ad796197a50665",
-            measurementId: "G-R6NT2QJQSC"
-        };
-
-        const GROUP_NAMES = ["第一組", "第二組", "第三組", "第四組", "第五組", "第六組", "第七組", "第八組", "第九組", "第十組", "第十一組", "第十二組"];
-        const PARTICIPANT_COUNT = GROUP_NAMES.length;
-        const MAX_HALO_DIAMETER = 330;
-        const MIN_HALO_AREA_RATIO = 0.5;
-        const auraLayer = document.getElementById("auraLayer");
-        const peopleLayer = document.getElementById("peopleLayer");
-        const roomIdEl = document.getElementById("roomId");
-        const shareUrlEl = document.getElementById("shareUrl");
-        const connectionStatusEl = document.getElementById("connectionStatus");
-        const statusDotEl = document.getElementById("statusDot");
-        const toastEl = document.getElementById("toast");
-        const sidePanel = document.getElementById("sidePanel");
-        const panelToggle = document.getElementById("panelToggle");
-        const panelClose = document.getElementById("panelClose");
-        const panelBackdrop = document.getElementById("panelBackdrop");
-
-        const placements = [
-            { x: 12, y: 38, scale: 0.72 },
-            { x: 30, y: 32, scale: 0.76 },
-            { x: 50, y: 29, scale: 0.82 },
-            { x: 70, y: 32, scale: 0.76 },
-            { x: 88, y: 38, scale: 0.72 },
-            { x: 21, y: 58, scale: 0.92 },
-            { x: 39, y: 53, scale: 1.02 },
-            { x: 61, y: 53, scale: 1.02 },
-            { x: 79, y: 58, scale: 0.92 },
-            { x: 12, y: 78, scale: 0.86 },
-            { x: 50, y: 75, scale: 1.08 },
-            { x: 88, y: 78, scale: 0.86 }
-        ];
-        const MEDITATOR_ASSET_PARTS = [
-            "assets/meditator.svg.b64.01",
-            "assets/meditator.svg.b64.02",
-            "assets/meditator.svg.b64.03",
-            "assets/meditator.svg.b64.04",
-            "assets/meditator.svg.b64.05",
-            "assets/meditator.svg.b64.06",
-            "assets/meditator.svg.b64.07"
-        ];
-
-        let database;
-        let scoresRef;
-        let roomId = "";
-        let scores = createEmptyScores();
-        let previousScores = createEmptyScores();
-        let toastTimer = null;
-        let meditatorAssetUrlPromise = null;
-
-        function createEmptyScores() {
-            const base = {};
-            for (let i = 1; i <= PARTICIPANT_COUNT; i += 1) {
-                base[i] = 0;
-            }
-            return base;
-        }
-
-        function ensureScores(value) {
-            const next = createEmptyScores();
-            Object.keys(value || {}).forEach((key) => {
-                const index = Number(key);
-                const numeric = Number(value[key]);
-                if (Number.isInteger(index) && index >= 1 && index <= PARTICIPANT_COUNT && Number.isFinite(numeric)) {
-                    next[index] = Math.max(0, numeric);
-                }
-            });
-            return next;
-        }
-
-        function haloMetrics(score, minScore, maxScore) {
-            const spread = maxScore - minScore;
-            const normalized = spread > 0
-                ? (score - minScore) / spread
-                : (maxScore > 0 ? 0.5 : 0);
-            // Keep comparison readable without making the lowest group feel unlit.
-            const areaRatio = MIN_HALO_AREA_RATIO + normalized * (1 - MIN_HALO_AREA_RATIO);
-            const diameter = MAX_HALO_DIAMETER * Math.sqrt(areaRatio);
-            const alpha = 0.48 + normalized * 0.48;
-            return { diameter, alpha };
-        }
-
-        async function getMeditatorAssetUrl() {
-            if (!meditatorAssetUrlPromise) {
-                meditatorAssetUrlPromise = (async () => {
-                    try {
-                        const directAsset = await fetch("assets/meditator.svg", { cache: "force-cache" });
-                        if (directAsset.ok) {
-                            return "assets/meditator.svg";
-                        }
-                    } catch (error) {
-                        console.warn("Direct meditator asset unavailable, falling back to chunks.", error);
-                    }
-
-                    const chunks = await Promise.all(MEDITATOR_ASSET_PARTS.map(async (path) => {
-                        const response = await fetch(path, { cache: "force-cache" });
-                        if (!response.ok) {
-                            throw new Error(`Missing meditator asset chunk: ${path}`);
-                        }
-                        return response.text();
-                    }));
-
-                    return `data:image/svg+xml;base64,${chunks.map((chunk) => chunk.trim()).join("")}`;
-                })();
-            }
-
-            return meditatorAssetUrlPromise;
-        }
-
-        async function hydrateMeditatorImages() {
-            try {
-                const assetUrl = await getMeditatorAssetUrl();
-                document.querySelectorAll("[data-meditator-image]").forEach((image) => {
-                    image.src = assetUrl;
-                });
-            } catch (error) {
-                console.error("Meditator asset failed to load:", error);
-            }
-        }
-
-        function renderPeople() {
-            auraLayer.innerHTML = "";
-            peopleLayer.innerHTML = "";
-
-            placements.forEach((place, index) => {
-                const personNumber = index + 1;
-                const groupName = GROUP_NAMES[index];
-                const auraSpot = document.createElement("div");
-                auraSpot.className = "aura-spot";
-                auraSpot.id = `aura-${personNumber}`;
-                auraSpot.style.setProperty("--x", `${place.x}%`);
-                auraSpot.style.setProperty("--y", `${place.y}%`);
-                auraSpot.style.setProperty("--scale", place.scale);
-                auraSpot.innerHTML = `<div class="aura"></div>`;
-
-                const meditator = document.createElement("article");
-                meditator.className = "meditator";
-                meditator.id = `meditator-${personNumber}`;
-                meditator.style.setProperty("--x", `${place.x}%`);
-                meditator.style.setProperty("--y", `${place.y}%`);
-                meditator.style.setProperty("--scale", place.scale);
-                meditator.setAttribute("aria-label", groupName);
-                meditator.innerHTML = `
-                    <div class="figure" aria-hidden="true">
-                        <img src="assets/meditator.svg" data-meditator-image alt="">
-                    </div>
-                    <div class="name-tag">${groupName}</div>
-                `;
-                auraLayer.appendChild(auraSpot);
-                peopleLayer.appendChild(meditator);
-            });
-        }
-
-        function updatePeople() {
-            const scoreValues = Object.values(scores).map((score) => Number(score) || 0);
-            const minScore = Math.min(...scoreValues);
-            const maxScore = Math.max(...scoreValues);
-
-            for (let i = 1; i <= PARTICIPANT_COUNT; i += 1) {
-                const auraSpot = document.getElementById(`aura-${i}`);
-                const meditator = document.getElementById(`meditator-${i}`);
-                if (!auraSpot || !meditator) continue;
-
-                const score = Number(scores[i] || 0);
-                const previous = Number(previousScores[i] || 0);
-                const { diameter, alpha } = haloMetrics(score, minScore, maxScore);
-                auraSpot.style.setProperty("--halo", `${diameter}px`);
-                auraSpot.style.setProperty("--aura-alpha", alpha.toFixed(3));
-
-                if (score > previous) {
-                    auraSpot.classList.remove("is-pulsing");
-                    void auraSpot.offsetWidth;
-                    auraSpot.classList.add("is-pulsing");
-                    window.setTimeout(() => auraSpot.classList.remove("is-pulsing"), 1200);
-                }
-            }
-
-            previousScores = { ...scores };
-        }
-
-        function setPanelOpen(isOpen) {
-            panelToggle.classList.toggle("is-active", isOpen);
-            panelToggle.setAttribute("aria-expanded", String(isOpen));
-            sidePanel.classList.toggle("is-open", isOpen);
-            sidePanel.setAttribute("aria-hidden", String(!isOpen));
-
-            if (isOpen) {
-                panelBackdrop.hidden = false;
-                window.requestAnimationFrame(() => panelBackdrop.classList.add("is-visible"));
-            } else {
-                panelBackdrop.classList.remove("is-visible");
-                window.setTimeout(() => {
-                    if (!sidePanel.classList.contains("is-open")) {
-                        panelBackdrop.hidden = true;
-                    }
-                }, 220);
-            }
-        }
-
-        function setConnection(connected, message) {
-            connectionStatusEl.textContent = message;
-            statusDotEl.classList.toggle("is-offline", !connected);
-        }
-
-        function showToast(message) {
-            toastEl.textContent = message;
-            toastEl.classList.add("show");
-            window.clearTimeout(toastTimer);
-            toastTimer = window.setTimeout(() => toastEl.classList.remove("show"), 2600);
-        }
-
-        function getRoomId() {
-            const params = new URLSearchParams(window.location.search);
-            const fromUrl = params.get("room");
-            if (fromUrl) return fromUrl;
-
-            const generated = `silent_${Math.random().toString(36).slice(2, 8)}`;
-            params.set("room", generated);
-            window.history.replaceState({}, "", `${window.location.pathname}?${params.toString()}`);
-            return generated;
-        }
-
-        function getScoreInputUrl() {
-            const url = new URL(window.location.href);
-            url.pathname = url.pathname.replace(/forest_point\.html$/, "forest_score_input.html");
-            url.searchParams.set("room", roomId);
-            return url.toString();
-        }
-
-        async function copyShareUrl() {
-            const url = getScoreInputUrl();
-            try {
-                await navigator.clipboard.writeText(url);
-                showToast("加分連結已複製");
-            } catch (error) {
-                showToast("瀏覽器無法自動複製，請開啟說明欄手動複製");
-            }
-        }
-
-        async function resetScores() {
-            const confirmed = window.confirm("確定要把這個「默」房間的十二組光圈都重置嗎？");
-            if (!confirmed || !scoresRef) return;
-
-            await scoresRef.set(createEmptyScores());
-            showToast("默房間已重置");
-        }
-
-        function bindControls() {
-            document.getElementById("copyButton").addEventListener("click", copyShareUrl);
-            document.getElementById("copyTopButton").addEventListener("click", copyShareUrl);
-            document.getElementById("resetButton").addEventListener("click", resetScores);
-            panelToggle.addEventListener("click", () => setPanelOpen(!sidePanel.classList.contains("is-open")));
-            panelClose.addEventListener("click", () => setPanelOpen(false));
-            panelBackdrop.addEventListener("click", () => setPanelOpen(false));
-            window.addEventListener("keydown", (event) => {
-                if (event.key === "Escape") {
-                    setPanelOpen(false);
-                }
-            });
-        }
-
-        async function initializeApp() {
-            renderPeople();
-            hydrateMeditatorImages();
-            bindControls();
-
-            try {
-                if (!firebase.apps.length) {
-                    firebase.initializeApp(firebaseConfig);
-                }
-
-                database = firebase.database();
-                roomId = getRoomId();
-                roomIdEl.textContent = roomId;
-                shareUrlEl.textContent = getScoreInputUrl();
-                scoresRef = database.ref(`rooms/${roomId}/forestScores`);
-
-                setConnection(true, "已連線");
-                updatePeople();
-
-                const snapshot = await scoresRef.once("value");
-                if (!snapshot.exists()) {
-                    await scoresRef.set(createEmptyScores());
-                } else {
-                    scores = ensureScores(snapshot.val());
-                    updatePeople();
-                }
-
-                scoresRef.on("value", (scoreSnapshot) => {
-                    scores = ensureScores(scoreSnapshot.val());
-                    updatePeople();
-                });
-            } catch (error) {
-                console.error("Silent desert stage initialization failed:", error);
-                setConnection(false, "連線失敗");
-                showToast("Firebase 連線失敗，請稍後再試");
-            }
-        }
-
-        window.addEventListener("load", initializeApp);
-    </script>
-</body>
-</html>
+<!DOCTYPE html><html lang="zh-TW"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>默</title><link rel="preload" href="assets/meditator.svg" as="image"><link rel="preload" href="assets/silent-desert.mp4" as="video" type="video/mp4"><style>@import url("https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@500;700&family=Zen+Kurenaido&display=swap");:root{--ink:#22231d;--soft-ink:rgba(34,35,29,0.66);--muted:rgba(34,35,29,0.54);--line:rgba(58,55,43,0.15);--paper:rgba(255,255,255,0.72);--paper-strong:rgba(255,255,255,0.9);--sand:#eee5d5;--warm:#c5ae73;--shadow:rgba(104,91,64,0.16)}*{box-sizing:border-box}html,body{height:100%;margin:0}body{min-height:100vh;overflow:hidden;overflow-x:hidden;color:var(--ink);font-family:"Noto Serif TC","Microsoft JhengHei",serif;background:radial-gradient(circle at 52% 4%,rgba(255,255,255,0.98)0 12rem,transparent 32rem),linear-gradient(180deg,#ffffff 0%,#fbfaf6 42%,#ece3d2 100%)}body::before,body::after{content:"";position:fixed;inset:0;pointer-events:none}body::before{z-index:-3;background:radial-gradient(ellipse 92% 20% at 42% 84%,rgba(221,209,184,0.48)0 42%,transparent 43%),radial-gradient(ellipse 76% 16% at 75% 78%,rgba(235,226,207,0.68)0 48%,transparent 49%),radial-gradient(ellipse 68% 12% at 13% 73%,rgba(242,236,224,0.88)0 52%,transparent 53%),linear-gradient(180deg,rgba(255,255,255,0.24),rgba(236,228,211,0.2))}body::after{z-index:-2;background:repeating-linear-gradient(173deg,rgba(167,151,112,0.08)0 1px,transparent 1px 18px),radial-gradient(ellipse at 50% 18%,rgba(255,255,255,0.74),transparent 48%);opacity:0.42;mix-blend-mode:multiply}button,input,select{font:inherit}button{color:inherit}[hidden]{display:none !important}.page-shell{position:relative;height:100vh;min-height:0;padding:clamp(10px,1.35vw,22px);display:grid;grid-template-rows:auto minmax(0,1fr);gap:clamp(8px,1vw,14px);overflow:hidden;transition:filter 240ms ease,transform 240ms ease}body.is-locked .page-shell{filter:blur(12px);transform:scale(1.012);pointer-events:none;user-select:none}.topbar{position:relative;z-index:12;display:grid;grid-template-columns:minmax(180px,1fr)auto minmax(260px,1fr);align-items:center;gap:clamp(10px,1vw,16px)}.brand{grid-column:2;display:grid;justify-items:center;gap:4px;transform:translateX(-4vw)}.eyebrow{color:var(--muted);font-family:"Zen Kurenaido","Noto Serif TC",serif;letter-spacing:0.26em;text-transform:uppercase;font-size:12px}h1{margin:0;font-size:clamp(48px,5.6vw,92px);line-height:0.86;letter-spacing:0.08em;font-weight:700}.toolbar{grid-column:3;display:flex;align-items:center;justify-content:flex-end;flex-wrap:wrap;gap:10px}.pill,.ghost-button{min-height:38px;border:1px solid var(--line);border-radius:999px;background:rgba(255,255,255,0.56);backdrop-filter:blur(14px);box-shadow:0 14px 34px rgba(112,96,61,0.08)}.pill{display:inline-flex;align-items:center;gap:8px;padding:0 14px;color:var(--soft-ink);font-size:13px}.status-dot{width:7px;height:7px;border-radius:50%;background:#7c8a68;box-shadow:0 0 18px rgba(124,138,104,0.54)}.status-dot.is-offline{background:#be8a75;box-shadow:0 0 18px rgba(190,138,117,0.5)}.ghost-button{padding:0 16px;cursor:pointer;color:rgba(34,35,29,0.78);transition:transform 180ms ease,background 180ms ease,border-color 180ms ease}.ghost-button:hover,.ghost-button.is-active{transform:translateY(-1px);border-color:rgba(197,174,115,0.38);background:rgba(255,255,255,0.82)}.stage-wrap{height:100%;min-height:0;display:block}.forest-stage{position:relative;height:100%;min-height:0;border:1px solid rgba(88,80,58,0.12);border-radius:clamp(26px,3vw,48px);overflow:hidden;background:radial-gradient(circle at 50% 30%,rgba(255,255,255,0.92)0 16rem,transparent 31rem),radial-gradient(ellipse at 50% 86%,rgba(207,193,160,0.42),transparent 42rem),linear-gradient(180deg,rgba(255,255,255,0.72),rgba(246,241,231,0.88));box-shadow:inset 0 0 0 1px rgba(255,255,255,0.66),0 34px 100px rgba(134,116,75,0.16);isolation:isolate}.desert-video{position:absolute;inset:0;z-index:-4;width:100%;height:100%;object-fit:cover;transform:scale(1.1);filter:saturate(0.62)contrast(0.92)brightness(1.16)}.video-veil{position:absolute;inset:0;z-index:-3;background:radial-gradient(circle at 50% 22%,rgba(255,255,255,0.5),transparent 35%),radial-gradient(ellipse at 50% 94%,rgba(239,226,195,0.46),transparent 56%),linear-gradient(180deg,rgba(255,255,255,0.45),rgba(255,251,241,0.2)46%,rgba(218,197,151,0.2))}.video-veil::after{content:"";position:absolute;inset:-1px;background:repeating-linear-gradient(173deg,rgba(255,255,255,0.08)0 1px,transparent 1px 17px),linear-gradient(90deg,rgba(255,255,255,0.18),transparent 24%,transparent 76%,rgba(255,255,255,0.24));opacity:0.7;mix-blend-mode:screen}.desert-haze{position:absolute;inset:auto -12% -4%;z-index:-2;height:42%;background:radial-gradient(ellipse at 24% 70%,rgba(255,255,255,0.52),transparent 38%),radial-gradient(ellipse at 68% 60%,rgba(240,228,202,0.54),transparent 44%),linear-gradient(180deg,transparent,rgba(225,204,158,0.28));filter:blur(20px);opacity:0.86}.aura-layer,.people-layer{position:absolute;inset:0}.aura-layer{z-index:0;pointer-events:none}.people-layer{z-index:1}.aura-spot,.meditator{--scale:1;position:absolute;left:var(--x);top:var(--y);width:150px;height:148px;transform:translate(-50%,-50%)scale(calc(var(--scale)* var(--responsive-scale,1)));transform-origin:center bottom}.aura-spot{--halo:234px;--aura-alpha:0.46;transform:translate(-50%,-50%)scale(var(--responsive-scale,1))}.meditator{display:grid;place-items:center;transition:filter 600ms ease}.meditator::after{content:"";position:absolute;left:50%;bottom:22px;z-index:1;width:112px;height:18px;transform:translateX(-50%);border-radius:50%;background:rgba(95,84,60,0.22);filter:blur(12px)}.aura{position:absolute;left:50%;top:48%;width:var(--halo);height:var(--halo);transform:translate(-50%,-50%);border-radius:50%;opacity:var(--aura-alpha);background:radial-gradient(circle,rgba(255,255,255,1)0 29%,rgba(255,251,226,0.95)43%,rgba(255,255,255,0.7)55%,rgba(236,199,105,0.34)66%,rgba(116,88,34,0.16)73%,transparent 82%);box-shadow:inset 0 0 calc(var(--halo)* 0.14)rgba(255,255,255,0.84),0 0 18px rgba(255,255,255,0.76),0 12px 30px rgba(92,70,24,0.16);transition:width 900ms cubic-bezier(0.2,0.8,0.2,1),height 900ms cubic-bezier(0.2,0.8,0.2,1),opacity 600ms ease;overflow:visible}.aura::before{content:"";position:absolute;inset:-8%;z-index:0;border-radius:inherit;background:radial-gradient(circle,transparent 0 49%,rgba(85,66,28,0.26)63%,rgba(180,142,54,0.15)72%,transparent 84%);filter:blur(4px)}.aura::after{content:"";position:absolute;inset:0;z-index:1;border:1px solid rgba(254,246,209,0.72);border-radius:inherit;box-shadow:inset 0 0 30px rgba(255,255,255,0.58),inset 0 0 calc(var(--halo)* 0.18)rgba(255,244,202,0.42),0 0 0 1px rgba(126,98,38,0.16)}.figure{position:relative;z-index:2;width:118px;height:114px;margin-top:22px;display:grid;place-items:center}.figure img{width:100%;height:100%;object-fit:contain;filter:grayscale(0.12)contrast(1.04)drop-shadow(0 12px 12px rgba(56,49,37,0.22));user-select:none;-webkit-user-drag:none}.name-tag{position:absolute;z-index:3;left:50%;bottom:0;transform:translateX(-50%);padding:5px 11px;border:1px solid rgba(62,56,42,0.12);border-radius:999px;color:rgba(39,38,31,0.72);background:rgba(255,255,255,0.66);backdrop-filter:blur(10px);box-shadow:0 8px 24px rgba(106,91,60,0.12);font-size:12px;letter-spacing:0.12em;white-space:nowrap}.aura-spot.is-pulsing .aura{animation:aura-breath 1100ms ease-out}@keyframes aura-breath{0%{transform:translate(-50%,-50%)scale(0.96);opacity:calc(var(--aura-alpha)* 0.86)}42%{transform:translate(-50%,-50%)scale(1.08);opacity:1}100%{transform:translate(-50%,-50%)scale(1);opacity:var(--aura-alpha)}}.panel-backdrop{position:fixed;inset:0;z-index:24;background:rgba(92,78,49,0.14);backdrop-filter:blur(3px);opacity:0;transition:opacity 220ms ease}.panel-backdrop.is-visible{opacity:1}.gate{position:fixed;inset:0;z-index:70;display:grid;place-items:center;padding:24px;background:radial-gradient(circle at 50% 28%,rgba(255,255,255,0.94),rgba(250,246,236,0.74)42%,rgba(222,204,164,0.24)),linear-gradient(180deg,rgba(255,255,255,0.72),rgba(238,228,208,0.76));backdrop-filter:blur(18px)}.gate-card{width:min(430px,calc(100vw - 36px));padding:clamp(26px,4vw,38px);border:1px solid rgba(70,62,43,0.13);border-radius:34px;background:rgba(255,255,255,0.74);box-shadow:0 34px 90px rgba(117,96,54,0.18),inset 0 0 0 1px rgba(255,255,255,0.72);backdrop-filter:blur(24px);display:grid;gap:18px;text-align:center}.gate-card h2{margin:0;font-size:clamp(28px,4vw,42px);line-height:1.18;letter-spacing:0.08em}.gate-card p{margin:0;min-height:1.6em;color:rgba(129,84,63,0.76);font-size:14px}.gate-card input{width:100%;min-height:56px;border:1px solid rgba(58,55,43,0.16);border-radius:999px;background:rgba(255,255,255,0.86);color:var(--ink);padding:0 18px;text-align:center;letter-spacing:0.24em;outline:none;box-shadow:inset 0 0 0 1px rgba(255,255,255,0.54)}.gate-card input:focus{border-color:rgba(174,150,86,0.58);box-shadow:0 0 0 4px rgba(174,150,86,0.12),inset 0 0 0 1px rgba(255,255,255,0.68)}.gate-card button{min-height:52px;border:1px solid rgba(174,150,86,0.36);border-radius:999px;background:linear-gradient(135deg,#d8c78f,#efe4bd);color:#242015;cursor:pointer;font-weight:700;box-shadow:0 18px 42px rgba(177,151,83,0.18)}.side-panel,.settlement-panel{position:fixed;z-index:30;top:clamp(80px,8vw,104px);right:clamp(14px,2vw,28px);bottom:clamp(14px,2vw,28px);width:min(390px,calc(100vw - 28px));padding:24px;border:1px solid var(--line);border-radius:34px;background:var(--paper);backdrop-filter:blur(24px);box-shadow:0 28px 80px rgba(97,82,51,0.2);display:flex;flex-direction:column;justify-content:space-between;gap:24px;transform:translateX(calc(100%+34px));opacity:0;pointer-events:none;transition:transform 260ms cubic-bezier(0.2,0.8,0.2,1),opacity 220ms ease}.settlement-panel{width:min(540px,calc(100vw - 28px))}.side-panel.is-open,.settlement-panel.is-open{transform:translateX(0);opacity:1;pointer-events:auto}.panel-head{display:flex;justify-content:space-between;align-items:start;gap:16px}.panel-close{width:38px;height:38px;border:1px solid var(--line);border-radius:50%;background:rgba(255,255,255,0.58);cursor:pointer;color:rgba(34,35,29,0.72)}.panel-copy{display:grid;gap:14px}.panel-copy h2{margin:0;font-size:clamp(23px,2vw,32px);line-height:1.28}.panel-copy p{margin:0;color:var(--soft-ink);line-height:1.85;font-size:15px}.share-card{display:grid;gap:10px;padding:16px;border:1px solid rgba(58,55,43,0.12);border-radius:24px;background:var(--paper-strong)}.share-label{color:rgba(126,103,48,0.82);font-size:12px;letter-spacing:0.18em}.share-url{overflow-wrap:anywhere;color:rgba(34,35,29,0.7);font-family:"Zen Kurenaido","Noto Serif TC",serif;line-height:1.5}.panel-actions{display:grid;gap:10px}.settlement-panel{justify-content:start;overflow:hidden}.settlement-body{min-height:0;display:grid;gap:16px;overflow:auto;padding-right:4px}.settlement-summary{margin:0;color:var(--soft-ink);line-height:1.7;font-size:14px}.podium-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));align-items:end;gap:10px}.podium-card,.ranking-row,.award-stage-card,.award-rank-row{border:1px solid rgba(58,55,43,0.12);background:rgba(255,255,255,0.56);box-shadow:0 16px 38px rgba(111,92,54,0.1)}.podium-card{min-height:132px;padding:14px 12px;border-radius:24px;display:grid;align-content:end;gap:8px}.podium-card.is-first{min-height:164px;background:linear-gradient(180deg,rgba(255,250,226,0.94),rgba(255,255,255,0.58));box-shadow:0 18px 48px rgba(189,158,74,0.18),inset 0 0 30px rgba(255,244,198,0.52)}.award-rank{color:rgba(126,103,48,0.86);font-family:"Zen Kurenaido","Noto Serif TC",serif;font-size:12px;letter-spacing:0.18em;text-transform:uppercase}.podium-card strong,.award-stage-card strong{font-size:clamp(18px,2vw,26px);line-height:1.15}.podium-card span,.award-stage-card span{color:rgba(34,35,29,0.58);font-family:"Zen Kurenaido","Noto Serif TC",serif;font-size:13px}.ranking-list{display:grid;gap:8px}.ranking-row{min-height:48px;padding:9px 12px;border-radius:18px;display:grid;grid-template-columns:48px 1fr auto;align-items:center;gap:10px}.ranking-row .rank-number{color:rgba(126,103,48,0.86);font-family:"Zen Kurenaido","Noto Serif TC",serif;letter-spacing:0.06em}.ranking-row .score-number{color:rgba(34,35,29,0.74);font-variant-numeric:tabular-nums;font-weight:700}.award-overlay{position:absolute;inset:0;z-index:8;display:grid;place-items:center;padding:clamp(22px,4vw,60px);background:radial-gradient(circle at 50% 28%,rgba(255,255,255,0.78),rgba(255,255,255,0.5)46%,rgba(226,207,164,0.38)),linear-gradient(180deg,rgba(255,255,255,0.58),rgba(244,235,214,0.68));backdrop-filter:blur(16px)saturate(0.88);opacity:0;pointer-events:none;transition:opacity 280ms ease}.award-overlay.is-open{opacity:1;pointer-events:auto}.award-card{width:min(980px,94%);max-height:94%;padding:clamp(22px,3vw,36px);border:1px solid rgba(58,55,43,0.12);border-radius:clamp(28px,4vw,46px);background:rgba(255,255,255,0.72);box-shadow:0 34px 100px rgba(111,92,54,0.18),inset 0 0 0 1px rgba(255,255,255,0.7);display:grid;gap:18px;overflow:auto;text-align:center}.award-card h2{margin:0;font-size:clamp(38px,5vw,72px);line-height:1;letter-spacing:0.1em}.award-stage-podium{display:grid;grid-template-columns:0.9fr 1.1fr 0.9fr;align-items:end;gap:clamp(10px,1.5vw,18px);margin-top:4px}.award-stage-card{min-height:150px;padding:clamp(16px,2vw,24px);border-radius:28px;display:grid;align-content:center;gap:10px}.award-stage-card.is-first{min-height:196px;background:radial-gradient(circle at 50% 18%,rgba(255,255,255,0.96),transparent 46%),linear-gradient(180deg,rgba(255,248,216,0.96),rgba(255,255,255,0.62));box-shadow:0 22px 66px rgba(189,158,74,0.2),inset 0 0 44px rgba(255,244,198,0.6)}.award-stage-card.is-second,.award-stage-card.is-third{transform:translateY(18px)}.award-rank-list{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;text-align:left}.award-rank-row{min-height:44px;padding:8px 10px;border-radius:16px;display:grid;gap:2px}.award-rank-row span{color:rgba(126,103,48,0.8);font-family:"Zen Kurenaido","Noto Serif TC",serif;font-size:12px}.award-rank-row strong{font-size:14px;line-height:1.2}.award-close{justify-self:center;min-width:180px;min-height:44px;border:1px solid rgba(58,55,43,0.13);border-radius:999px;background:rgba(255,255,255,0.58);color:rgba(34,35,29,0.7);cursor:pointer}.primary-button,.quiet-button{width:100%;min-height:48px;border-radius:999px;cursor:pointer;transition:transform 180ms ease,border-color 180ms ease,background 180ms ease}.primary-button{border:1px solid rgba(174,150,86,0.36);background:linear-gradient(135deg,#d8c78f,#efe4bd);color:#242015;box-shadow:0 18px 42px rgba(177,151,83,0.18);font-weight:700}.quiet-button{border:1px solid rgba(58,55,43,0.13);background:rgba(255,255,255,0.42);color:rgba(34,35,29,0.66)}.primary-button:hover,.quiet-button:hover,.panel-close:hover{transform:translateY(-1px)}.toast{position:fixed;left:50%;bottom:24px;z-index:40;max-width:min(420px,calc(100vw - 36px));padding:12px 16px;border:1px solid rgba(58,55,43,0.14);border-radius:999px;background:rgba(255,255,255,0.78);color:rgba(34,35,29,0.82);backdrop-filter:blur(16px);box-shadow:0 18px 48px rgba(114,94,55,0.18);transform:translate(-50%,20px);opacity:0;pointer-events:none;transition:opacity 220ms ease,transform 220ms ease}.toast.show{opacity:1;transform:translate(-50%,0)}@media(max-width:980px){.topbar{grid-template-columns:1fr;align-items:start}.brand,.toolbar{grid-column:1}.brand{justify-items:start;transform:none}.toolbar{justify-content:flex-start}.forest-stage{min-height:0}.award-rank-list{grid-template-columns:repeat(3,minmax(0,1fr))}}@media(max-width:640px){.page-shell{padding:14px}.forest-stage{min-height:0;border-radius:28px}.aura-spot,.meditator{--responsive-scale:0.72}.meditator{width:136px;height:134px}.toolbar{width:100%}.pill,.ghost-button{width:100%;justify-content:center}.side-panel,.settlement-panel{top:86px;width:calc(100vw - 28px);padding:20px;border-radius:28px}.podium-grid,.award-stage-podium,.award-rank-list{grid-template-columns:1fr}.award-stage-card.is-second,.award-stage-card.is-third{transform:none}}@media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto !important;animation-duration:0.01ms !important;animation-iteration-count:1 !important;transition-duration:0.01ms !important}}</style></head><body class="is-locked"><div class="gate" id="gate" role="dialog" aria-modal="true" aria-labelledby="gateTitle"><form class="gate-card" id="gateForm"><div class="eyebrow">Private Stage</div><h2 id="gateTitle">輸入密碼進入「默」</h2><input id="gatePassword" type="password" autocomplete="off" aria-label="舞台密碼" required><button type="submit">進入舞台</button><p id="gateMessage" role="status" aria-live="polite"></p></form></div><main class="page-shell"><header class="topbar"><div class="brand"><div class="eyebrow">Silent Desert Draw</div><h1>默</h1></div><div class="toolbar"><div class="pill" aria-live="polite"><span class="status-dot is-offline" id="statusDot"></span><span id="connectionStatus">連線中</span></div><div class="pill">房間 <span id="roomId">讀取中</span></div><button class="ghost-button" id="copyTopButton" type="button">複製加分連結</button><button class="ghost-button" id="settlementToggle" type="button" aria-expanded="false" aria-controls="settlementPanel">結算</button><button class="ghost-button" id="panelToggle" type="button" aria-expanded="false" aria-controls="sidePanel">說明欄</button></div></header><section class="stage-wrap"><div class="forest-stage" aria-label="十二組在全白沙漠中的光圈舞台"><video class="desert-video" autoplay muted loop playsinline preload="auto" aria-hidden="true"><source src="assets/silent-desert.mp4" type="video/mp4"></video><div class="video-veil" aria-hidden="true"></div><div class="desert-haze" aria-hidden="true"></div><div class="aura-layer" id="auraLayer" aria-hidden="true"></div><div class="people-layer" id="peopleLayer"></div><div class="award-overlay" id="awardOverlay" aria-hidden="true"><div class="award-card" role="dialog" aria-labelledby="awardTitle"><div><div class="eyebrow">Silent Award</div><h2 id="awardTitle">默 · 結算</h2></div><div class="award-stage-podium" id="awardStagePodium"></div><div class="award-rank-list" id="awardRankList"></div><button class="award-close" id="awardClose" type="button">回到光圈舞台</button></div></div></div><aside class="side-panel" id="sidePanel" aria-hidden="true"><div class="panel-copy"><div class="panel-head"><div><div class="eyebrow">Quiet, not empty</div><h2>不顯示分數，只讓光在沙裡長大。</h2></div><button class="panel-close" id="panelClose" type="button" aria-label="收起說明欄">收</button></div><p>十二組人物坐在流動的白色沙漠裡。光圈依同房間分數相對放大；最高分最亮最大，最低分也保留約一半面積的光，不會黯淡消失。</p></div><div class="share-card"><div class="share-label">加分端網址</div><div class="share-url" id="shareUrl">產生中</div></div><div class="panel-actions"><button class="primary-button" id="copyButton" type="button">複製加分連結</button><button class="quiet-button" id="resetButton" type="button">重置這個默房間</button></div></aside><aside class="settlement-panel" id="settlementPanel" aria-hidden="true"><div class="panel-copy"><div class="panel-head"><div><div class="eyebrow">Private Ranking</div><h2>即時排名與結算</h2></div><button class="panel-close" id="settlementClose" type="button" aria-label="收起結算欄">收</button></div><p class="settlement-summary" id="settlementSummary">等待分數同步中。</p></div><div class="settlement-body"><div class="podium-grid" id="settlementPodium"></div><div class="ranking-list" id="rankingList"></div></div><div class="panel-actions"><button class="primary-button" id="awardButton" type="button">結算頒獎</button><button class="quiet-button" id="copyRankingButton" type="button">複製排名摘要</button><button class="quiet-button" id="resetFromSettlementButton" type="button">重置這個默房間</button></div></aside></section></main><div class="panel-backdrop" id="panelBackdrop" hidden></div><div class="toast" id="toast" role="status" aria-live="polite"></div><script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script><script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script><script>
+const firebaseConfig = {
+apiKey: "AIzaSyD5ytWrUOI6UIUBIcKpF3fyODQR2pXFMmY",
+authDomain: "score-calculation-ef584.firebaseapp.com",
+databaseURL: "https://score-calculation-ef584-default-rtdb.firebaseio.com",
+projectId: "score-calculation-ef584",
+storageBucket: "score-calculation-ef584.firebasestorage.app",
+messagingSenderId: "634074718336",
+appId: "1:634074718336:web:38960860ad796197a50665",
+measurementId: "G-R6NT2QJQSC"
+};
+const GROUP_NAMES = ["第一組", "第二組", "第三組", "第四組", "第五組", "第六組", "第七組", "第八組", "第九組", "第十組", "第十一組", "第十二組"];
+const PARTICIPANT_COUNT = GROUP_NAMES.length;
+const MAX_HALO_DIAMETER = 330;
+const MIN_HALO_AREA_RATIO = 0.5;
+const STAGE_PASSWORD = "ikd184179";
+const auraLayer = document.getElementById("auraLayer");
+const peopleLayer = document.getElementById("peopleLayer");
+const roomIdEl = document.getElementById("roomId");
+const shareUrlEl = document.getElementById("shareUrl");
+const connectionStatusEl = document.getElementById("connectionStatus");
+const statusDotEl = document.getElementById("statusDot");
+const toastEl = document.getElementById("toast");
+const gate = document.getElementById("gate");
+const gateForm = document.getElementById("gateForm");
+const gatePassword = document.getElementById("gatePassword");
+const gateMessage = document.getElementById("gateMessage");
+const sidePanel = document.getElementById("sidePanel");
+const panelToggle = document.getElementById("panelToggle");
+const panelClose = document.getElementById("panelClose");
+const settlementPanel = document.getElementById("settlementPanel");
+const settlementToggle = document.getElementById("settlementToggle");
+const settlementClose = document.getElementById("settlementClose");
+const settlementSummary = document.getElementById("settlementSummary");
+const settlementPodium = document.getElementById("settlementPodium");
+const rankingList = document.getElementById("rankingList");
+const awardButton = document.getElementById("awardButton");
+const copyRankingButton = document.getElementById("copyRankingButton");
+const resetFromSettlementButton = document.getElementById("resetFromSettlementButton");
+const awardOverlay = document.getElementById("awardOverlay");
+const awardStagePodium = document.getElementById("awardStagePodium");
+const awardRankList = document.getElementById("awardRankList");
+const awardClose = document.getElementById("awardClose");
+const panelBackdrop = document.getElementById("panelBackdrop");
+const placements = [
+{ x: 12, y: 38, scale: 0.72 },
+{ x: 30, y: 32, scale: 0.76 },
+{ x: 50, y: 29, scale: 0.82 },
+{ x: 70, y: 32, scale: 0.76 },
+{ x: 88, y: 38, scale: 0.72 },
+{ x: 21, y: 58, scale: 0.92 },
+{ x: 39, y: 53, scale: 1.02 },
+{ x: 61, y: 53, scale: 1.02 },
+{ x: 79, y: 58, scale: 0.92 },
+{ x: 12, y: 78, scale: 0.86 },
+{ x: 50, y: 75, scale: 1.08 },
+{ x: 88, y: 78, scale: 0.86 }
+];
+const MEDITATOR_ASSET_PARTS = [
+"assets/meditator.svg.b64.01",
+"assets/meditator.svg.b64.02",
+"assets/meditator.svg.b64.03",
+"assets/meditator.svg.b64.04",
+"assets/meditator.svg.b64.05",
+"assets/meditator.svg.b64.06",
+"assets/meditator.svg.b64.07"
+];
+let database;
+let scoresRef;
+let roomId = "";
+let scores = createEmptyScores();
+let previousScores = createEmptyScores();
+let toastTimer = null;
+let meditatorAssetUrlPromise = null;
+let appStarted = false;
+function createEmptyScores() {
+const base = {};
+for (let i = 1; i <= PARTICIPANT_COUNT; i += 1) {
+base[i] = 0;
+}
+return base;
+}
+function ensureScores(value) {
+const next = createEmptyScores();
+Object.keys(value || {}).forEach((key) => {
+const index = Number(key);
+const numeric = Number(value[key]);
+if (Number.isInteger(index) && index >= 1 && index <= PARTICIPANT_COUNT && Number.isFinite(numeric)) {
+next[index] = Math.max(0, numeric);
+}
+});
+return next;
+}
+function haloMetrics(score, minScore, maxScore) {
+const spread = maxScore - minScore;
+const normalized = spread > 0
+? (score - minScore) / spread
+: (maxScore > 0 ? 0.5 : 0);
+// Keep comparison readable without making the lowest group feel unlit.
+const areaRatio = MIN_HALO_AREA_RATIO + normalized * (1 - MIN_HALO_AREA_RATIO);
+const diameter = MAX_HALO_DIAMETER * Math.sqrt(areaRatio);
+const alpha = 0.48 + normalized * 0.48;
+return { diameter, alpha };
+}
+function formatScore(score) {
+return `${Number(score || 0).toLocaleString("zh-TW")} 分`;
+}
+function getRankings() {
+const rows = GROUP_NAMES.map((name, index) => ({
+index: index + 1,
+name,
+score: Number(scores[index + 1] || 0)
+}));
+rows.sort((a, b) => b.score - a.score || a.index - b.index);
+let previousScore = null;
+let previousRank = 0;
+rows.forEach((row, sortedIndex) => {
+if (row.score !== previousScore) {
+previousRank = sortedIndex + 1;
+previousScore = row.score;
+}
+row.rank = previousRank;
+});
+return rows;
+}
+function getPodiumRows(rankings) {
+return [rankings[1], rankings[0], rankings[2]].filter(Boolean);
+}
+function rankLabel(row) {
+if (!row) return "";
+if (row.rank === 1) return "第一名";
+if (row.rank === 2) return "第二名";
+if (row.rank === 3) return "第三名";
+return `第 ${row.rank} 名`;
+}
+function rankClass(row) {
+if (!row) return "";
+if (row.rank === 1) return "is-first";
+if (row.rank === 2) return "is-second";
+if (row.rank === 3) return "is-third";
+return "";
+}
+function renderSettlement() {
+const rankings = getRankings();
+const totalScore = rankings.reduce((sum, row) => sum + row.score, 0);
+const leader = rankings[0];
+settlementSummary.textContent = totalScore > 0
+? `目前最高是 ${leader.name}，累積 ${formatScore(leader.score)}。這個欄位只在舞台密碼通過後可開啟，觀眾端不會看到實際分數。`
+: "目前尚未加分。所有組別先並列起跑，等加分後會在這裡即時排序。";
+settlementPodium.innerHTML = getPodiumRows(rankings).map((row) => `
+<article class="podium-card ${rankClass(row)}"><div class="award-rank">${rankLabel(row)}</div><strong>${row.name}</strong><span>${formatScore(row.score)}</span></article>
+`).join("");
+rankingList.innerHTML = rankings.map((row) => `
+<div class="ranking-row"><span class="rank-number">#${row.rank}</span><span>${row.name}</span><span class="score-number">${formatScore(row.score)}</span></div>
+`).join("");
+if (awardOverlay.classList.contains("is-open")) {
+renderAwardOverlay();
+}
+}
+function renderAwardOverlay() {
+const rankings = getRankings();
+awardStagePodium.innerHTML = getPodiumRows(rankings).map((row) => `
+<article class="award-stage-card ${rankClass(row)}"><div class="award-rank">${rankLabel(row)}</div><strong>${row.name}</strong><span>${formatScore(row.score)}</span></article>
+`).join("");
+awardRankList.innerHTML = rankings.map((row) => `
+<div class="award-rank-row"><span>#${row.rank} · ${formatScore(row.score)}</span><strong>${row.name}</strong></div>
+`).join("");
+}
+async function getMeditatorAssetUrl() {
+if (!meditatorAssetUrlPromise) {
+meditatorAssetUrlPromise = (async () => {
+try {
+const directAsset = await fetch("assets/meditator.svg", { cache: "force-cache" });
+if (directAsset.ok) {
+return "assets/meditator.svg";
+}
+} catch (error) {
+console.warn("Direct meditator asset unavailable, falling back to chunks.", error);
+}
+const chunks = await Promise.all(MEDITATOR_ASSET_PARTS.map(async (path) => {
+const response = await fetch(path, { cache: "force-cache" });
+if (!response.ok) {
+throw new Error(`Missing meditator asset chunk: ${path}`);
+}
+return response.text();
+}));
+return `data:image/svg+xml;base64,${chunks.map((chunk) => chunk.trim()).join("")}`;
+})();
+}
+return meditatorAssetUrlPromise;
+}
+async function hydrateMeditatorImages() {
+try {
+const assetUrl = await getMeditatorAssetUrl();
+document.querySelectorAll("[data-meditator-image]").forEach((image) => {
+image.src = assetUrl;
+});
+} catch (error) {
+console.error("Meditator asset failed to load:", error);
+}
+}
+function renderPeople() {
+auraLayer.innerHTML = "";
+peopleLayer.innerHTML = "";
+placements.forEach((place, index) => {
+const personNumber = index + 1;
+const groupName = GROUP_NAMES[index];
+const auraSpot = document.createElement("div");
+auraSpot.className = "aura-spot";
+auraSpot.id = `aura-${personNumber}`;
+auraSpot.style.setProperty("--x", `${place.x}%`);
+auraSpot.style.setProperty("--y", `${place.y}%`);
+auraSpot.style.setProperty("--scale", place.scale);
+auraSpot.innerHTML = `<div class="aura"></div>`;
+const meditator = document.createElement("article");
+meditator.className = "meditator";
+meditator.id = `meditator-${personNumber}`;
+meditator.style.setProperty("--x", `${place.x}%`);
+meditator.style.setProperty("--y", `${place.y}%`);
+meditator.style.setProperty("--scale", place.scale);
+meditator.setAttribute("aria-label", groupName);
+meditator.innerHTML = `
+<div class="figure" aria-hidden="true"><img src="assets/meditator.svg" data-meditator-image alt=""></div><div class="name-tag">${groupName}</div>
+`;
+auraLayer.appendChild(auraSpot);
+peopleLayer.appendChild(meditator);
+});
+}
+function updatePeople() {
+const scoreValues = Object.values(scores).map((score) => Number(score) || 0);
+const minScore = Math.min(...scoreValues);
+const maxScore = Math.max(...scoreValues);
+for (let i = 1; i <= PARTICIPANT_COUNT; i += 1) {
+const auraSpot = document.getElementById(`aura-${i}`);
+const meditator = document.getElementById(`meditator-${i}`);
+if (!auraSpot || !meditator) continue;
+const score = Number(scores[i] || 0);
+const previous = Number(previousScores[i] || 0);
+const { diameter, alpha } = haloMetrics(score, minScore, maxScore);
+auraSpot.style.setProperty("--halo", `${diameter}px`);
+auraSpot.style.setProperty("--aura-alpha", alpha.toFixed(3));
+if (score > previous) {
+auraSpot.classList.remove("is-pulsing");
+void auraSpot.offsetWidth;
+auraSpot.classList.add("is-pulsing");
+window.setTimeout(() => auraSpot.classList.remove("is-pulsing"), 1200);
+}
+}
+previousScores = { ...scores };
+renderSettlement();
+}
+function syncBackdrop() {
+const hasOpenPanel = sidePanel.classList.contains("is-open") || settlementPanel.classList.contains("is-open");
+if (hasOpenPanel) {
+panelBackdrop.hidden = false;
+window.requestAnimationFrame(() => panelBackdrop.classList.add("is-visible"));
+return;
+}
+panelBackdrop.classList.remove("is-visible");
+window.setTimeout(() => {
+const stillOpen = sidePanel.classList.contains("is-open") || settlementPanel.classList.contains("is-open");
+if (!stillOpen) {
+panelBackdrop.hidden = true;
+}
+}, 220);
+}
+function setPanelOpen(isOpen, shouldSync = true) {
+if (isOpen) {
+setSettlementOpen(false, false);
+}
+panelToggle.classList.toggle("is-active", isOpen);
+panelToggle.setAttribute("aria-expanded", String(isOpen));
+sidePanel.classList.toggle("is-open", isOpen);
+sidePanel.setAttribute("aria-hidden", String(!isOpen));
+if (shouldSync) {
+syncBackdrop();
+}
+}
+function setSettlementOpen(isOpen, shouldSync = true) {
+if (isOpen) {
+renderSettlement();
+setPanelOpen(false, false);
+}
+settlementToggle.classList.toggle("is-active", isOpen);
+settlementToggle.setAttribute("aria-expanded", String(isOpen));
+settlementPanel.classList.toggle("is-open", isOpen);
+settlementPanel.setAttribute("aria-hidden", String(!isOpen));
+if (shouldSync) {
+syncBackdrop();
+}
+}
+function closePanels() {
+setPanelOpen(false, false);
+setSettlementOpen(false, false);
+syncBackdrop();
+}
+function showAwardOverlay() {
+renderAwardOverlay();
+closePanels();
+awardOverlay.classList.add("is-open");
+awardOverlay.setAttribute("aria-hidden", "false");
+}
+function hideAwardOverlay() {
+awardOverlay.classList.remove("is-open");
+awardOverlay.setAttribute("aria-hidden", "true");
+}
+function setConnection(connected, message) {
+connectionStatusEl.textContent = message;
+statusDotEl.classList.toggle("is-offline", !connected);
+}
+function showToast(message) {
+toastEl.textContent = message;
+toastEl.classList.add("show");
+window.clearTimeout(toastTimer);
+toastTimer = window.setTimeout(() => toastEl.classList.remove("show"), 2600);
+}
+function getRoomId() {
+const params = new URLSearchParams(window.location.search);
+const fromUrl = params.get("room");
+if (fromUrl) return fromUrl;
+const generated = `silent_${Math.random().toString(36).slice(2, 8)}`;
+params.set("room", generated);
+window.history.replaceState({}, "", `${window.location.pathname}?${params.toString()}`);
+return generated;
+}
+function getScoreInputUrl() {
+const url = new URL(window.location.href);
+url.pathname = url.pathname.replace(/forest_point\.html$/, "forest_score_input.html");
+url.searchParams.set("room", roomId);
+return url.toString();
+}
+async function copyShareUrl() {
+const url = getScoreInputUrl();
+try {
+await navigator.clipboard.writeText(url);
+showToast("加分連結已複製");
+} catch (error) {
+showToast("瀏覽器無法自動複製，請開啟說明欄手動複製");
+}
+}
+async function copyRankingSummary() {
+const lines = [
+`默｜${roomId || "未指定房間"}｜結算排名`,
+...getRankings().map((row) => `${rankLabel(row)}　${row.name}　${formatScore(row.score)}`)
+];
+try {
+await navigator.clipboard.writeText(lines.join("\n"));
+showToast("排名摘要已複製");
+} catch (error) {
+showToast("瀏覽器無法自動複製排名");
+}
+}
+async function resetScores() {
+const confirmed = window.confirm("確定要把這個「默」房間的十二組光圈都重置嗎？");
+if (!confirmed || !scoresRef) return;
+await scoresRef.set(createEmptyScores());
+showToast("默房間已重置");
+}
+function bindControls() {
+document.getElementById("copyButton").addEventListener("click", copyShareUrl);
+document.getElementById("copyTopButton").addEventListener("click", copyShareUrl);
+document.getElementById("resetButton").addEventListener("click", resetScores);
+resetFromSettlementButton.addEventListener("click", resetScores);
+copyRankingButton.addEventListener("click", copyRankingSummary);
+awardButton.addEventListener("click", showAwardOverlay);
+awardClose.addEventListener("click", hideAwardOverlay);
+panelToggle.addEventListener("click", () => setPanelOpen(!sidePanel.classList.contains("is-open")));
+settlementToggle.addEventListener("click", () => setSettlementOpen(!settlementPanel.classList.contains("is-open")));
+panelClose.addEventListener("click", () => setPanelOpen(false));
+settlementClose.addEventListener("click", () => setSettlementOpen(false));
+panelBackdrop.addEventListener("click", closePanels);
+window.addEventListener("keydown", (event) => {
+if (event.key === "Escape") {
+closePanels();
+hideAwardOverlay();
+}
+});
+}
+function getUnlockStorageKey() {
+roomId = roomId || getRoomId();
+roomIdEl.textContent = roomId;
+return `silentDesertStageUnlocked:${roomId}`;
+}
+function startStage() {
+if (appStarted) return;
+appStarted = true;
+gate.hidden = true;
+document.body.classList.remove("is-locked");
+initializeApp();
+}
+function initializeGate() {
+const unlockStorageKey = getUnlockStorageKey();
+if (window.sessionStorage.getItem(unlockStorageKey) === "true") {
+startStage();
+return;
+}
+gate.hidden = false;
+gateForm.addEventListener("submit", (event) => {
+event.preventDefault();
+const password = gatePassword.value;
+if (password !== STAGE_PASSWORD) {
+gateMessage.textContent = "密碼不正確，請再試一次。";
+gatePassword.value = "";
+gatePassword.focus();
+return;
+}
+window.sessionStorage.setItem(unlockStorageKey, "true");
+gateMessage.textContent = "";
+startStage();
+});
+window.requestAnimationFrame(() => gatePassword.focus());
+}
+async function initializeApp() {
+renderPeople();
+hydrateMeditatorImages();
+bindControls();
+try {
+if (!firebase.apps.length) {
+firebase.initializeApp(firebaseConfig);
+}
+database = firebase.database();
+roomId = getRoomId();
+roomIdEl.textContent = roomId;
+shareUrlEl.textContent = getScoreInputUrl();
+scoresRef = database.ref(`rooms/${roomId}/forestScores`);
+setConnection(true, "已連線");
+updatePeople();
+const snapshot = await scoresRef.once("value");
+if (!snapshot.exists()) {
+await scoresRef.set(createEmptyScores());
+} else {
+scores = ensureScores(snapshot.val());
+updatePeople();
+}
+scoresRef.on("value", (scoreSnapshot) => {
+scores = ensureScores(scoreSnapshot.val());
+updatePeople();
+});
+} catch (error) {
+console.error("Silent desert stage initialization failed:", error);
+setConnection(false, "連線失敗");
+showToast("Firebase 連線失敗，請稍後再試");
+}
+}
+window.addEventListener("load", initializeGate);
+</script></body></html>
