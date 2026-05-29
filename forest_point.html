@@ -12,7 +12,8 @@ measurementId: "G-R6NT2QJQSC"
 const GROUP_NAMES = ["第一組", "第二組", "第三組", "第四組", "第五組", "第六組", "第七組", "第八組", "第九組", "第十組", "第十一組", "第十二組"];
 const PARTICIPANT_COUNT = GROUP_NAMES.length;
 const MAX_HALO_DIAMETER = 330;
-const MIN_HALO_AREA_RATIO = 0.5;
+const RANKING_THRESHOLD_SCORE = 1000;
+const BASELINE_HALO_AREA_RATIO = 0.5;
 const STAGE_PASSWORD = "ikd184179";
 const auraLayer = document.getElementById("auraLayer");
 const peopleLayer = document.getElementById("peopleLayer");
@@ -91,15 +92,34 @@ next[index] = Math.max(0, numeric);
 });
 return next;
 }
-function haloMetrics(score, minScore, maxScore) {
-const spread = maxScore - minScore;
-const normalized = spread > 0
-? (score - minScore) / spread
-: (maxScore > 0 ? 0.5 : 0);
-// Keep comparison readable without making the lowest group feel unlit.
-const areaRatio = MIN_HALO_AREA_RATIO + normalized * (1 - MIN_HALO_AREA_RATIO);
+function getHaloRankMap() {
+const rankedRows = GROUP_NAMES.map((name, index) => ({
+index: index + 1,
+score: Number(scores[index + 1] || 0)
+}))
+.filter((row) => row.score > RANKING_THRESHOLD_SCORE)
+.sort((a, b) => b.score - a.score || a.index - b.index);
+const rankMap = {};
+let previousScore = null;
+let previousRank = 0;
+rankedRows.forEach((row, sortedIndex) => {
+if (row.score !== previousScore) {
+previousRank = sortedIndex + 1;
+previousScore = row.score;
+}
+rankMap[row.index] = previousRank;
+});
+return rankMap;
+}
+function haloMetrics(score, rank) {
+const safeScore = Math.max(0, Number(score) || 0);
+let areaRatio = BASELINE_HALO_AREA_RATIO * Math.min(safeScore, RANKING_THRESHOLD_SCORE) / RANKING_THRESHOLD_SCORE;
+if (safeScore > RANKING_THRESHOLD_SCORE && rank) {
+const rankedAreaRatio = (PARTICIPANT_COUNT - rank + 1) / PARTICIPANT_COUNT;
+areaRatio = Math.max(BASELINE_HALO_AREA_RATIO, rankedAreaRatio);
+}
 const diameter = MAX_HALO_DIAMETER * Math.sqrt(areaRatio);
-const alpha = 0.48 + normalized * 0.48;
+const alpha = areaRatio <= 0 ? 0 : 0.16 + areaRatio * 0.8;
 return { diameter, alpha };
 }
 function formatScore(score) {
@@ -227,16 +247,14 @@ peopleLayer.appendChild(meditator);
 });
 }
 function updatePeople() {
-const scoreValues = Object.values(scores).map((score) => Number(score) || 0);
-const minScore = Math.min(...scoreValues);
-const maxScore = Math.max(...scoreValues);
+const haloRanks = getHaloRankMap();
 for (let i = 1; i <= PARTICIPANT_COUNT; i += 1) {
 const auraSpot = document.getElementById(`aura-${i}`);
 const meditator = document.getElementById(`meditator-${i}`);
 if (!auraSpot || !meditator) continue;
 const score = Number(scores[i] || 0);
 const previous = Number(previousScores[i] || 0);
-const { diameter, alpha } = haloMetrics(score, minScore, maxScore);
+const { diameter, alpha } = haloMetrics(score, haloRanks[i]);
 auraSpot.style.setProperty("--halo", `${diameter}px`);
 auraSpot.style.setProperty("--aura-alpha", alpha.toFixed(3));
 if (score > previous) {
