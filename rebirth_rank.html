@@ -1,0 +1,416 @@
+<!DOCTYPE html><html lang="zh-TW"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>轉生榜</title><style>@import url("https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@600;700;900&family=Zen+Maru+Gothic:wght@500;700;900&display=swap");:root{--ink:#231817;--paper:rgba(255,250,238,0.86);--paper-strong:rgba(255,255,248,0.95);--coral:#df806e;--coral-deep:#b93535;--gold:#ffd86f;--rose:#ffd8d0;--line:rgba(92,43,34,0.16);--shadow:rgba(128,53,32,0.22)}*{box-sizing:border-box}html,body{width:100%;height:100%;margin:0}body{min-height:100vh;overflow:hidden;color:var(--ink);font-family:"Zen Maru Gothic","Noto Serif TC","Microsoft JhengHei",sans-serif;background:radial-gradient(circle at 7% 90%,rgba(255,211,118,0.44)0 10rem,transparent 20rem),radial-gradient(circle at 86% 8%,rgba(177,47,47,0.72)0 21rem,transparent 21.2rem),linear-gradient(135deg,#e88974 0%,#f2b59b 45%,#fff4db 100%)}body::before,body::after{content:"";position:fixed;inset:0;pointer-events:none}body::before{z-index:-2;background:linear-gradient(90deg,transparent 0 52px,rgba(255,255,255,0.15)52px 54px,transparent 54px 108px),linear-gradient(0deg,transparent 0 52px,rgba(255,255,255,0.12)52px 54px,transparent 54px 108px);mask-image:linear-gradient(180deg,rgba(0,0,0,0.55),rgba(0,0,0,0.12))}body::after{z-index:-1;background:radial-gradient(circle at 18% 19%,rgba(255,250,196,0.56)0 1.1rem,transparent 1.2rem),radial-gradient(circle at 80% 78%,rgba(255,234,159,0.52)0 0.9rem,transparent 1rem),radial-gradient(circle at 62% 14%,rgba(255,210,202,0.54)0 1.4rem,transparent 1.5rem)}button,input{font:inherit}button{color:inherit}[hidden]{display:none !important}.pixel-plus{position:absolute;width:var(--size);height:var(--size);opacity:var(--alpha);background:linear-gradient(var(--color)0 0)center / 34% 100% no-repeat,linear-gradient(var(--color)0 0)center / 100% 34% no-repeat;filter:drop-shadow(0 8px 0 rgba(104,42,29,0.05))}.p1{--size:104px;--alpha:0.34;--color:#fff0a4;left:5%;bottom:12%}.p2{--size:72px;--alpha:0.26;--color:#ffd2ca;right:8%;top:62%}.p3{--size:62px;--alpha:0.24;--color:#fff0a4;right:12%;top:8%}.p4{--size:82px;--alpha:0.22;--color:#ffd2ca;left:17%;top:18%}.page-shell{position:relative;height:100vh;padding:clamp(12px,1.5vw,24px);display:grid;grid-template-rows:auto minmax(0,1fr);gap:clamp(8px,1vw,14px);transition:filter 240ms ease,transform 240ms ease}body.is-locked .page-shell{filter:blur(12px);transform:scale(1.012);pointer-events:none;user-select:none}.topbar{position:relative;z-index:20;display:grid;grid-template-columns:minmax(240px,1fr)auto minmax(420px,1fr);align-items:center;gap:18px}.brand{grid-column:2;display:grid;justify-items:center;gap:4px;transform:translateX(-2.5vw)}.kicker{color:rgba(35,24,23,0.58);font-size:12px;letter-spacing:0.28em;text-transform:uppercase}h1{margin:0;font-family:"Noto Serif TC",serif;font-size:clamp(48px,5.5vw,94px);font-weight:900;line-height:0.9;letter-spacing:0.12em;text-shadow:0 14px 32px rgba(119,42,31,0.14)}.toolbar{grid-column:3;display:flex;justify-content:flex-end;align-items:center;flex-wrap:wrap;gap:10px}.pill,.ghost-button{min-height:38px;border:1px solid var(--line);border-radius:999px;background:rgba(255,250,238,0.72);box-shadow:0 14px 34px rgba(118,52,35,0.09);backdrop-filter:blur(16px)}.pill{display:inline-flex;align-items:center;gap:8px;padding:0 14px;color:rgba(35,24,23,0.68);font-size:13px}.status-dot{width:8px;height:8px;border-radius:50%;background:#758e52;box-shadow:0 0 18px rgba(117,142,82,0.54)}.status-dot.is-offline{background:#bd4f43;box-shadow:0 0 18px rgba(189,79,67,0.52)}.ghost-button{padding:0 16px;cursor:pointer;color:rgba(35,24,23,0.78);transition:transform 170ms ease,background 170ms ease,border-color 170ms ease}.ghost-button:hover,.ghost-button.is-active{transform:translateY(-1px);border-color:rgba(185,53,53,0.26);background:rgba(255,255,248,0.9)}.stage-frame{position:relative;min-height:0;border:1px solid rgba(92,43,34,0.13);border-radius:clamp(28px,3vw,50px);overflow:hidden;background:radial-gradient(circle at 50% 15%,rgba(255,255,255,0.82)0 10rem,transparent 30rem),linear-gradient(180deg,rgba(255,255,247,0.8),rgba(255,235,206,0.74));box-shadow:inset 0 0 0 1px rgba(255,255,255,0.62),0 38px 100px rgba(120,45,31,0.18);isolation:isolate}.stage-frame::before{content:"";position:absolute;inset:0;z-index:-4;background:radial-gradient(ellipse at 50% 100%,rgba(255,191,96,0.22),transparent 58%),linear-gradient(90deg,rgba(255,255,255,0.38),transparent 18%,transparent 82%,rgba(255,255,255,0.3))}.stage-frame::after{content:"";position:absolute;inset:18px;z-index:-3;border-radius:clamp(22px,2.6vw,42px);background:linear-gradient(90deg,rgba(180,53,48,0.08)0 2px,transparent 2px 42px),linear-gradient(0deg,rgba(180,53,48,0.06)0 2px,transparent 2px 42px);opacity:0.45}.world-title{position:absolute;left:26px;top:22px;z-index:3;width:min(320px,32vw);padding:18px 20px;border:1px solid rgba(92,43,34,0.12);border-radius:28px;background:rgba(255,250,238,0.66);backdrop-filter:blur(18px)}.world-title strong{display:block;margin-top:6px;font-family:"Noto Serif TC",serif;font-size:clamp(24px,2.8vw,38px);line-height:1.18}.world-title p{margin:10px 0 0;color:rgba(35,24,23,0.58);line-height:1.7;font-size:14px}.realm-rail{position:absolute;right:28px;top:50%;z-index:2;transform:translateY(-50%);display:grid;gap:8px;width:150px}.realm-rail span{padding:8px 10px;border:1px solid rgba(92,43,34,0.1);border-radius:999px;background:rgba(255,250,238,0.5);color:rgba(35,24,23,0.5);font-size:12px;letter-spacing:0.12em;text-align:center}.arena-layer{position:absolute;inset:0}.fighter-card{--x:50%;--y:50%;--scale:1;--aura:96px;--power:0;--flame-alpha:0.22;--leader-alpha:0.78;--hue:0deg;position:absolute;left:var(--x);top:var(--y);width:156px;height:178px;transform:translate(-50%,-50%)scale(var(--scale));transform-origin:center bottom;display:grid;place-items:end center;filter:drop-shadow(0 18px 22px rgba(73,29,21,0.16))}.fighter-aura{position:absolute;left:50%;top:47%;width:var(--aura);height:var(--aura);transform:translate(-50%,-50%);border-radius:50%;opacity:var(--flame-alpha);background:radial-gradient(circle,rgba(255,255,255,1)0 22%,rgba(255,243,167,0.95)38%,rgba(255,151,74,0.42)57%,rgba(178,44,39,0.18)70%,transparent 78%),conic-gradient(from 0deg,rgba(255,234,124,0.72),rgba(255,126,78,0.22),rgba(255,255,255,0.6),rgba(255,234,124,0.72));box-shadow:0 0 calc(var(--aura)* 0.22)rgba(255,236,150,0.7),inset 0 0 calc(var(--aura)* 0.15)rgba(255,255,255,0.74);filter:hue-rotate(var(--hue));transition:width 850ms cubic-bezier(0.2,0.8,0.2,1),height 850ms cubic-bezier(0.2,0.8,0.2,1),opacity 500ms ease}.fighter-aura::before,.fighter-aura::after{content:"";position:absolute;inset:-16%;border-radius:inherit;background:repeating-conic-gradient(from 8deg,transparent 0 12deg,rgba(255,249,192,0.68)13deg 17deg,transparent 18deg 32deg);opacity:calc(var(--power)* 0.55);animation:spin 9s linear infinite}.fighter-aura::after{inset:-28%;opacity:calc(var(--power)* 0.34);animation-duration:14s;animation-direction:reverse}@keyframes spin{to{transform:rotate(360deg)}}.sprite{position:relative;z-index:3;width:104px;height:116px}.head,.torso,.legs,.hair,.sword,.scroll,.cape,.crown,.flame{position:absolute;left:50%;transform:translateX(-50%)}.head{top:16px;width:25px;height:27px;border-radius:45% 45% 50% 50%;background:#251d1b;box-shadow:inset 0 8px 0 rgba(255,255,255,0.08)}.hair{top:8px;width:30px;height:17px;border-radius:14px 14px 4px 4px;background:#15100f}.torso{top:44px;width:54px;height:46px;border-radius:18px 18px 10px 10px;background:linear-gradient(90deg,rgba(255,255,255,0.18),transparent 34%),linear-gradient(180deg,#2a2321,#3c2822);border:2px solid rgba(255,236,160,0.28)}.torso::before,.torso::after{content:"";position:absolute;top:8px;width:18px;height:44px;border-radius:12px;background:#211a18}.torso::before{left:-15px;transform:rotate(16deg)}.torso::after{right:-15px;transform:rotate(-16deg)}.legs{top:84px;width:76px;height:24px;border-radius:0 0 22px 22px;background:radial-gradient(ellipse at 20% 70%,#1d1715 0 18px,transparent 19px),radial-gradient(ellipse at 80% 70%,#1d1715 0 18px,transparent 19px)}.shadow{position:absolute;left:50%;bottom:6px;width:118px;height:22px;transform:translateX(-50%);border-radius:50%;background:rgba(105,49,35,0.18);filter:blur(10px)}.sword{top:34px;right:14px;left:auto;width:8px;height:76px;transform:rotate(24deg);border-radius:6px;background:linear-gradient(180deg,#fff9ca,#b93535 36%,#2a1816 37%);opacity:0}.scroll{top:60px;left:24px;width:28px;height:38px;transform:rotate(-13deg);border-radius:4px;background:#fff6d5;border:2px solid rgba(165,55,44,0.32);opacity:0}.cape{top:40px;width:78px;height:72px;border-radius:34px 34px 18px 18px;background:linear-gradient(180deg,rgba(194,48,43,0.72),rgba(255,130,82,0.18));opacity:0}.crown{top:0;width:52px;height:21px;background:linear-gradient(135deg,transparent 0 22%,#ffe36b 23% 42%,transparent 43%),linear-gradient(45deg,transparent 0 22%,#ffe36b 23% 42%,transparent 43%),linear-gradient(90deg,#ffca4d,#fff0a3,#ffca4d);clip-path:polygon(0 100%,8% 38%,26% 100%,50% 0,74% 100%,92% 38%,100% 100%);opacity:0}.flame{top:-12px;width:96px;height:132px;transform:translateX(-50%);background:radial-gradient(ellipse at 50% 70%,rgba(255,255,255,0.66),transparent 35%),conic-gradient(from 180deg at 50% 82%,transparent,rgba(255,215,74,0.82),rgba(255,105,58,0.7),transparent);clip-path:polygon(48% 0,58% 22%,72% 10%,67% 38%,94% 26%,78% 58%,100% 70%,70% 78%,60% 100%,50% 82%,38% 100%,31% 78%,0 70%,22% 58%,6% 26%,34% 38%,28% 10%,42% 22%);opacity:0;filter:blur(0.4px)drop-shadow(0 0 20px rgba(255,207,71,0.4));animation:flame-dance 900ms ease-in-out infinite alternate}@keyframes flame-dance{from{transform:translateX(-50%)scaleY(0.96)skewX(-1deg)}to{transform:translateX(-50%)scaleY(1.04)skewX(1deg)}}.stage-0 .sprite{transform:scale(0.78)}.stage-0 .torso{width:42px;height:36px;top:50px}.stage-0 .legs{width:54px;top:80px}.stage-1 .sprite{transform:scale(0.88)}.stage-2 .scroll{opacity:1}.stage-3 .sword{opacity:1}.stage-4 .scroll,.stage-4 .sword{opacity:1}.stage-4 .torso{border-color:rgba(255,226,86,0.54)}.stage-5 .cape,.stage-5 .sword{opacity:1}.stage-5 .torso{background:linear-gradient(180deg,#38211d,#7e2f27)}.stage-6 .cape,.stage-6 .sword,.stage-6 .scroll{opacity:1}.stage-6 .torso{background:linear-gradient(180deg,#271b1a,#aa382f)}.stage-7 .cape,.stage-7 .sword,.stage-7 .scroll,.stage-7 .crown,.stage-7 .flame{opacity:1}.stage-7 .torso{background:linear-gradient(180deg,#201715,#cf4538);border-color:rgba(255,231,109,0.82)}.fighter-card.is-leader .fighter-aura{opacity:var(--leader-alpha);animation:leader-pulse 880ms ease-in-out infinite alternate}.fighter-card.is-leader .flame,.fighter-card.is-leader .crown{opacity:1}@keyframes leader-pulse{from{transform:translate(-50%,-50%)scale(0.98)}to{transform:translate(-50%,-50%)scale(1.04)}}.name-tag,.realm-tag{position:absolute;left:50%;z-index:6;transform:translateX(-50%);white-space:nowrap}.name-tag{bottom:17px;padding:5px 11px;border:2px solid rgba(35,24,23,0.1);border-radius:999px;background:rgba(255,255,248,0.82);color:rgba(35,24,23,0.76);font-size:12px;font-weight:900;box-shadow:0 10px 22px rgba(85,36,26,0.1)}.realm-tag{bottom:0;color:rgba(120,39,33,0.68);font-size:10px;letter-spacing:0.12em;text-shadow:0 1px 0 rgba(255,255,255,0.62)}.fighter-card.is-pulsing .sprite{animation:gain-pop 760ms ease-out}@keyframes gain-pop{0%{transform:translateY(0)scale(1)}36%{transform:translateY(-8px)scale(1.08)}100%{transform:translateY(0)scale(1)}}.panel-backdrop{position:fixed;inset:0;z-index:24;background:rgba(112,53,37,0.18);backdrop-filter:blur(3px);opacity:0;transition:opacity 220ms ease}.panel-backdrop.is-visible{opacity:1}.side-panel,.settlement-panel{position:fixed;z-index:30;top:clamp(82px,8vw,108px);right:clamp(14px,2vw,28px);bottom:clamp(14px,2vw,28px);width:min(420px,calc(100vw - 28px));padding:24px;border:1px solid var(--line);border-radius:34px;background:var(--paper);backdrop-filter:blur(24px);box-shadow:0 30px 90px rgba(112,53,37,0.22);display:flex;flex-direction:column;gap:20px;transform:translateX(calc(100%+34px));opacity:0;pointer-events:none;transition:transform 260ms cubic-bezier(0.2,0.8,0.2,1),opacity 220ms ease}.settlement-panel{width:min(560px,calc(100vw - 28px))}.side-panel.is-open,.settlement-panel.is-open{transform:translateX(0);opacity:1;pointer-events:auto}.panel-head{display:flex;justify-content:space-between;align-items:flex-start;gap:16px}.panel-head h2{margin:6px 0 0;font-family:"Noto Serif TC",serif;font-size:clamp(24px,2.4vw,34px);line-height:1.22}.panel-copy{color:rgba(35,24,23,0.64);line-height:1.85;font-size:15px}.panel-close,.award-close{min-width:42px;min-height:38px;border:1px solid var(--line);border-radius:999px;background:rgba(255,255,248,0.62);cursor:pointer}.share-card,.podium-card,.ranking-row,.award-stage-card,.award-rank-row{border:1px solid rgba(92,43,34,0.11);background:rgba(255,255,248,0.58);box-shadow:0 14px 34px rgba(112,53,37,0.08)}.share-card{padding:16px;border-radius:24px;display:grid;gap:8px;overflow-wrap:anywhere}.share-label{color:rgba(185,53,53,0.78);font-size:12px;font-weight:900;letter-spacing:0.16em}.panel-actions{margin-top:auto;display:grid;gap:10px}.primary-button,.quiet-button{width:100%;min-height:48px;border-radius:999px;cursor:pointer}.primary-button{border:1px solid rgba(185,53,53,0.24);background:linear-gradient(135deg,#ffe374,#ffb36f 58%,#ef806b);color:#2b1713;font-weight:900;box-shadow:0 16px 36px rgba(190,79,67,0.18)}.quiet-button{border:1px solid var(--line);background:rgba(255,255,248,0.44);color:rgba(35,24,23,0.7)}.settlement-body{min-height:0;overflow:auto;display:grid;gap:14px;padding-right:4px}.settlement-summary{margin:0}.podium-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));align-items:end;gap:10px}.podium-card{min-height:132px;padding:14px 12px;border-radius:24px;display:grid;align-content:end;gap:8px}.podium-card.is-first{min-height:164px;background:radial-gradient(circle at 50% 18%,rgba(255,255,255,0.94),transparent 48%),linear-gradient(180deg,rgba(255,234,139,0.86),rgba(255,255,248,0.62))}.award-rank{color:rgba(185,53,53,0.76);font-size:12px;font-weight:900;letter-spacing:0.18em}.podium-card strong,.award-stage-card strong{font-size:clamp(18px,2vw,26px)}.ranking-list{display:grid;gap:8px}.ranking-row{min-height:48px;padding:9px 12px;border-radius:18px;display:grid;grid-template-columns:48px 1fr auto;align-items:center;gap:10px}.rank-number,.score-number{font-weight:900}.rank-number{color:rgba(185,53,53,0.78)}.award-overlay{position:absolute;inset:0;z-index:10;display:grid;place-items:center;padding:clamp(24px,4vw,60px);background:radial-gradient(circle at 50% 22%,rgba(255,255,255,0.86),rgba(255,243,207,0.6)46%,rgba(226,98,73,0.35)),linear-gradient(180deg,rgba(255,251,235,0.66),rgba(255,216,185,0.68));backdrop-filter:blur(16px);opacity:0;pointer-events:none;transition:opacity 280ms ease}.award-overlay.is-open{opacity:1;pointer-events:auto}.award-card{width:min(1040px,94%);max-height:94%;padding:clamp(24px,3vw,38px);border:1px solid var(--line);border-radius:clamp(28px,4vw,46px);background:rgba(255,250,238,0.78);box-shadow:0 36px 110px rgba(128,53,32,0.2),inset 0 0 0 1px rgba(255,255,255,0.62);overflow:auto;display:grid;gap:18px;text-align:center}.award-card h2{margin:0;font-family:"Noto Serif TC",serif;font-size:clamp(40px,5vw,78px);line-height:1;letter-spacing:0.12em}.award-stage-podium{display:grid;grid-template-columns:0.9fr 1.1fr 0.9fr;align-items:end;gap:14px}.award-stage-card{min-height:150px;padding:20px;border-radius:28px;display:grid;align-content:center;gap:10px}.award-stage-card.is-first{min-height:210px;background:radial-gradient(circle at 50% 16%,rgba(255,255,255,0.96),transparent 45%),linear-gradient(180deg,rgba(255,229,102,0.98),rgba(255,250,238,0.66));box-shadow:0 22px 66px rgba(190,79,67,0.18),inset 0 0 44px rgba(255,236,140,0.62)}.award-rank-list{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;text-align:left}.award-rank-row{min-height:48px;padding:8px 10px;border-radius:16px;display:grid;gap:2px}.gate{position:fixed;inset:0;z-index:70;display:grid;place-items:center;padding:24px;background:radial-gradient(circle at 50% 24%,rgba(255,255,248,0.96),rgba(255,224,191,0.74)48%,rgba(210,73,54,0.32)),linear-gradient(135deg,rgba(255,255,255,0.76),rgba(255,212,180,0.8));backdrop-filter:blur(18px)}.gate-card{width:min(430px,calc(100vw - 36px));padding:clamp(26px,4vw,38px);border:1px solid var(--line);border-radius:34px;background:rgba(255,250,238,0.78);box-shadow:0 34px 90px rgba(117,50,35,0.18),inset 0 0 0 1px rgba(255,255,255,0.72);backdrop-filter:blur(24px);display:grid;gap:18px;text-align:center}.gate-card h2{margin:0;font-family:"Noto Serif TC",serif;font-size:clamp(28px,4vw,42px);line-height:1.18}.gate-card input{width:100%;min-height:56px;border:1px solid var(--line);border-radius:999px;background:rgba(255,255,248,0.86);color:var(--ink);padding:0 18px;text-align:center;letter-spacing:0.24em;outline:none}.gate-card button{min-height:52px;border:1px solid rgba(185,53,53,0.24);border-radius:999px;background:linear-gradient(135deg,#ffe374,#ffb36f 58%,#ef806b);color:#2b1713;cursor:pointer;font-weight:900}.gate-card p{min-height:1.5em;margin:0;color:rgba(185,53,53,0.78)}.toast{position:fixed;left:50%;bottom:24px;z-index:45;max-width:min(430px,calc(100vw - 36px));padding:12px 16px;border:1px solid var(--line);border-radius:999px;background:rgba(255,250,238,0.82);box-shadow:0 18px 48px rgba(112,53,37,0.18);backdrop-filter:blur(16px);transform:translate(-50%,20px);opacity:0;pointer-events:none;transition:opacity 220ms ease,transform 220ms ease}.toast.show{opacity:1;transform:translate(-50%,0)}@media(max-width:1040px){.topbar{grid-template-columns:1fr}.brand,.toolbar{grid-column:1;justify-self:start;transform:none}.toolbar{justify-content:flex-start}.world-title,.realm-rail{display:none}.fighter-card{transform:translate(-50%,-50%)scale(calc(var(--scale)* 0.86))}}@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:0.01ms !important;animation-iteration-count:1 !important;transition-duration:0.01ms !important}}</style></head><body class="is-locked"><div class="pixel-plus p1" aria-hidden="true"></div><div class="pixel-plus p2" aria-hidden="true"></div><div class="pixel-plus p3" aria-hidden="true"></div><div class="pixel-plus p4" aria-hidden="true"></div><div class="gate" id="gate" role="dialog" aria-modal="true" aria-labelledby="gateTitle"><form class="gate-card" id="gateForm"><div class="kicker">Private Rank Stage</div><h2 id="gateTitle">輸入密碼進入「轉生榜」</h2><input id="gatePassword" type="password" autocomplete="off" aria-label="舞台密碼" required><button type="submit">進入舞台</button><p id="gateMessage" role="status" aria-live="polite"></p></form></div><main class="page-shell"><header class="topbar"><div class="brand"><div class="kicker">Pixel Rebirth Ranking</div><h1>轉生榜</h1></div><div class="toolbar"><div class="pill" aria-live="polite"><span class="status-dot is-offline" id="statusDot"></span><span id="connectionStatus">連線中</span></div><div class="pill">房間 <span id="roomId">讀取中</span></div><button class="ghost-button" id="copyTopButton" type="button">複製加分連結</button><button class="ghost-button" id="settlementToggle" type="button" aria-expanded="false" aria-controls="settlementPanel">結算</button><button class="ghost-button" id="panelToggle" type="button" aria-expanded="false" aria-controls="sidePanel">設定</button></div></header><section class="stage-frame" aria-label="十一組轉生修煉排名舞台"><div class="world-title"><div class="kicker">關於我轉生成古代大神這檔事</div><strong>立德、立功、立言，讓境界自己長出來。</strong><p>舞台不公開分數，只用境界、氣場與符文呈現各組修煉進度。</p></div><div class="realm-rail" aria-hidden="true"><span>凡人登入</span><span>開智新手</span><span>修心門生</span><span>執劍行者</span><span>立德賢者</span><span>立功戰將</span><span>立言天命者</span><span>古代大神</span></div><div class="arena-layer" id="arenaLayer"></div><div class="award-overlay" id="awardOverlay" aria-hidden="true"><div class="award-card" role="dialog" aria-labelledby="awardTitle"><div><div class="kicker">Fengshen Ranking</div><h2 id="awardTitle">封神結算</h2></div><div class="award-stage-podium" id="awardStagePodium"></div><div class="award-rank-list" id="awardRankList"></div><button class="award-close" id="awardClose" type="button">回到轉生舞台</button></div></div><aside class="side-panel" id="sidePanel" aria-hidden="true"><div class="panel-head"><div><div class="kicker">System Scroll</div><h2>這是獨立主題，不會碰到「默」。</h2></div><button class="panel-close" id="panelClose" type="button" aria-label="收起設定">收</button></div><p class="panel-copy">目前使用同一組 Firebase，但資料寫入 <strong>rebirthScores</strong>。加分端只負責加分；舞台端密碼通過後才能查看實際排名與結算。</p><div class="share-card"><div class="share-label">加分端網址</div><div id="shareUrl">產生中</div></div><div class="panel-actions"><button class="primary-button" id="copyButton" type="button">複製加分連結</button><button class="quiet-button" id="resetButton" type="button">重置這個轉生房間</button></div></aside><aside class="settlement-panel" id="settlementPanel" aria-hidden="true"><div class="panel-head"><div><div class="kicker">Private Ranking</div><h2>即時排名與封神結算</h2></div><button class="panel-close" id="settlementClose" type="button" aria-label="收起結算欄">收</button></div><p class="settlement-summary panel-copy" id="settlementSummary">等待分數同步中。</p><div class="settlement-body"><div class="podium-grid" id="settlementPodium"></div><div class="ranking-list" id="rankingList"></div></div><div class="panel-actions"><button class="primary-button" id="awardButton" type="button">封神結算</button><button class="quiet-button" id="copyRankingButton" type="button">複製排名摘要</button><button class="quiet-button" id="resetFromSettlementButton" type="button">重置這個轉生房間</button></div></aside></section></main><div class="panel-backdrop" id="panelBackdrop" hidden></div><div class="toast" id="toast" role="status" aria-live="polite"></div><script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script><script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script><script>
+const firebaseConfig = {
+apiKey: "AIzaSyD5ytWrUOI6UIUBIcKpF3fyODQR2pXFMmY",
+authDomain: "score-calculation-ef584.firebaseapp.com",
+databaseURL: "https://score-calculation-ef584-default-rtdb.firebaseio.com",
+projectId: "score-calculation-ef584",
+storageBucket: "score-calculation-ef584.firebasestorage.app",
+messagingSenderId: "634074718336",
+appId: "1:634074718336:web:38960860ad796197a50665",
+measurementId: "G-R6NT2QJQSC"
+};
+const GROUP_NAMES = ["第一組", "第二組", "第三組", "第四組", "第五組", "第六組", "第七組", "第八組", "第九組", "第十組", "第十一組"];
+const PARTICIPANT_COUNT = GROUP_NAMES.length;
+const MAX_SCORE_FOR_LEVEL = 3200;
+const STAGE_PASSWORD = "ikd184179";
+const STAGES = [
+{ threshold: 0, name: "凡人登入" },
+{ threshold: 200, name: "開智新手" },
+{ threshold: 500, name: "修心門生" },
+{ threshold: 900, name: "執劍行者" },
+{ threshold: 1300, name: "立德賢者" },
+{ threshold: 1800, name: "立功戰將" },
+{ threshold: 2400, name: "立言天命者" },
+{ threshold: 3200, name: "古代大神" }
+];
+const placements = [
+{ x: 12, y: 36, scale: 0.82 },
+{ x: 30, y: 28, scale: 0.88 },
+{ x: 50, y: 24, scale: 0.94 },
+{ x: 70, y: 28, scale: 0.88 },
+{ x: 88, y: 36, scale: 0.82 },
+{ x: 20, y: 58, scale: 0.96 },
+{ x: 42, y: 52, scale: 1.03 },
+{ x: 64, y: 52, scale: 1.03 },
+{ x: 84, y: 59, scale: 0.96 },
+{ x: 32, y: 79, scale: 1.06 },
+{ x: 68, y: 79, scale: 1.06 }
+];
+const arenaLayer = document.getElementById("arenaLayer");
+const roomIdEl = document.getElementById("roomId");
+const shareUrlEl = document.getElementById("shareUrl");
+const connectionStatusEl = document.getElementById("connectionStatus");
+const statusDotEl = document.getElementById("statusDot");
+const toastEl = document.getElementById("toast");
+const gate = document.getElementById("gate");
+const gateForm = document.getElementById("gateForm");
+const gatePassword = document.getElementById("gatePassword");
+const gateMessage = document.getElementById("gateMessage");
+const sidePanel = document.getElementById("sidePanel");
+const panelToggle = document.getElementById("panelToggle");
+const panelClose = document.getElementById("panelClose");
+const settlementPanel = document.getElementById("settlementPanel");
+const settlementToggle = document.getElementById("settlementToggle");
+const settlementClose = document.getElementById("settlementClose");
+const settlementSummary = document.getElementById("settlementSummary");
+const settlementPodium = document.getElementById("settlementPodium");
+const rankingList = document.getElementById("rankingList");
+const awardButton = document.getElementById("awardButton");
+const copyRankingButton = document.getElementById("copyRankingButton");
+const resetFromSettlementButton = document.getElementById("resetFromSettlementButton");
+const awardOverlay = document.getElementById("awardOverlay");
+const awardStagePodium = document.getElementById("awardStagePodium");
+const awardRankList = document.getElementById("awardRankList");
+const awardClose = document.getElementById("awardClose");
+const panelBackdrop = document.getElementById("panelBackdrop");
+let database;
+let scoresRef;
+let roomId = "";
+let scores = createEmptyScores();
+let previousScores = createEmptyScores();
+let toastTimer = null;
+let appStarted = false;
+function createEmptyScores() {
+const base = {};
+for (let i = 1; i <= PARTICIPANT_COUNT; i += 1) {
+base[i] = 0;
+}
+return base;
+}
+function ensureScores(value) {
+const next = createEmptyScores();
+Object.keys(value || {}).forEach((key) => {
+const index = Number(key);
+const numeric = Number(value[key]);
+if (Number.isInteger(index) && index >= 1 && index <= PARTICIPANT_COUNT && Number.isFinite(numeric)) {
+next[index] = Math.max(0, numeric);
+}
+});
+return next;
+}
+function getStage(score) {
+let current = STAGES[0];
+STAGES.forEach((stage, index) => {
+if (score >= stage.threshold) {
+current = { ...stage, index };
+}
+});
+return current;
+}
+function getRankings() {
+const rows = GROUP_NAMES.map((name, index) => ({
+index: index + 1,
+name,
+score: Number(scores[index + 1] || 0)
+}));
+rows.sort((a, b) => b.score - a.score || a.index - b.index);
+let previousScore = null;
+let previousRank = 0;
+rows.forEach((row, sortedIndex) => {
+if (row.score !== previousScore) {
+previousRank = sortedIndex + 1;
+previousScore = row.score;
+}
+row.rank = previousRank;
+});
+return rows;
+}
+function getRankMap() {
+return getRankings().reduce((map, row) => {
+map[row.index] = row.rank;
+return map;
+}, {});
+}
+function getVisualMetrics(score, rank) {
+const safeScore = Math.max(0, Number(score) || 0);
+const progress = Math.min(safeScore / MAX_SCORE_FOR_LEVEL, 1);
+const rankedBoost = safeScore >= MAX_SCORE_FOR_LEVEL
+? (PARTICIPANT_COUNT - rank + 1) / PARTICIPANT_COUNT
+: 0;
+const power = Math.max(progress, rankedBoost);
+const aura = 82 + 245 * Math.sqrt(power);
+const flameAlpha = 0.2 + power * 0.68;
+return { power, aura, flameAlpha };
+}
+function formatScore(score) {
+return `${Number(score || 0).toLocaleString("zh-TW")} 分`;
+}
+function rankLabel(row) {
+if (!row) return "";
+if (row.rank === 1) return "第一名";
+if (row.rank === 2) return "第二名";
+if (row.rank === 3) return "第三名";
+return `第 ${row.rank} 名`;
+}
+function rankClass(row) {
+if (!row) return "";
+if (row.rank === 1) return "is-first";
+if (row.rank === 2) return "is-second";
+if (row.rank === 3) return "is-third";
+return "";
+}
+function getPodiumRows(rankings) {
+return [rankings[1], rankings[0], rankings[2]].filter(Boolean);
+}
+function renderFighters() {
+arenaLayer.innerHTML = "";
+placements.forEach((place, index) => {
+const groupIndex = index + 1;
+const fighter = document.createElement("article");
+fighter.className = "fighter-card stage-0";
+fighter.id = `fighter-${groupIndex}`;
+fighter.style.setProperty("--x", `${place.x}%`);
+fighter.style.setProperty("--y", `${place.y}%`);
+fighter.style.setProperty("--scale", place.scale);
+fighter.style.setProperty("--hue", `${index * 24}deg`);
+fighter.setAttribute("aria-label", GROUP_NAMES[index]);
+fighter.innerHTML = `
+<div class="fighter-aura" aria-hidden="true"></div><div class="shadow" aria-hidden="true"></div><div class="sprite" aria-hidden="true"><div class="flame"></div><div class="cape"></div><div class="sword"></div><div class="scroll"></div><div class="crown"></div><div class="hair"></div><div class="head"></div><div class="torso"></div><div class="legs"></div></div><div class="name-tag">${GROUP_NAMES[index]}</div><div class="realm-tag" id="realm-${groupIndex}">凡人登入</div>
+`;
+arenaLayer.appendChild(fighter);
+});
+}
+function updateFighters() {
+const rankMap = getRankMap();
+const leaderScore = Math.max(...Object.values(scores).map((score) => Number(score) || 0));
+for (let i = 1; i <= PARTICIPANT_COUNT; i += 1) {
+const fighter = document.getElementById(`fighter-${i}`);
+const realm = document.getElementById(`realm-${i}`);
+if (!fighter || !realm) continue;
+const score = Number(scores[i] || 0);
+const previous = Number(previousScores[i] || 0);
+const stage = getStage(score);
+const metrics = getVisualMetrics(score, rankMap[i] || PARTICIPANT_COUNT);
+fighter.className = `fighter-card stage-${stage.index}`;
+fighter.classList.toggle("is-leader", score > 0 && score === leaderScore);
+fighter.style.setProperty("--aura", `${metrics.aura}px`);
+fighter.style.setProperty("--power", metrics.power.toFixed(3));
+fighter.style.setProperty("--flame-alpha", metrics.flameAlpha.toFixed(3));
+fighter.style.setProperty("--leader-alpha", Math.max(metrics.flameAlpha, 0.78).toFixed(3));
+realm.textContent = stage.name;
+if (score > previous) {
+fighter.classList.remove("is-pulsing");
+void fighter.offsetWidth;
+fighter.classList.add("is-pulsing");
+window.setTimeout(() => fighter.classList.remove("is-pulsing"), 850);
+}
+}
+previousScores = { ...scores };
+renderSettlement();
+}
+function renderSettlement() {
+const rankings = getRankings();
+const totalScore = rankings.reduce((sum, row) => sum + row.score, 0);
+const leader = rankings[0];
+settlementSummary.textContent = totalScore > 0
+? `目前最高是 ${leader.name}，境界為「${getStage(leader.score).name}」，累積 ${formatScore(leader.score)}。`
+: "目前尚未加分。十一組都從凡人登入開始。";
+settlementPodium.innerHTML = getPodiumRows(rankings).map((row) => `
+<article class="podium-card ${rankClass(row)}"><div class="award-rank">${rankLabel(row)}</div><strong>${row.name}</strong><span>${getStage(row.score).name}</span><span>${formatScore(row.score)}</span></article>
+`).join("");
+rankingList.innerHTML = rankings.map((row) => `
+<div class="ranking-row"><span class="rank-number">#${row.rank}</span><span>${row.name}｜${getStage(row.score).name}</span><span class="score-number">${formatScore(row.score)}</span></div>
+`).join("");
+if (awardOverlay.classList.contains("is-open")) {
+renderAwardOverlay();
+}
+}
+function renderAwardOverlay() {
+const rankings = getRankings();
+awardStagePodium.innerHTML = getPodiumRows(rankings).map((row) => `
+<article class="award-stage-card ${rankClass(row)}"><div class="award-rank">${rankLabel(row)}</div><strong>${row.name}</strong><span>${getStage(row.score).name}</span><span>${formatScore(row.score)}</span></article>
+`).join("");
+awardRankList.innerHTML = rankings.map((row) => `
+<div class="award-rank-row"><span>#${row.rank} · ${formatScore(row.score)}</span><strong>${row.name}｜${getStage(row.score).name}</strong></div>
+`).join("");
+}
+function syncBackdrop() {
+const hasOpenPanel = sidePanel.classList.contains("is-open") || settlementPanel.classList.contains("is-open");
+if (hasOpenPanel) {
+panelBackdrop.hidden = false;
+window.requestAnimationFrame(() => panelBackdrop.classList.add("is-visible"));
+return;
+}
+panelBackdrop.classList.remove("is-visible");
+window.setTimeout(() => {
+const stillOpen = sidePanel.classList.contains("is-open") || settlementPanel.classList.contains("is-open");
+if (!stillOpen) {
+panelBackdrop.hidden = true;
+}
+}, 220);
+}
+function setPanelOpen(isOpen, shouldSync = true) {
+if (isOpen) {
+setSettlementOpen(false, false);
+}
+panelToggle.classList.toggle("is-active", isOpen);
+panelToggle.setAttribute("aria-expanded", String(isOpen));
+sidePanel.classList.toggle("is-open", isOpen);
+sidePanel.setAttribute("aria-hidden", String(!isOpen));
+if (shouldSync) syncBackdrop();
+}
+function setSettlementOpen(isOpen, shouldSync = true) {
+if (isOpen) {
+renderSettlement();
+setPanelOpen(false, false);
+}
+settlementToggle.classList.toggle("is-active", isOpen);
+settlementToggle.setAttribute("aria-expanded", String(isOpen));
+settlementPanel.classList.toggle("is-open", isOpen);
+settlementPanel.setAttribute("aria-hidden", String(!isOpen));
+if (shouldSync) syncBackdrop();
+}
+function closePanels() {
+setPanelOpen(false, false);
+setSettlementOpen(false, false);
+syncBackdrop();
+}
+function showAwardOverlay() {
+renderAwardOverlay();
+closePanels();
+awardOverlay.classList.add("is-open");
+awardOverlay.setAttribute("aria-hidden", "false");
+}
+function hideAwardOverlay() {
+awardOverlay.classList.remove("is-open");
+awardOverlay.setAttribute("aria-hidden", "true");
+}
+function setConnection(connected, message) {
+connectionStatusEl.textContent = message;
+statusDotEl.classList.toggle("is-offline", !connected);
+}
+function showToast(message) {
+toastEl.textContent = message;
+toastEl.classList.add("show");
+window.clearTimeout(toastTimer);
+toastTimer = window.setTimeout(() => toastEl.classList.remove("show"), 2600);
+}
+function getRoomId() {
+const params = new URLSearchParams(window.location.search);
+const fromUrl = params.get("room");
+if (fromUrl) return fromUrl;
+const generated = `rebirth_${Math.random().toString(36).slice(2, 8)}`;
+params.set("room", generated);
+window.history.replaceState({}, "", `${window.location.pathname}?${params.toString()}`);
+return generated;
+}
+function getScoreInputUrl() {
+const url = new URL(window.location.href);
+url.pathname = url.pathname.replace(/rebirth_rank\.html$/, "rebirth_score_input.html");
+url.searchParams.set("room", roomId);
+return url.toString();
+}
+async function copyShareUrl() {
+const url = getScoreInputUrl();
+try {
+await navigator.clipboard.writeText(url);
+showToast("加分連結已複製");
+} catch (error) {
+showToast("瀏覽器無法自動複製，請開啟設定欄手動複製");
+}
+}
+async function copyRankingSummary() {
+const lines = [
+`轉生榜｜${roomId || "未指定房間"}｜封神排名`,
+...getRankings().map((row) => `${rankLabel(row)}　${row.name}　${getStage(row.score).name}　${formatScore(row.score)}`)
+];
+try {
+await navigator.clipboard.writeText(lines.join("\n"));
+showToast("排名摘要已複製");
+} catch (error) {
+showToast("瀏覽器無法自動複製排名");
+}
+}
+async function resetScores() {
+const confirmed = window.confirm("確定要把這個「轉生榜」房間的十一組進度都重置嗎？");
+if (!confirmed || !scoresRef) return;
+await scoresRef.set(createEmptyScores());
+showToast("轉生房間已重置");
+}
+function bindControls() {
+document.getElementById("copyButton").addEventListener("click", copyShareUrl);
+document.getElementById("copyTopButton").addEventListener("click", copyShareUrl);
+document.getElementById("resetButton").addEventListener("click", resetScores);
+resetFromSettlementButton.addEventListener("click", resetScores);
+copyRankingButton.addEventListener("click", copyRankingSummary);
+awardButton.addEventListener("click", showAwardOverlay);
+awardClose.addEventListener("click", hideAwardOverlay);
+panelToggle.addEventListener("click", () => setPanelOpen(!sidePanel.classList.contains("is-open")));
+settlementToggle.addEventListener("click", () => setSettlementOpen(!settlementPanel.classList.contains("is-open")));
+panelClose.addEventListener("click", () => setPanelOpen(false));
+settlementClose.addEventListener("click", () => setSettlementOpen(false));
+panelBackdrop.addEventListener("click", closePanels);
+window.addEventListener("keydown", (event) => {
+if (event.key === "Escape") {
+closePanels();
+hideAwardOverlay();
+}
+});
+}
+function getUnlockStorageKey() {
+roomId = roomId || getRoomId();
+roomIdEl.textContent = roomId;
+return `rebirthRankStageUnlocked:${roomId}`;
+}
+function startStage() {
+if (appStarted) return;
+appStarted = true;
+gate.hidden = true;
+document.body.classList.remove("is-locked");
+initializeApp();
+}
+function initializeGate() {
+const unlockStorageKey = getUnlockStorageKey();
+if (window.sessionStorage.getItem(unlockStorageKey) === "true") {
+startStage();
+return;
+}
+gate.hidden = false;
+gateForm.addEventListener("submit", (event) => {
+event.preventDefault();
+const password = gatePassword.value;
+if (password !== STAGE_PASSWORD) {
+gateMessage.textContent = "密碼不正確，請再試一次。";
+gatePassword.value = "";
+gatePassword.focus();
+return;
+}
+window.sessionStorage.setItem(unlockStorageKey, "true");
+gateMessage.textContent = "";
+startStage();
+});
+window.requestAnimationFrame(() => gatePassword.focus());
+}
+async function initializeApp() {
+renderFighters();
+bindControls();
+try {
+if (!firebase.apps.length) {
+firebase.initializeApp(firebaseConfig);
+}
+database = firebase.database();
+roomId = getRoomId();
+roomIdEl.textContent = roomId;
+shareUrlEl.textContent = getScoreInputUrl();
+scoresRef = database.ref(`rooms/${roomId}/rebirthScores`);
+setConnection(true, "已連線");
+updateFighters();
+const snapshot = await scoresRef.once("value");
+if (!snapshot.exists()) {
+await scoresRef.set(createEmptyScores());
+} else {
+scores = ensureScores(snapshot.val());
+updateFighters();
+}
+scoresRef.on("value", (scoreSnapshot) => {
+scores = ensureScores(scoreSnapshot.val());
+updateFighters();
+});
+} catch (error) {
+console.error("Rebirth rank stage initialization failed:", error);
+setConnection(false, "連線失敗");
+showToast("Firebase 連線失敗，請稍後再試");
+}
+}
+window.addEventListener("load", initializeGate);
+</script></body></html>
