@@ -17,7 +17,7 @@
 <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script><script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script>
 <script>
 const firebaseConfig={apiKey:"AIzaSyD5ytWrUOI6UIUBIcKpF3fyODQR2pXFMmY",authDomain:"score-calculation-ef584.firebaseapp.com",databaseURL:"https://score-calculation-ef584-default-rtdb.firebaseio.com",projectId:"score-calculation-ef584",storageBucket:"score-calculation-ef584.firebasestorage.app",messagingSenderId:"634074718336",appId:"1:634074718336:web:38960860ad796197a50665",measurementId:"G-R6NT2QJQSC"};
-const GROUPS=["第一組","第二組","第三組","第四組","第五組","第六組","第七組","第八組","第九組","第十組","第十一組"],PASS="ikd184179",FINAL=1541,REVEAL=2800,TOTAL=5000;
+const GROUPS=["第一組","第二組","第三組","第四組","第五組","第六組","第七組","第八組","第九組","第十組","第十一組"],PASS="184179",FINAL=1541,REVEAL=2800,TOTAL=5000;
 const STAGES=[{t:0,n:"初生者",img:"assets/rebirth-stage-1.png"},{t:221,n:"覺醒少年",img:"assets/rebirth-stage-2.png"},{t:441,n:"修心門生",img:"assets/rebirth-stage-3.png"},{t:661,n:"執劍行者",img:"assets/rebirth-stage-4.png"},{t:881,n:"立德賢者",img:"assets/rebirth-stage-5.png"},{t:1101,n:"立功戰將",img:"assets/rebirth-stage-6.png"},{t:1321,n:"立言天命者",img:"assets/rebirth-stage-7.png"},{t:FINAL,n:"古代大神",img:"assets/rebirth-stage-8.png"}];
 const POS=[{x:10,y:34,s:.74},{x:28,y:29,s:.8},{x:48,y:26,s:.86},{x:68,y:29,s:.8},{x:88,y:34,s:.74},{x:18,y:58,s:.9},{x:38,y:54,s:.98},{x:58,y:54,s:.98},{x:78,y:58,s:.9},{x:35,y:80,s:.98},{x:65,y:80,s:.98}];
 const $=id=>document.getElementById(id);let db,ref,room="",scores=empty(),prev=empty(),hydrated=false,timers=new Map(),toastTimer=null;
