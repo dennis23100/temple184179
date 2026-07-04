@@ -6,8 +6,248 @@
 <title>各組加分</title>
 <style>
 @import url("https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@700;900&family=Zen+Maru+Gothic:wght@500;700;900&display=swap");
-:root{--ink:#241b16;--muted:rgba(36,27,22,.58);--paper:rgba(255,253,244,.9);--line:rgba(83,55,30,.16);--gold:#f2d46e;--amber:#c79244;--red:#b94a38;--shadow:rgba(90,60,28,.2)}
-*{box-sizing:border-box}html,body{margin:0;min-height:100%}body{min-height:100vh;display:grid;place-items:center;padding:18px;color:var(--ink);font-family:"Zen Maru Gothic","Noto Serif TC","Microsoft JhengHei",sans-serif;background:radial-gradient(circle at 18% 10%,rgba(255,239,185,.72),transparent 30rem),radial-gradient(circle at 88% 8%,rgba(181,74,56,.34),transparent 18rem),linear-gradient(135deg,#f6d9b3,#fffaf0 52%,#e9c6a5);overflow-x:hidden}body:before{content:"";position:fixed;inset:0;pointer-events:none;background:linear-gradient(90deg,transparent 0 42px,rgba(255,255,255,.18)42px 44px,transparent 44px 86px),linear-gradient(0deg,transparent 0 42px,rgba(255,255,255,.12)42px 44px,transparent 44px 86px);opacity:.48}.card{position:relative;z-index:1;width:min(520px,100%);padding:clamp(24px,6vw,42px);border:1px solid var(--line);border-radius:34px;background:linear-gradient(180deg,rgba(255,255,250,.93),rgba(255,244,226,.82));box-shadow:0 34px 86px var(--shadow),inset 0 0 0 1px rgba(255,255,255,.6);backdrop-filter:blur(20px);overflow:hidden}.card:before,.card:after{content:"";position:absolute;pointer-events:none;opacity:.25}.card:before{right:-34px;top:-28px;width:156px;height:156px;background:linear-gradient(var(--gold)0 0)center/32% 100% no-repeat,linear-gradient(var(--gold)0 0)center/100% 32% no-repeat}.card:after{left:-32px;bottom:30px;width:118px;height:118px;background:linear-gradient(#ffd1c7 0 0)center/32% 100% no-repeat,linear-gradient(#ffd1c7 0 0)center/100% 32% no-repeat}.kicker{display:inline-flex;margin-bottom:12px;padding:7px 12px;border:1px solid var(--line);border-radius:999px;background:rgba(255,255,255,.48);color:var(--muted);font-size:12px;font-weight:900;letter-spacing:.22em}.title{margin:0;font-family:"Noto Serif TC",serif;font-size:clamp(30px,9vw,46px);letter-spacing:.08em;line-height:1.05}.status-row{display:flex;flex-wrap:wrap;gap:9px;margin:22px 0 24px}.pill{min-height:37px;display:inline-flex;align-items:center;gap:8px;padding:0 13px;border:1px solid var(--line);border-radius:999px;background:rgba(255,255,255,.46);color:rgba(36,27,22,.68);font-size:13px;font-weight:700}.dot{width:8px;height:8px;border-radius:50%;background:#7f9858;box-shadow:0 0 14px rgba(127,152,88,.6)}.dot.off{background:#c45143;box-shadow:0 0 14px rgba(196,81,67,.5)}form{display:grid;gap:18px}.field{display:grid;gap:8px}label{font-weight:900;color:rgba(36,27,22,.82)}select,input{width:100%;min-height:58px;border:1px solid var(--line);border-radius:20px;background:rgba(255,255,250,.92);color:var(--ink);padding:0 16px;font:inherit;font-weight:800;outline:none;transition:box-shadow .16s,border-color .16s,transform .16s}select:focus,input:focus{border-color:rgba(185,74,56,.42);box-shadow:0 0 0 4px rgba(185,74,56,.12);transform:translateY(-1px)}.quick{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.chip{min-height:45px;border:1px solid rgba(83,55,30,.16);border-radius:999px;background:rgba(255,255,255,.54);color:rgba(36,27,22,.78);font-weight:900;cursor:pointer;transition:.16s}.chip:hover{transform:translateY(-1px);border-color:rgba(185,74,56,.3);background:rgba(255,255,255,.84)}.submit{min-height:60px;margin-top:3px;border:1px solid rgba(161,103,34,.28);border-radius:999px;background:linear-gradient(135deg,#ffe477,#e8bd54 58%,#bd8341);color:#211510;font-weight:900;cursor:pointer;box-shadow:0 20px 44px rgba(163,103,32,.18);transition:.18s}.submit:hover:not(:disabled){transform:translateY(-2px);filter:brightness(1.03)}.submit:disabled{opacity:.55;cursor:not-allowed;box-shadow:none}.toast{position:fixed;left:50%;bottom:22px;z-index:5;width:min(420px,calc(100vw - 28px));padding:13px 16px;border:1px solid var(--line);border-radius:22px;background:rgba(255,252,244,.92);box-shadow:0 20px 58px var(--shadow);text-align:center;font-weight:800;color:rgba(36,27,22,.82);backdrop-filter:blur(16px);transform:translate(-50%,20px);opacity:0;pointer-events:none;transition:.2s}.toast.show{opacity:1;transform:translate(-50%,0)}@media(max-width:440px){body{padding:12px}.card{border-radius:28px}.quick{grid-template-columns:repeat(2,1fr)}}
+
+:root {
+  --ink: #241b16;
+  --muted: rgba(36, 27, 22, .58);
+  --line: rgba(83, 55, 30, .16);
+  --gold: #f2d46e;
+  --red: #b94a38;
+  --shadow: rgba(90, 60, 28, .2);
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; min-height: 100%; }
+body {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  place-items: center;
+  padding: 18px;
+  color: var(--ink);
+  font-family: "Zen Maru Gothic", "Noto Serif TC", "Microsoft JhengHei", sans-serif;
+  background:
+    radial-gradient(circle at 18% 10%, rgba(255, 239, 185, .72), transparent 30rem),
+    radial-gradient(circle at 88% 8%, rgba(181, 74, 56, .34), transparent 18rem),
+    linear-gradient(135deg, #f6d9b3, #fffaf0 52%, #e9c6a5);
+  overflow-x: hidden;
+}
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(90deg, transparent 0 42px, rgba(255, 255, 255, .18) 42px 44px, transparent 44px 86px),
+    linear-gradient(0deg, transparent 0 42px, rgba(255, 255, 255, .12) 42px 44px, transparent 44px 86px);
+  opacity: .48;
+}
+button, select, input { font: inherit; }
+
+.card {
+  position: relative;
+  z-index: 1;
+  width: min(540px, 100%);
+  min-width: 0;
+  padding: clamp(24px, 6vw, 42px);
+  border: 1px solid var(--line);
+  border-radius: 34px;
+  background: linear-gradient(180deg, rgba(255, 255, 250, .93), rgba(255, 244, 226, .84));
+  box-shadow: 0 34px 86px var(--shadow), inset 0 0 0 1px rgba(255, 255, 255, .6);
+  backdrop-filter: blur(20px);
+  overflow: hidden;
+}
+.card::before,
+.card::after {
+  content: "";
+  position: absolute;
+  pointer-events: none;
+  opacity: .25;
+}
+.card::before {
+  right: -34px;
+  top: -28px;
+  width: 156px;
+  height: 156px;
+  background:
+    linear-gradient(var(--gold) 0 0) center / 32% 100% no-repeat,
+    linear-gradient(var(--gold) 0 0) center / 100% 32% no-repeat;
+}
+.card::after {
+  left: -32px;
+  bottom: 30px;
+  width: 118px;
+  height: 118px;
+  background:
+    linear-gradient(#ffd1c7 0 0) center / 32% 100% no-repeat,
+    linear-gradient(#ffd1c7 0 0) center / 100% 32% no-repeat;
+}
+.kicker {
+  display: inline-flex;
+  margin-bottom: 12px;
+  padding: 7px 12px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, .48);
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: .22em;
+}
+.title {
+  margin: 0;
+  font-family: "Noto Serif TC", serif;
+  font-size: clamp(32px, 9vw, 46px);
+  letter-spacing: .08em;
+  line-height: 1.05;
+}
+.status-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 9px;
+  margin: 22px 0 18px;
+}
+.pill {
+  min-height: 37px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  padding: 0 13px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, .46);
+  color: rgba(36, 27, 22, .68);
+  font-size: 13px;
+  font-weight: 700;
+}
+.room {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.dot {
+  flex: 0 0 auto;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #7f9858;
+  box-shadow: 0 0 14px rgba(127, 152, 88, .6);
+}
+.dot.off {
+  background: #c45143;
+  box-shadow: 0 0 14px rgba(196, 81, 67, .5);
+}
+.score-summary {
+  margin-bottom: 20px;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 14px;
+  align-items: center;
+  padding: 14px 16px;
+  border: 1px solid rgba(148, 100, 36, .16);
+  border-radius: 20px;
+  background: linear-gradient(135deg, rgba(255, 246, 202, .76), rgba(255, 255, 255, .58));
+}
+.score-summary span { color: var(--muted); font-size: 13px; font-weight: 800; }
+.score-summary strong {
+  color: #855818;
+  font-size: 23px;
+  font-variant-numeric: tabular-nums;
+}
+form { display: grid; gap: 18px; }
+.field { display: grid; gap: 8px; }
+label { font-weight: 900; color: rgba(36, 27, 22, .82); }
+select, input {
+  width: 100%;
+  min-height: 58px;
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  background: rgba(255, 255, 250, .92);
+  color: var(--ink);
+  padding: 0 16px;
+  font-weight: 800;
+  outline: none;
+  transition: box-shadow .16s, border-color .16s, transform .16s;
+}
+select:focus, input:focus {
+  border-color: rgba(185, 74, 56, .42);
+  box-shadow: 0 0 0 4px rgba(185, 74, 56, .12);
+  transform: translateY(-1px);
+}
+.quick {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+.chip {
+  min-height: 45px;
+  border: 1px solid rgba(83, 55, 30, .16);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, .54);
+  color: rgba(36, 27, 22, .78);
+  font-weight: 900;
+  cursor: pointer;
+  transition: .16s;
+}
+.chip:hover:not(:disabled),
+.chip:focus-visible {
+  transform: translateY(-1px);
+  border-color: rgba(185, 74, 56, .3);
+  background: rgba(255, 255, 255, .84);
+}
+.chip:disabled { opacity: .5; cursor: not-allowed; }
+.submit {
+  min-height: 60px;
+  margin-top: 3px;
+  border: 1px solid rgba(161, 103, 34, .28);
+  border-radius: 999px;
+  background: linear-gradient(135deg, #ffe477, #e8bd54 58%, #bd8341);
+  color: #211510;
+  font-weight: 900;
+  cursor: pointer;
+  box-shadow: 0 20px 44px rgba(163, 103, 32, .18);
+  transition: .18s;
+}
+.submit:hover:not(:disabled) { transform: translateY(-2px); filter: brightness(1.03); }
+.submit:disabled { opacity: .55; cursor: not-allowed; box-shadow: none; }
+.hint {
+  margin: -8px 0 0;
+  color: var(--muted);
+  font-size: 12px;
+  text-align: center;
+}
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: 22px;
+  z-index: 5;
+  width: min(420px, calc(100vw - 28px));
+  padding: 13px 16px;
+  border: 1px solid var(--line);
+  border-radius: 22px;
+  background: rgba(255, 252, 244, .94);
+  box-shadow: 0 20px 58px var(--shadow);
+  text-align: center;
+  font-weight: 800;
+  color: rgba(36, 27, 22, .82);
+  backdrop-filter: blur(16px);
+  transform: translate(-50%, 20px);
+  opacity: 0;
+  pointer-events: none;
+  transition: .2s;
+}
+.toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+@media (max-width: 440px) {
+  body { padding: 12px; }
+  .card { border-radius: 28px; }
+  .quick { grid-template-columns: repeat(2, 1fr); }
+  .chip { min-width: 0; font-size: 13px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { transition-duration: .01ms !important; }
+}
 </style>
 </head>
 <body>
@@ -16,18 +256,24 @@
   <h1 class="title">各組加分</h1>
   <div class="status-row">
     <div class="pill"><span class="dot off" id="statusDot"></span><span id="connectionStatus">連線中</span></div>
-    <div class="pill">房間 <span id="roomId">讀取中</span></div>
+    <div class="pill room">房間 <span id="roomId">讀取中</span></div>
+  </div>
+  <div class="score-summary" aria-live="polite">
+    <span id="selectedGroupText">選擇組別後顯示目前分數</span>
+    <strong id="currentScore">—</strong>
   </div>
   <form id="scoreForm">
     <div class="field">
       <label for="groupSelect">選擇組別</label>
-      <select id="groupSelect" required><option value="">請選擇</option></select>
+      <select id="groupSelect" required>
+        <option value="">請選擇</option>
+      </select>
     </div>
     <div class="field">
-      <label for="scoreInput">加分</label>
-      <input id="scoreInput" type="number" min="1" max="10000" value="100" inputmode="numeric" required>
+      <label for="scoreInput">本次加分</label>
+      <input id="scoreInput" type="number" min="1" max="10000" step="1" value="100" inputmode="numeric" required>
     </div>
-    <div class="quick" aria-label="快速加分">
+    <div class="quick" aria-label="快速選擇分數">
       <button class="chip" type="button" data-points="10">+10</button>
       <button class="chip" type="button" data-points="50">+50</button>
       <button class="chip" type="button" data-points="100">+100</button>
@@ -36,38 +282,191 @@
       <button class="chip" type="button" data-points="1000">+1000</button>
     </div>
     <button class="submit" id="submitButton" type="submit" disabled>送出加分</button>
+    <p class="hint">每次最多加 10,000 分，送出後會立即同步到轉生榜。</p>
   </form>
 </main>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
 <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script>
 <script>
-const firebaseConfig={apiKey:"AIzaSyD5ytWrUOI6UIUBIcKpF3fyODQR2pXFMmY",authDomain:"score-calculation-ef584.firebaseapp.com",databaseURL:"https://score-calculation-ef584-default-rtdb.firebaseio.com",projectId:"score-calculation-ef584",storageBucket:"score-calculation-ef584.firebasestorage.app",messagingSenderId:"634074718336",appId:"1:634074718336:web:38960860ad796197a50665",measurementId:"G-R6NT2QJQSC"};
-const GROUP_COUNT=11;
-const CN=["一","二","三","四","五","六","七","八","九","十","十一"];
-const groupSelect=document.getElementById("groupSelect");
-const scoreInput=document.getElementById("scoreInput");
-const scoreForm=document.getElementById("scoreForm");
-const submitButton=document.getElementById("submitButton");
-const statusDot=document.getElementById("statusDot");
-const connectionStatus=document.getElementById("connectionStatus");
-const roomIdEl=document.getElementById("roomId");
-const toast=document.getElementById("toast");
-let roomId="";
-let database=null;
-let scoresRef=null;
-let connected=false;
-let submitting=false;
-function roomFromUrl(){return new URLSearchParams(location.search).get("room")||""}
-function emptyScores(){return Object.fromEntries(Array.from({length:GROUP_COUNT},(_,i)=>[String(i+1),0]))}
-function showToast(message){toast.textContent=message;toast.classList.add("show");clearTimeout(showToast.timer);showToast.timer=setTimeout(()=>toast.classList.remove("show"),1800)}
-function setConnection(next,message){connected=next;statusDot.classList.toggle("off",!next);connectionStatus.textContent=message;submitButton.disabled=!connected||submitting||!roomId}
-function fillGroups(){for(let i=1;i<=GROUP_COUNT;i++){const option=document.createElement("option");option.value=String(i);option.textContent=`第${CN[i-1]}組`;groupSelect.appendChild(option)}}
-function setSubmitting(next){submitting=next;submitButton.disabled=!connected||next||!roomId;submitButton.textContent=next?"送出中":"送出加分"}
-async function addScore(group,points){if(!scoresRef)throw new Error("missing ref");const personRef=scoresRef.child(String(group));return new Promise((resolve,reject)=>{personRef.transaction(current=>(Number(current)||0)+points,(error,committed,snap)=>{if(error)reject(error);else if(!committed)reject(new Error("未完成加分"));else resolve(Number(snap.val())||0)})})}
-scoreForm.addEventListener("submit",async event=>{event.preventDefault();const group=groupSelect.value;const points=Math.floor(Number(scoreInput.value));if(!group){showToast("請先選擇組別");return}if(!Number.isFinite(points)||points<=0){showToast("請輸入正確分數");return}setSubmitting(true);try{await addScore(group,points);showToast(`第${CN[Number(group)-1]}組 +${points}`);scoreInput.select()}catch(error){console.error(error);showToast("加分失敗，請再試一次")}finally{setSubmitting(false)}});
-document.querySelectorAll("[data-points]").forEach(button=>button.addEventListener("click",()=>{scoreInput.value=button.dataset.points;scoreInput.focus();scoreInput.select()}));
-async function init(){fillGroups();roomId=roomFromUrl();roomIdEl.textContent=roomId||"未指定";if(!roomId){setConnection(false,"缺少房間");return}try{if(!firebase.apps.length)firebase.initializeApp(firebaseConfig);database=firebase.database();scoresRef=database.ref(`rooms/${roomId}/rebirthScores`);database.ref(".info/connected").on("value",snap=>setConnection(Boolean(snap.val()),snap.val()?"已連線":"離線"));const snap=await scoresRef.once("value");if(!snap.exists())await scoresRef.set(emptyScores());setConnection(true,"已連線")}catch(error){console.error(error);setConnection(false,"連線失敗")}}
+const firebaseConfig = {
+  apiKey: "AIzaSyD5ytWrUOI6UIUBIcKpF3fyODQR2pXFMmY",
+  authDomain: "score-calculation-ef584.firebaseapp.com",
+  databaseURL: "https://score-calculation-ef584-default-rtdb.firebaseio.com",
+  projectId: "score-calculation-ef584",
+  storageBucket: "score-calculation-ef584.firebasestorage.app",
+  messagingSenderId: "634074718336",
+  appId: "1:634074718336:web:38960860ad796197a50665",
+  measurementId: "G-R6NT2QJQSC"
+};
+
+const GROUP_COUNT = 11;
+const MAX_POINTS = 10000;
+const CN = ["一", "二", "三", "四", "五", "六", "七", "八", "九", "十", "十一"];
+const groupSelect = document.getElementById("groupSelect");
+const scoreInput = document.getElementById("scoreInput");
+const scoreForm = document.getElementById("scoreForm");
+const submitButton = document.getElementById("submitButton");
+const statusDot = document.getElementById("statusDot");
+const connectionStatus = document.getElementById("connectionStatus");
+const roomIdEl = document.getElementById("roomId");
+const selectedGroupText = document.getElementById("selectedGroupText");
+const currentScore = document.getElementById("currentScore");
+const toast = document.getElementById("toast");
+const quickButtons = [...document.querySelectorAll("[data-points]")];
+
+let roomId = "";
+let database = null;
+let scoresRef = null;
+let connected = false;
+let submitting = false;
+let scores = emptyScores();
+
+function roomFromUrl() {
+  const value = new URLSearchParams(location.search).get("room") || "";
+  return /^[A-Za-z0-9_-]{1,80}$/.test(value) ? value : "";
+}
+function emptyScores() {
+  return Object.fromEntries(Array.from({ length: GROUP_COUNT }, (_, i) => [String(i + 1), 0]));
+}
+function cleanScores(raw) {
+  const next = emptyScores();
+  if (raw && typeof raw === "object") {
+    Object.keys(next).forEach(key => {
+      next[key] = Math.max(0, Number(raw[key]) || 0);
+    });
+  }
+  return next;
+}
+function showToast(message) {
+  toast.textContent = message;
+  toast.classList.add("show");
+  clearTimeout(showToast.timer);
+  showToast.timer = setTimeout(() => toast.classList.remove("show"), 2000);
+}
+function syncControls() {
+  const ready = connected && !submitting && Boolean(roomId);
+  submitButton.disabled = !ready;
+  quickButtons.forEach(button => {
+    button.disabled = !ready;
+  });
+  submitButton.textContent = submitting ? "送出中…" : "送出加分";
+}
+function setConnection(next, message) {
+  connected = next;
+  statusDot.classList.toggle("off", !next);
+  connectionStatus.textContent = message;
+  syncControls();
+}
+function fillGroups() {
+  for (let i = 1; i <= GROUP_COUNT; i++) {
+    const option = document.createElement("option");
+    option.value = String(i);
+    option.textContent = `第${CN[i - 1]}組`;
+    groupSelect.appendChild(option);
+  }
+}
+function updateCurrentScore() {
+  const group = groupSelect.value;
+  if (!group) {
+    selectedGroupText.textContent = "選擇組別後顯示目前分數";
+    currentScore.textContent = "—";
+    return;
+  }
+  selectedGroupText.textContent = `第${CN[Number(group) - 1]}組目前分數`;
+  currentScore.textContent = `${Number(scores[group]) || 0} 分`;
+}
+function setSubmitting(next) {
+  submitting = next;
+  syncControls();
+}
+async function addScore(group, points) {
+  if (!scoresRef) throw new Error("missing ref");
+  const personRef = scoresRef.child(String(group));
+  return new Promise((resolve, reject) => {
+    personRef.transaction(
+      current => (Number(current) || 0) + points,
+      (error, committed, snap) => {
+        if (error) reject(error);
+        else if (!committed) reject(new Error("未完成加分"));
+        else resolve(Number(snap.val()) || 0);
+      }
+    );
+  });
+}
+
+scoreForm.addEventListener("submit", async event => {
+  event.preventDefault();
+  const group = groupSelect.value;
+  const points = Number(scoreInput.value);
+
+  if (!group) {
+    showToast("請先選擇組別");
+    groupSelect.focus();
+    return;
+  }
+  if (!Number.isInteger(points) || points < 1 || points > MAX_POINTS) {
+    showToast(`請輸入 1～${MAX_POINTS.toLocaleString("zh-TW")} 的整數分數`);
+    scoreInput.focus();
+    scoreInput.select();
+    return;
+  }
+
+  setSubmitting(true);
+  try {
+    const total = await addScore(group, points);
+    scores[group] = total;
+    updateCurrentScore();
+    showToast(`第${CN[Number(group) - 1]}組 +${points}，目前 ${total} 分`);
+    scoreInput.focus();
+    scoreInput.select();
+  } catch (error) {
+    console.error(error);
+    showToast("加分失敗，請再試一次");
+  } finally {
+    setSubmitting(false);
+  }
+});
+groupSelect.addEventListener("change", updateCurrentScore);
+quickButtons.forEach(button => {
+  button.addEventListener("click", () => {
+    scoreInput.value = button.dataset.points;
+    scoreInput.focus();
+    scoreInput.select();
+  });
+});
+
+async function init() {
+  fillGroups();
+  syncControls();
+  roomId = roomFromUrl();
+  roomIdEl.textContent = roomId || "未指定";
+
+  if (!roomId) {
+    setConnection(false, "缺少房間");
+    showToast("連結缺少有效的房間代碼");
+    return;
+  }
+
+  try {
+    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+    database = firebase.database();
+    scoresRef = database.ref(`rooms/${roomId}/rebirthScores`);
+    database.ref(".info/connected").on("value", snap => {
+      setConnection(Boolean(snap.val()), snap.val() ? "已連線" : "離線");
+    });
+    const snap = await scoresRef.once("value");
+    if (!snap.exists()) await scoresRef.set(emptyScores());
+    scoresRef.on("value", nextSnap => {
+      scores = cleanScores(nextSnap.val());
+      updateCurrentScore();
+    });
+  } catch (error) {
+    console.error(error);
+    setConnection(false, "連線失敗");
+  }
+}
 init();
 </script>
 </body>
