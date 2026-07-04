@@ -719,7 +719,7 @@ const LOCAL_ASSET_PREVIEW = location.protocol === "file:" || location.hostname =
 const ASSET_ROOT = LOCAL_ASSET_PREVIEW
   ? "https://raw.githubusercontent.com/dennis23100/temple184179/main/assets/"
   : "assets/";
-//const TRANSFORMATION_VIDEO = `${ASSET_ROOT}change.mp4`;
+const TRANSFORMATION_VIDEO = `${ASSET_ROOT}change.mp4`;
 document.documentElement.style.setProperty("--scene-background", `url("${ASSET_ROOT}bg.png")`);
 const STAGES = [
   { threshold: 0, name: "初生", image: `${ASSET_ROOT}rebirth-stage-1.png` },
