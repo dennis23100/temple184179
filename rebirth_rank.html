@@ -459,8 +459,8 @@ button.ghost { cursor: pointer; }
 }
 @keyframes transformationVideo {
   0% { opacity: 0; transform: translate(-50%, -50%) scale(.86); filter: brightness(.5); }
-  7%, 82% { opacity: 1; transform: translate(-50%, -50%) scale(1); filter: brightness(1); }
-  92%, 100% { opacity: 0; transform: translate(-50%, -50%) scale(1.04); filter: brightness(1.18); }
+  3%, 96% { opacity: 1; transform: translate(-50%, -50%) scale(1); filter: brightness(1); }
+  100% { opacity: 0; transform: translate(-50%, -50%) scale(1.04); filter: brightness(1.18); }
 }
 @keyframes spinAura {
   to { transform: translate(-50%, -50%) rotate(360deg); }
@@ -499,6 +499,10 @@ button.ghost { cursor: pointer; }
     animation-duration: .01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: .01ms !important;
+  }
+  .person.transforming .transformation-media,
+  .person.transforming .avatar {
+    animation-duration: var(--transformation-duration, 6.8s) !important;
   }
 }
 </style>
@@ -545,11 +549,8 @@ const firebaseConfig = {
 const PASSWORD = "184179";
 const GROUP_COUNT = 11;
 const CN = ["一", "二", "三", "四", "五", "六", "七", "八", "九", "十", "十一"];
-const LOCAL_ASSET_PREVIEW = location.protocol === "file:" || location.hostname === "127.0.0.1" || location.hostname === "localhost";
-const ASSET_ROOT = LOCAL_ASSET_PREVIEW
-  ? "https://raw.githubusercontent.com/dennis23100/temple184179/main/assets/"
-  : "assets/";
-const TRANSFORMATION_VIDEO = `${ASSET_ROOT}change.mp4`;
+const ASSET_ROOT = "assets/";
+const TRANSFORMATION_VIDEO = `${ASSET_ROOT}change-web.mp4`;
 document.documentElement.style.setProperty("--scene-background", `url("${ASSET_ROOT}bg.png")`);
 const STAGES = [
   { threshold: 0, name: "初生", image: `${ASSET_ROOT}rebirth-stage-1.png` },
@@ -691,7 +692,7 @@ function createNode(id) {
     <div class="strike"></div>
     <div class="smoke"></div>
     <div class="transformation-media" aria-hidden="true">
-      <video class="transform-video" src="${TRANSFORMATION_VIDEO}" preload="metadata" muted playsinline></video>
+      <video class="transform-video" src="${TRANSFORMATION_VIDEO}" preload="auto" muted playsinline></video>
     </div>
     <div class="avatar-wrap"><img class="avatar" alt="${groupName(id)}"></div>
     <div class="identity">
@@ -703,7 +704,9 @@ function createNode(id) {
     el,
     img: el.querySelector("img"),
     video: el.querySelector(".transform-video"),
-    stageName: el.querySelector(".stage-name")
+    stageName: el.querySelector(".stage-name"),
+    transformToken: null,
+    transformEndHandler: null
   };
   node.video.addEventListener("error", () => el.classList.add("video-failed"));
   node.video.addEventListener("loadedmetadata", () => {
@@ -711,6 +714,7 @@ function createNode(id) {
       el.style.setProperty("--transformation-duration", `${node.video.duration}s`);
     }
   });
+  node.video.load();
   nodes.set(id, node);
   return node;
 }
@@ -726,18 +730,43 @@ function renderPeople() {
     node.el.classList.toggle("final", stage.index === STAGES.length - 1);
     node.el.style.setProperty("--aura", auraFor(item).toFixed(2));
     node.el.style.setProperty("--power", powerFor(item).toFixed(2));
-    node.stageName.textContent = stage.name;
 
     if (transformTargetByGroup.get(id) === stage.index) continue;
     if (!hydrated || stage.index <= oldIndex) {
       clearTransform(id);
       stageByGroup.set(id, stage.index);
+      node.stageName.textContent = stage.name;
       setImage(node.img, stage.image);
       continue;
     }
     playTransform(id, node, stage);
   }
   hydrated = true;
+}
+function waitForVideoReady(video, timeoutMs = 12000) {
+  if (video.readyState >= HTMLMediaElement.HAVE_FUTURE_DATA) return Promise.resolve();
+  return new Promise((resolve, reject) => {
+    const cleanup = () => {
+      clearTimeout(timeout);
+      video.removeEventListener("canplay", ready);
+      video.removeEventListener("error", failed);
+    };
+    const ready = () => {
+      cleanup();
+      resolve();
+    };
+    const failed = () => {
+      cleanup();
+      reject(video.error || new Error("變身影片載入失敗"));
+    };
+    const timeout = setTimeout(() => {
+      cleanup();
+      reject(new Error("變身影片載入逾時"));
+    }, timeoutMs);
+    video.addEventListener("canplay", ready);
+    video.addEventListener("error", failed);
+    video.load();
+  });
 }
 function clearTransform(id) {
   const timer = timers.get(id);
@@ -747,41 +776,67 @@ function clearTransform(id) {
   }
   transformTargetByGroup.delete(id);
   const node = nodes.get(id);
-  if (node) {
-    node.el.classList.remove("transforming");
-    node.video.pause();
-    node.video.currentTime = 0;
+  if (!node) return;
+  node.transformToken = null;
+  if (node.transformEndHandler) {
+    node.video.removeEventListener("ended", node.transformEndHandler);
+    node.transformEndHandler = null;
   }
+  node.el.classList.remove("transforming", "video-failed");
+  node.video.pause();
+  if (node.video.readyState > 0) node.video.currentTime = 0;
 }
-function playTransform(id, node, stage) {
+async function playTransform(id, node, stage) {
   clearTransform(id);
+  const token = Symbol(`transform-${id}-${stage.index}`);
+  node.transformToken = token;
   transformTargetByGroup.set(id, stage.index);
-  node.el.classList.remove("video-failed");
-  node.el.classList.add("transforming");
-  node.video.currentTime = 0;
-  const playback = node.video.play();
-  if (playback) {
-    playback.catch(error => {
-      console.warn("transformation video fallback", error);
-      node.el.classList.add("video-failed");
-    });
-  }
   transparentAsset(stage.image);
-  const durationMs = Number.isFinite(node.video.duration) && node.video.duration > 0
-    ? node.video.duration * 1000
-    : 6800;
-  const reveal = setTimeout(() => {
+
+  const finish = () => {
+    if (node.transformToken !== token) return;
+    const timer = timers.get(id);
+    if (timer) timer.forEach(clearTimeout);
+    timers.delete(id);
+    if (node.transformEndHandler) {
+      node.video.removeEventListener("ended", node.transformEndHandler);
+      node.transformEndHandler = null;
+    }
     setImage(node.img, stage.image);
     stageByGroup.set(id, stage.index);
-  }, Math.max(0, durationMs - 900));
-  const end = setTimeout(() => {
-    node.el.classList.remove("transforming");
+    node.stageName.textContent = stage.name;
+    node.el.classList.remove("transforming", "video-failed");
     node.video.pause();
-    node.video.currentTime = 0;
+    if (node.video.readyState > 0) node.video.currentTime = 0;
+    node.transformToken = null;
     transformTargetByGroup.delete(id);
-    timers.delete(id);
-  }, durationMs + 200);
-  timers.set(id, [reveal, end]);
+  };
+  const lightningFallback = error => {
+    if (node.transformToken !== token) return;
+    console.warn("transformation video fallback", error);
+    node.el.classList.add("video-failed", "transforming");
+    timers.set(id, [setTimeout(finish, 5200)]);
+  };
+
+  try {
+    await waitForVideoReady(node.video);
+    if (node.transformToken !== token) return;
+    node.video.currentTime = 0;
+    await node.video.play();
+    if (node.transformToken !== token) {
+      node.video.pause();
+      return;
+    }
+    node.el.classList.add("transforming");
+    node.transformEndHandler = finish;
+    node.video.addEventListener("ended", finish, { once: true });
+    const durationMs = Number.isFinite(node.video.duration) && node.video.duration > 0
+      ? node.video.duration * 1000
+      : 6800;
+    timers.set(id, [setTimeout(finish, durationMs + 5000)]);
+  } catch (error) {
+    lightningFallback(error);
+  }
 }
 function scoreLink() {
   const url = new URL(location.href);
