@@ -138,23 +138,6 @@ button, select, input { font: inherit; }
   background: #c45143;
   box-shadow: 0 0 14px rgba(196, 81, 67, .5);
 }
-.score-summary {
-  margin-bottom: 20px;
-  display: grid;
-  grid-template-columns: 1fr auto;
-  gap: 14px;
-  align-items: center;
-  padding: 14px 16px;
-  border: 1px solid rgba(148, 100, 36, .16);
-  border-radius: 20px;
-  background: linear-gradient(135deg, rgba(255, 246, 202, .76), rgba(255, 255, 255, .58));
-}
-.score-summary span { color: var(--muted); font-size: 13px; font-weight: 800; }
-.score-summary strong {
-  color: #855818;
-  font-size: 23px;
-  font-variant-numeric: tabular-nums;
-}
 form { display: grid; gap: 18px; }
 .field { display: grid; gap: 8px; }
 label { font-weight: 900; color: rgba(36, 27, 22, .82); }
@@ -258,10 +241,6 @@ select:focus, input:focus {
     <div class="pill"><span class="dot off" id="statusDot"></span><span id="connectionStatus">連線中</span></div>
     <div class="pill room">房間 <span id="roomId">讀取中</span></div>
   </div>
-  <div class="score-summary" aria-live="polite">
-    <span id="selectedGroupText">選擇組別後顯示目前分數</span>
-    <strong id="currentScore">—</strong>
-  </div>
   <form id="scoreForm">
     <div class="field">
       <label for="groupSelect">選擇組別</label>
@@ -311,8 +290,6 @@ const submitButton = document.getElementById("submitButton");
 const statusDot = document.getElementById("statusDot");
 const connectionStatus = document.getElementById("connectionStatus");
 const roomIdEl = document.getElementById("roomId");
-const selectedGroupText = document.getElementById("selectedGroupText");
-const currentScore = document.getElementById("currentScore");
 const toast = document.getElementById("toast");
 const quickButtons = [...document.querySelectorAll("[data-points]")];
 
@@ -321,7 +298,6 @@ let database = null;
 let scoresRef = null;
 let connected = false;
 let submitting = false;
-let scores = emptyScores();
 
 function roomFromUrl() {
   const value = new URLSearchParams(location.search).get("room") || "";
@@ -329,15 +305,6 @@ function roomFromUrl() {
 }
 function emptyScores() {
   return Object.fromEntries(Array.from({ length: GROUP_COUNT }, (_, i) => [String(i + 1), 0]));
-}
-function cleanScores(raw) {
-  const next = emptyScores();
-  if (raw && typeof raw === "object") {
-    Object.keys(next).forEach(key => {
-      next[key] = Math.max(0, Number(raw[key]) || 0);
-    });
-  }
-  return next;
 }
 function showToast(message) {
   toast.textContent = message;
@@ -366,16 +333,6 @@ function fillGroups() {
     option.textContent = `第${CN[i - 1]}組`;
     groupSelect.appendChild(option);
   }
-}
-function updateCurrentScore() {
-  const group = groupSelect.value;
-  if (!group) {
-    selectedGroupText.textContent = "選擇組別後顯示目前分數";
-    currentScore.textContent = "—";
-    return;
-  }
-  selectedGroupText.textContent = `第${CN[Number(group) - 1]}組目前分數`;
-  currentScore.textContent = `${Number(scores[group]) || 0} 分`;
 }
 function setSubmitting(next) {
   submitting = next;
@@ -415,10 +372,8 @@ scoreForm.addEventListener("submit", async event => {
 
   setSubmitting(true);
   try {
-    const total = await addScore(group, points);
-    scores[group] = total;
-    updateCurrentScore();
-    showToast(`第${CN[Number(group) - 1]}組 +${points}，目前 ${total} 分`);
+    await addScore(group, points);
+    showToast(`第${CN[Number(group) - 1]}組已成功加 ${points} 分`);
     scoreInput.focus();
     scoreInput.select();
   } catch (error) {
@@ -428,7 +383,6 @@ scoreForm.addEventListener("submit", async event => {
     setSubmitting(false);
   }
 });
-groupSelect.addEventListener("change", updateCurrentScore);
 quickButtons.forEach(button => {
   button.addEventListener("click", () => {
     scoreInput.value = button.dataset.points;
@@ -458,10 +412,6 @@ async function init() {
     });
     const snap = await scoresRef.once("value");
     if (!snap.exists()) await scoresRef.set(emptyScores());
-    scoresRef.on("value", nextSnap => {
-      scores = cleanScores(nextSnap.val());
-      updateCurrentScore();
-    });
   } catch (error) {
     console.error(error);
     setConnection(false, "連線失敗");
