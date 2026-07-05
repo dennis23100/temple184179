@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>轉生榜完整排名</title>
+
+  <style>
+    :root {
+      --bg: #070914;
+      --panel: rgba(12, 16, 34, 0.88);
+      --panel2: rgba(255, 255, 255, 0.08);
+      --text: #f8fafc;
+      --muted: #aab3c5;
+      --gold: #f6d365;
+      --line: rgba(255, 255, 255, 0.16);
+      --danger: #ff6b6b;
+      --ok: #6ee7b7;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Noto Sans TC", "Microsoft JhengHei", system-ui, sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at 20% 10%, rgba(246, 211, 101, 0.22), transparent 28%),
+        radial-gradient(circle at 80% 30%, rgba(125, 211, 252, 0.14), transparent 32%),
+        linear-gradient(135deg, #050713, #101326 55%, #050713);
+      padding: 22px;
+    }
+
+    .app {
+      max-width: 1080px;
+      margin: 0 auto;
+    }
+
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 14px;
+      margin-bottom: 18px;
+      flex-wrap: wrap;
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      font-size: clamp(28px, 4vw, 44px);
+      letter-spacing: 0.06em;
+    }
+
+    .subtitle {
+      color: var(--muted);
+      font-size: 15px;
+    }
+
+    .chips {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .chip, button, input {
+      border: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--text);
+      border-radius: 999px;
+      padding: 9px 13px;
+      font-size: 14px;
+    }
+
+    .dot {
+      display: inline-block;
+      width: 10px;
+      height: 10px;
+      border-radius: 999px;
+      background: var(--ok);
+      margin-right: 6px;
+      box-shadow: 0 0 12px var(--ok);
+    }
+
+    .dot.off {
+      background: var(--danger);
+      box-shadow: 0 0 12px var(--danger);
+    }
+
+    button {
+      cursor: pointer;
+      transition: 0.16s;
+    }
+
+    button:hover {
+      transform: translateY(-1px);
+      background: rgba(255, 255, 255, 0.14);
+    }
+
+    .summary {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      padding: 16px;
+      box-shadow: 0 18px 40px rgba(0, 0, 0, 0.28);
+      backdrop-filter: blur(14px);
+    }
+
+    .summary .label {
+      color: var(--muted);
+      font-size: 13px;
+      margin-bottom: 6px;
+    }
+
+    .summary .value {
+      font-size: 26px;
+      font-weight: 800;
+      color: var(--gold);
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 760px;
+    }
+
+    th, td {
+      padding: 14px 12px;
+      border-bottom: 1px solid var(--line);
+      text-align: left;
+      white-space: nowrap;
+    }
+
+    th {
+      color: var(--muted);
+      font-size: 13px;
+      letter-spacing: 0.06em;
+      font-weight: 700;
+    }
+
+    td {
+      font-size: 16px;
+    }
+
+    .rank {
+      font-size: 22px;
+      font-weight: 900;
+      color: var(--gold);
+    }
+
+    .group-name {
+      font-weight: 800;
+      font-size: 18px;
+    }
+
+    .score {
+      font-size: 21px;
+      font-weight: 900;
+    }
+
+    .stage {
+      display: inline-flex;
+      align-items: center;
+      border-radius: 999px;
+      padding: 5px 10px;
+      background: rgba(246, 211, 101, 0.13);
+      color: #ffe7a0;
+      border: 1px solid rgba(246, 211, 101, 0.28);
+      font-weight: 700;
+    }
+
+    .bar {
+      width: 180px;
+      height: 10px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.12);
+      overflow: hidden;
+    }
+
+    .bar > span {
+      display: block;
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #f6d365, #fda085);
+      border-radius: inherit;
+    }
+
+    .top1 {
+      background: linear-gradient(90deg, rgba(246, 211, 101, 0.18), rgba(255, 255, 255, 0.04));
+    }
+
+    .top2 {
+      background: linear-gradient(90deg, rgba(203, 213, 225, 0.15), rgba(255, 255, 255, 0.04));
+    }
+
+    .top3 {
+      background: linear-gradient(90deg, rgba(251, 146, 60, 0.14), rgba(255, 255, 255, 0.04));
+    }
+
+    .hint {
+      color: var(--muted);
+      font-size: 13px;
+      margin-top: 12px;
+      line-height: 1.7;
+    }
+
+    .gate {
+      position: fixed;
+      inset: 0;
+      z-index: 10;
+      display: grid;
+      place-items: center;
+      padding: 20px;
+      background:
+        radial-gradient(circle at 50% 20%, rgba(246, 211, 101, 0.18), transparent 32%),
+        rgba(3, 5, 15, 0.92);
+      backdrop-filter: blur(18px);
+    }
+
+    .gate.hide {
+      display: none;
+    }
+
+    .gate-card {
+      width: min(420px, 100%);
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 26px;
+      padding: 28px;
+      text-align: center;
+      box-shadow: 0 24px 70px rgba(0, 0, 0, 0.45);
+    }
+
+    .gate-card small {
+      color: var(--gold);
+      letter-spacing: 0.2em;
+    }
+
+    .gate-card h2 {
+      margin: 10px 0 18px;
+    }
+
+    .gate-card input {
+      width: 100%;
+      border-radius: 16px;
+      margin-bottom: 12px;
+      text-align: center;
+      font-size: 22px;
+      letter-spacing: 0.16em;
+    }
+
+    .gate-card button {
+      width: 100%;
+      border-radius: 16px;
+      background: linear-gradient(135deg, #f6d365, #fda085);
+      color: #1a1306;
+      font-weight: 900;
+      border: none;
+    }
+
+    .toast {
+      position: fixed;
+      left: 50%;
+      bottom: 22px;
+      transform: translateX(-50%) translateY(20px);
+      opacity: 0;
+      background: rgba(0, 0, 0, 0.78);
+      color: white;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 10px 16px;
+      pointer-events: none;
+      transition: 0.2s;
+      z-index: 20;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    @media (max-width: 760px) {
+      body {
+        padding: 14px;
+      }
+
+      .summary {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .chips {
+        justify-content: flex-start;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="app">
+    <header class="topbar">
+      <div>
+        <h1>轉生榜完整排名</h1>
+        <div class="subtitle">即時顯示 11 組完整分數、排名、階段與差距</div>
+      </div>
+
+      <div class="chips">
+        <span class="chip"><span class="dot off" id="statusDot"></span><span id="statusText">連線中</span></span>
+        <span class="chip">房間 <span id="roomText">-</span></span>
+        <button type="button" id="copyLinkBtn">複製本頁連結</button>
+        <button type="button" id="exportCsvBtn">匯出 CSV</button>
+      </div>
+    </header>
+
+    <section class="summary">
+      <div class="card">
+        <div class="label">目前第一名</div>
+        <div class="value" id="firstPlace">-</div>
+      </div>
+
+      <div class="card">
+        <div class="label">最高分</div>
+        <div class="value" id="highestScore">0</div>
+      </div>
+
+      <div class="card">
+        <div class="label">總分</div>
+        <div class="value" id="totalScore">0</div>
+      </div>
+
+      <div class="card">
+        <div class="label">最後更新</div>
+        <div class="value" id="updatedAt" style="font-size:20px;">-</div>
+      </div>
+    </section>
+
+    <main class="card table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>排名</th>
+            <th>組別</th>
+            <th>分數</th>
+            <th>階段</th>
+            <th>與上一名差距</th>
+            <th>領先下一名</th>
+            <th>進度</th>
+          </tr>
+        </thead>
+        <tbody id="rankBody"></tbody>
+      </table>
+
+      <div class="hint">
+        排名規則：分數越高排名越前；同分會並列同名次，例如 1、2、2、4。  
+        這頁只讀取分數，不會修改分數。
+      </div>
+    </main>
+  </div>
+
+  <section class="gate" id="gate">
+    <form class="gate-card" id="gateForm">
+      <small>FULL RANK LOCKED</small>
+      <h2>輸入密碼查看完整排名</h2>
+      <input id="passwordInput" type="password" inputmode="numeric" autocomplete="current-password" autofocus />
+      <button type="submit">進入完整排名</button>
+    </form>
+  </section>
+
+  <div class="toast" id="toast"></div>
+
+  <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyD5ytWrUOI6UIUBIcKpF3fyODQR2pXFMmY",
+      authDomain: "score-calculation-ef584.firebaseapp.com",
+      databaseURL: "https://score-calculation-ef584-default-rtdb.firebaseio.com",
+      projectId: "score-calculation-ef584",
+      storageBucket: "score-calculation-ef584.firebasestorage.app",
+      messagingSenderId: "634074718336",
+      appId: "1:634074718336:web:38960860ad796197a50665",
+      measurementId: "G-R6NT2QJQSC"
+    };
+
+    const PASSWORD = "184179";
+    const GROUP_COUNT = 11;
+    const CN = ["一", "二", "三", "四", "五", "六", "七", "八", "九", "十", "十一"];
+
+    const STAGES = [
+      { threshold: 0, name: "初生" },
+      { threshold: 221, name: "覺醒" },
+      { threshold: 441, name: "修心" },
+      { threshold: 661, name: "執劍" },
+      { threshold: 881, name: "立德" },
+      { threshold: 1101, name: "立功" },
+      { threshold: 1321, name: "立言" },
+      { threshold: 1541, name: "古代大神" }
+    ];
+
+    const rankBody = document.getElementById("rankBody");
+    const statusDot = document.getElementById("statusDot");
+    const statusText = document.getElementById("statusText");
+    const roomText = document.getElementById("roomText");
+    const firstPlace = document.getElementById("firstPlace");
+    const highestScore = document.getElementById("highestScore");
+    const totalScore = document.getElementById("totalScore");
+    const updatedAt = document.getElementById("updatedAt");
+    const copyLinkBtn = document.getElementById("copyLinkBtn");
+    const exportCsvBtn = document.getElementById("exportCsvBtn");
+    const toast = document.getElementById("toast");
+    const gate = document.getElementById("gate");
+    const gateForm = document.getElementById("gateForm");
+    const passwordInput = document.getElementById("passwordInput");
+
+    let room = "";
+    let database = null;
+    let scoresRef = null;
+    let latestRows = [];
+
+    function showToast(message) {
+      toast.textContent = message;
+      toast.classList.add("show");
+      clearTimeout(showToast.timer);
+      showToast.timer = setTimeout(() => toast.classList.remove("show"), 1800);
+    }
+
+    function validRoom(value) {
+      return /^[A-Za-z0-9_-]{1,80}$/.test(value);
+    }
+
+    function getRoom() {
+      const url = new URL(location.href);
+      const supplied = url.searchParams.get("room");
+      return supplied && validRoom(supplied) ? supplied : "";
+    }
+
+    function emptyScores() {
+      return Object.fromEntries(
+        Array.from({ length: GROUP_COUNT }, (_, i) => [String(i + 1), 0])
+      );
+    }
+
+    function cleanScores(raw) {
+      const next = emptyScores();
+
+      if (raw && typeof raw === "object") {
+        Object.keys(next).forEach(key => {
+          next[key] = Math.max(0, Number(raw[key]) || 0);
+        });
+      }
+
+      return next;
+    }
+
+    function groupName(id) {
+      return `第${CN[Number(id) - 1]}組`;
+    }
+
+    function getStage(score) {
+      let found = STAGES[0];
+
+      STAGES.forEach(stage => {
+        if (score >= stage.threshold) found = stage;
+      });
+
+      return found;
+    }
+
+    function formatNumber(value) {
+      return Number(value || 0).toLocaleString("zh-TW");
+    }
+
+    function buildRows(scores) {
+      const sorted = Object.entries(scores)
+        .map(([id, score]) => ({
+          id,
+          name: groupName(id),
+          score: Number(score) || 0,
+          stage: getStage(Number(score) || 0)
+        }))
+        .sort((a, b) => {
+          if (b.score !== a.score) return b.score - a.score;
+          return Number(a.id) - Number(b.id);
+        });
+
+      let previousScore = null;
+      let previousRank = 0;
+
+      return sorted.map((item, index) => {
+        let rank;
+
+        if (previousScore === item.score) {
+          rank = previousRank;
+        } else {
+          rank = index + 1;
+          previousRank = rank;
+          previousScore = item.score;
+        }
+
+        const above = index > 0 ? sorted[index - 1] : null;
+        const below = index < sorted.length - 1 ? sorted[index + 1] : null;
+
+        return {
+          ...item,
+          rank,
+          gapToAbove: above ? Math.max(0, above.score - item.score) : 0,
+          leadToBelow: below ? Math.max(0, item.score - below.score) : 0
+        };
+      });
+    }
+
+    function render(scores) {
+      const rows = buildRows(scores);
+      latestRows = rows;
+
+      const maxScore = Math.max(...rows.map(row => row.score), 0);
+      const sum = rows.reduce((acc, row) => acc + row.score, 0);
+      const winners = rows.filter(row => row.rank === 1 && row.score === maxScore);
+
+      firstPlace.textContent = winners.length
+        ? winners.map(row => row.name).join("、")
+        : "-";
+
+      highestScore.textContent = formatNumber(maxScore);
+      totalScore.textContent = formatNumber(sum);
+      updatedAt.textContent = new Date().toLocaleTimeString("zh-TW", {
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit"
+      });
+
+      rankBody.innerHTML = rows.map(row => {
+        const percent = maxScore > 0 ? Math.round((row.score / maxScore) * 100) : 0;
+        const topClass = row.rank === 1 ? "top1" : row.rank === 2 ? "top2" : row.rank === 3 ? "top3" : "";
+
+        return `
+          <tr class="${topClass}">
+            <td class="rank">#${row.rank}</td>
+            <td class="group-name">${row.name}</td>
+            <td class="score">${formatNumber(row.score)}</td>
+            <td><span class="stage">${row.stage.name}</span></td>
+            <td>${row.rank === 1 ? "第一名" : formatNumber(row.gapToAbove)}</td>
+            <td>${row.leadToBelow === 0 ? "-" : formatNumber(row.leadToBelow)}</td>
+            <td>
+              <div class="bar" aria-label="分數進度">
+                <span style="width:${percent}%"></span>
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join("");
+    }
+
+    function setConnection(ok, message) {
+      statusDot.classList.toggle("off", !ok);
+      statusText.textContent = message || (ok ? "已連線" : "離線");
+    }
+
+    async function startFirebase() {
+      room = getRoom();
+      roomText.textContent = room || "未指定";
+
+      if (!room) {
+        setConnection(false, "缺少房間");
+        rankBody.innerHTML = `
+          <tr>
+            <td colspan="7">
+              缺少房間代碼。請用這種網址打開：rebirth_full_rank.html?room=你的房間代碼
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      try {
+        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+
+        database = firebase.database();
+        scoresRef = database.ref(`rooms/${room}/rebirthScores`);
+
+        database.ref(".info/connected").on("value", snap => {
+          setConnection(Boolean(snap.val()), snap.val() ? "已連線" : "離線");
+        });
+
+        const initial = await scoresRef.once("value");
+        if (!initial.exists()) await scoresRef.set(emptyScores());
+
+        scoresRef.on("value", snap => {
+          render(cleanScores(snap.val()));
+        });
+      } catch (error) {
+        console.error(error);
+        setConnection(false, "連線失敗");
+        showToast("Firebase 連線失敗");
+      }
+    }
+
+    function unlock() {
+      sessionStorage.setItem(`rebirthFullRankUnlocked:${room || getRoom()}`, "true");
+      gate.classList.add("hide");
+      startFirebase();
+    }
+
+    gateForm.addEventListener("submit", event => {
+      event.preventDefault();
+
+      if (passwordInput.value.trim() === PASSWORD) {
+        unlock();
+      } else {
+        passwordInput.value = "";
+        passwordInput.focus();
+        showToast("密碼錯誤");
+      }
+    });
+
+    copyLinkBtn.addEventListener("click", async () => {
+      try {
+        await navigator.clipboard.writeText(location.href);
+        showToast("已複製完整排名連結");
+      } catch {
+        prompt("完整排名連結", location.href);
+      }
+    });
+
+    exportCsvBtn.addEventListener("click", () => {
+      if (!latestRows.length) {
+        showToast("目前沒有資料可匯出");
+        return;
+      }
+
+      const header = ["排名", "組別", "分數", "階段", "與上一名差距", "領先下一名"];
+      const lines = [
+        header.join(","),
+        ...latestRows.map(row => [
+          row.rank,
+          row.name,
+          row.score,
+          row.stage.name,
+          row.rank === 1 ? "第一名" : row.gapToAbove,
+          row.leadToBelow || ""
+        ].join(","))
+      ];
+
+      const blob = new Blob(["\uFEFF" + lines.join("\n")], {
+        type: "text/csv;charset=utf-8"
+      });
+
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `rebirth_full_rank_${room || "room"}.csv`;
+      a.click();
+      URL.revokeObjectURL(url);
+    });
+
+    room = getRoom();
+    roomText.textContent = room || "未指定";
+
+    if (sessionStorage.getItem(`rebirthFullRankUnlocked:${room}`) === "true") {
+      unlock();
+    } else {
+      passwordInput.focus();
+    }
+  </script>
+</body>
+</html>
