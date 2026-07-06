@@ -1,0 +1,1132 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+<meta name="theme-color" content="#fff7e6">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="每日星星">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="assets/icon-180.png">
+<link rel="icon" type="image/png" href="assets/icon-192.png">
+<title>每日星星．精神小語</title>
+<style>
+@import url("https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@700;900&family=Zen+Maru+Gothic:wght@500;700;900&display=swap");
+
+:root {
+  --ink: #201912;
+  --paper: #fffaf0;
+  --cream: #fff7e6;
+  --gold: #f4d778;
+  --amber: #bf8640;
+  --red: #b94a38;
+  --line: rgba(54, 41, 24, .15);
+  --shadow: rgba(60, 45, 24, .18);
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+}
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html, body { margin: 0; width: 100%; min-height: 100%; }
+body {
+  color: var(--ink);
+  font-family: "Zen Maru Gothic", "Noto Serif TC", "Microsoft JhengHei", sans-serif;
+  background:
+    radial-gradient(circle at 20% 8%, rgba(244, 215, 120, .25), transparent 42%),
+    radial-gradient(circle at 85% 30%, rgba(255, 255, 255, .65), transparent 40%),
+    var(--cream);
+  overscroll-behavior-y: none;
+}
+button, input, textarea { font: inherit; color: inherit; }
+
+.app {
+  max-width: 520px;
+  margin: 0 auto;
+  padding: calc(14px + var(--safe-top)) 16px calc(86px + var(--safe-bottom));
+  min-height: 100vh;
+}
+
+/* ---------- header ---------- */
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+.brand h1 {
+  margin: 0;
+  font-family: "Noto Serif TC", serif;
+  font-size: 24px;
+  font-weight: 900;
+  letter-spacing: .04em;
+}
+.brand small {
+  display: block;
+  margin-top: 2px;
+  color: rgba(32, 25, 18, .5);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .12em;
+}
+.user-chip {
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: rgba(255, 253, 245, .8);
+  padding: 7px 13px;
+  font-size: 13px;
+  font-weight: 900;
+  box-shadow: 0 8px 20px rgba(80, 56, 24, .08);
+  cursor: pointer;
+  white-space: nowrap;
+  max-width: 44vw;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ---------- cards ---------- */
+.card {
+  position: relative;
+  border: 1px solid rgba(60, 45, 24, .1);
+  border-radius: 24px;
+  background: linear-gradient(180deg, rgba(255, 255, 250, .92), rgba(255, 249, 236, .9));
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .55), 0 18px 48px rgba(60, 45, 24, .1);
+  padding: 20px;
+  margin-bottom: 16px;
+}
+.card h2 {
+  margin: 0 0 10px;
+  font-size: 14px;
+  font-weight: 900;
+  letter-spacing: .2em;
+  color: rgba(32, 25, 18, .48);
+}
+.quote-text {
+  margin: 4px 0 2px;
+  font-family: "Noto Serif TC", serif;
+  font-size: 21px;
+  line-height: 1.65;
+  font-weight: 900;
+}
+.date-line {
+  margin-top: 12px;
+  color: rgba(32, 25, 18, .45);
+  font-size: 12px;
+  font-weight: 700;
+}
+textarea.mood {
+  width: 100%;
+  min-height: 128px;
+  padding: 14px 16px;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, .82);
+  resize: vertical;
+  outline: none;
+  font-size: 16px;
+  line-height: 1.6;
+}
+textarea.mood:focus {
+  border-color: rgba(191, 134, 64, .4);
+  box-shadow: 0 0 0 4px rgba(191, 134, 64, .14);
+}
+.primary {
+  display: block;
+  width: 100%;
+  height: 54px;
+  margin-top: 14px;
+  border: 1px solid rgba(168, 110, 40, .24);
+  border-radius: 999px;
+  background: linear-gradient(135deg, #ffe57d, #d79e45);
+  font-size: 17px;
+  font-weight: 900;
+  cursor: pointer;
+  box-shadow: 0 14px 30px rgba(191, 134, 64, .28);
+  transition: transform .12s;
+}
+.primary:active { transform: scale(.97); }
+.primary[disabled] { opacity: .55; box-shadow: none; cursor: default; }
+.mine-text {
+  padding: 13px 16px;
+  border-radius: 18px;
+  border: 1px dashed rgba(191, 134, 64, .35);
+  background: rgba(255, 244, 214, .55);
+  font-size: 15.5px;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+.draw-cta {
+  background: linear-gradient(135deg, #ffd97d, #f0a03c);
+  animation: breathe 2.2s ease-in-out infinite;
+}
+@keyframes breathe {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.025); }
+}
+
+/* today's star result */
+.today-star {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.today-star img {
+  width: 116px;
+  height: 116px;
+  object-fit: contain;
+  filter: drop-shadow(0 10px 12px rgba(30, 24, 17, .18));
+  animation: floaty 3.2s ease-in-out infinite;
+}
+@keyframes floaty {
+  0%, 100% { transform: translateY(0) rotate(-2deg); }
+  50% { transform: translateY(-7px) rotate(2deg); }
+}
+.today-star .star-name {
+  font-family: "Noto Serif TC", serif;
+  font-size: 22px;
+  font-weight: 900;
+}
+.today-star .star-sub {
+  margin-top: 4px;
+  color: rgba(32, 25, 18, .5);
+  font-size: 12.5px;
+  font-weight: 700;
+}
+.countdown {
+  margin-top: 14px;
+  text-align: center;
+  color: rgba(32, 25, 18, .5);
+  font-size: 12.5px;
+  font-weight: 900;
+}
+
+/* ---------- star wall ---------- */
+.star-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+.star-cell {
+  border: 1px solid rgba(60, 45, 24, .1);
+  border-radius: 18px;
+  background: rgba(255, 253, 245, .85);
+  padding: 10px 8px 9px;
+  text-align: center;
+  box-shadow: 0 10px 24px rgba(60, 45, 24, .07);
+}
+.star-cell img {
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: contain;
+}
+.star-cell .n {
+  font-size: 13px;
+  font-weight: 900;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.star-cell .d {
+  color: rgba(32, 25, 18, .42);
+  font-size: 10.5px;
+  font-weight: 700;
+}
+.empty-hint {
+  padding: 34px 10px;
+  text-align: center;
+  color: rgba(32, 25, 18, .45);
+  font-weight: 700;
+  font-size: 14px;
+  line-height: 1.8;
+}
+
+/* ---------- history ---------- */
+.day-card .h-date {
+  font-size: 13px;
+  font-weight: 900;
+  color: rgba(32, 25, 18, .5);
+}
+.day-card .h-quote {
+  margin: 8px 0 10px;
+  font-family: "Noto Serif TC", serif;
+  font-size: 16.5px;
+  line-height: 1.6;
+  font-weight: 900;
+}
+.day-card .h-flex {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+.day-card .h-flex .mine-text { flex: 1; font-size: 14px; }
+.day-card .h-star {
+  width: 74px;
+  flex: none;
+  text-align: center;
+}
+.day-card .h-star img { width: 68px; height: 68px; object-fit: contain; }
+.day-card .h-star .n { font-size: 11.5px; font-weight: 900; }
+
+/* ---------- tabs ---------- */
+.tabbar {
+  position: fixed;
+  z-index: 30;
+  left: 50%;
+  bottom: calc(12px + var(--safe-bottom));
+  transform: translateX(-50%);
+  display: flex;
+  gap: 4px;
+  padding: 5px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: rgba(255, 253, 245, .9);
+  backdrop-filter: blur(14px);
+  box-shadow: 0 18px 44px rgba(60, 45, 24, .18);
+}
+.tabbar button {
+  min-width: 92px;
+  height: 44px;
+  border: none;
+  border-radius: 999px;
+  background: transparent;
+  font-size: 14px;
+  font-weight: 900;
+  color: rgba(32, 25, 18, .55);
+  cursor: pointer;
+}
+.tabbar button.active {
+  background: linear-gradient(135deg, #ffe57d, #e0a94f);
+  color: var(--ink);
+  box-shadow: 0 8px 18px rgba(191, 134, 64, .3);
+}
+.view { display: none; }
+.view.active { display: block; animation: fadeUp .3s ease both; }
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ---------- gate (name) ---------- */
+.gate {
+  position: fixed;
+  z-index: 60;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: radial-gradient(circle at 50% 28%, rgba(255, 255, 255, .92), rgba(244, 215, 120, .55) 52%, rgba(191, 134, 64, .4));
+  backdrop-filter: blur(10px);
+}
+.gate-card {
+  width: min(400px, 100%);
+  padding: 30px 26px;
+  border: 1px solid rgba(85, 62, 31, .14);
+  border-radius: 30px;
+  background: rgba(255, 253, 246, .94);
+  box-shadow: 0 34px 90px rgba(60, 45, 24, .26);
+  text-align: center;
+}
+.gate-card small {
+  display: block;
+  margin-bottom: 10px;
+  color: rgba(32, 25, 18, .45);
+  font-weight: 900;
+  letter-spacing: .3em;
+}
+.gate-card h2 {
+  margin: 0 0 18px;
+  font-family: "Noto Serif TC", serif;
+  font-size: 26px;
+  letter-spacing: .06em;
+}
+.gate-card input {
+  width: 100%;
+  height: 56px;
+  margin-bottom: 14px;
+  padding: 0 18px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, .8);
+  font-size: 19px;
+  font-weight: 900;
+  text-align: center;
+  outline: none;
+}
+.gate-card input:focus {
+  border-color: rgba(191, 134, 64, .4);
+  box-shadow: 0 0 0 4px rgba(191, 134, 64, .15);
+}
+.gate-card .primary { margin-top: 4px; }
+
+/* ---------- draw overlay ---------- */
+.draw-overlay {
+  position: fixed;
+  z-index: 70;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: radial-gradient(circle at 50% 34%, rgba(255, 250, 232, .97), rgba(240, 213, 140, .94));
+  backdrop-filter: blur(8px);
+}
+.draw-box {
+  width: min(400px, 100%);
+  text-align: center;
+}
+.draw-box h3 {
+  margin: 0 0 6px;
+  font-family: "Noto Serif TC", serif;
+  font-size: 26px;
+  font-weight: 900;
+}
+.draw-box .sub {
+  margin: 0 0 22px;
+  color: rgba(32, 25, 18, .55);
+  font-size: 13.5px;
+  font-weight: 700;
+}
+.capsule {
+  width: 190px;
+  height: 190px;
+  margin: 0 auto 24px;
+  display: grid;
+  place-items: center;
+  font-size: 120px;
+  line-height: 1;
+  filter: drop-shadow(0 20px 22px rgba(140, 96, 30, .35));
+  user-select: none;
+}
+.capsule.shake { animation: shake .5s ease-in-out infinite; }
+@keyframes shake {
+  0%, 100% { transform: rotate(0) translateX(0); }
+  20% { transform: rotate(-14deg) translateX(-8px); }
+  40% { transform: rotate(10deg) translateX(7px) scale(1.05); }
+  60% { transform: rotate(-9deg) translateX(-6px) scale(1.08); }
+  80% { transform: rotate(12deg) translateX(6px) scale(1.03); }
+}
+.reveal-star {
+  width: min(240px, 62vw);
+  height: min(240px, 62vw);
+  margin: 0 auto 8px;
+  object-fit: contain;
+  filter: drop-shadow(0 18px 20px rgba(30, 24, 17, .22));
+  animation: popIn .65s cubic-bezier(.2, 1.4, .4, 1) both, floaty 3.2s 0.7s ease-in-out infinite;
+}
+@keyframes popIn {
+  from { opacity: 0; transform: scale(.2) rotate(-30deg); }
+  to { opacity: 1; transform: scale(1) rotate(0); }
+}
+.name-row {
+  display: flex;
+  gap: 10px;
+  margin-top: 16px;
+}
+.name-row input {
+  flex: 1;
+  height: 52px;
+  padding: 0 16px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, .88);
+  font-size: 17px;
+  font-weight: 900;
+  text-align: center;
+  outline: none;
+}
+.name-row input:focus {
+  border-color: rgba(191, 134, 64, .4);
+  box-shadow: 0 0 0 4px rgba(191, 134, 64, .15);
+}
+.name-row .primary {
+  width: 108px;
+  flex: none;
+  margin-top: 0;
+  height: 52px;
+}
+.spark {
+  position: absolute;
+  font-size: 22px;
+  animation: sparkFly 1s ease-out both;
+  pointer-events: none;
+}
+@keyframes sparkFly {
+  from { opacity: 1; transform: translate(0, 0) scale(.6); }
+  to { opacity: 0; transform: translate(var(--dx), var(--dy)) scale(1.4); }
+}
+
+.hide { display: none !important; }
+.toast {
+  position: fixed;
+  z-index: 90;
+  left: 50%;
+  bottom: calc(84px + var(--safe-bottom));
+  transform: translate(-50%, 14px);
+  max-width: calc(100vw - 40px);
+  padding: 12px 18px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: rgba(255, 253, 246, .95);
+  box-shadow: 0 18px 48px rgba(60, 45, 24, .22);
+  font-size: 14px;
+  font-weight: 900;
+  opacity: 0;
+  transition: .2s;
+  pointer-events: none;
+}
+.toast.show { opacity: 1; transform: translate(-50%, 0); }
+.status-chip {
+  display: inline-block;
+  margin-left: 6px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #c35445;
+}
+.status-chip.on { background: #7e9654; }
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="topbar">
+    <div class="brand">
+      <h1>每日星星</h1>
+      <small>DAILY STAR<span class="status-chip" id="connDot" title="連線狀態"></span></small>
+    </div>
+    <button class="user-chip" id="userChip" type="button">☆</button>
+  </header>
+
+  <!-- 今日 -->
+  <section class="view active" id="viewToday">
+    <div class="card">
+      <h2>今日精神小語</h2>
+      <p class="quote-text" id="quoteText">…</p>
+      <div class="date-line" id="dateLine"></div>
+    </div>
+
+    <div class="card" id="writeCard">
+      <h2>寫下今天的一句話</h2>
+      <textarea class="mood" id="moodInput" maxlength="500" placeholder="今天過得怎麼樣？想說什麼都可以⋯"></textarea>
+      <button class="primary" id="submitBtn" type="button">送出，解鎖抽星星 ✦</button>
+    </div>
+
+    <div class="card hide" id="submittedCard">
+      <h2>你今天寫下的話</h2>
+      <div class="mine-text" id="myTextView"></div>
+      <button class="primary draw-cta hide" id="drawBtn" type="button">抽今天的星星 ★</button>
+      <div class="hide" id="todayStarBox">
+        <div class="today-star" style="margin-top:16px">
+          <img id="todayStarImg" alt="今日星星">
+          <div>
+            <div class="star-name" id="todayStarName"></div>
+            <div class="star-sub" id="todayStarSub">今天的星星，明天凌晨四點再見！</div>
+          </div>
+        </div>
+      </div>
+      <div class="countdown" id="countdown"></div>
+    </div>
+  </section>
+
+  <!-- 我的星星 -->
+  <section class="view" id="viewStars">
+    <div class="card">
+      <h2 id="starWallTitle">我的星星牆</h2>
+      <div class="star-grid" id="starGrid"></div>
+      <div class="empty-hint hide" id="starEmpty">還沒有星星。<br>每天寫一句話，就能抽一顆 ✦</div>
+    </div>
+  </section>
+
+  <!-- 紀錄 -->
+  <section class="view" id="viewHistory">
+    <div id="historyList"></div>
+    <div class="card hide" id="historyEmpty">
+      <div class="empty-hint">還沒有任何紀錄。<br>今天就開始吧！</div>
+    </div>
+  </section>
+</div>
+
+<nav class="tabbar">
+  <button class="active" data-view="viewToday" type="button">今日</button>
+  <button data-view="viewStars" type="button">我的星星</button>
+  <button data-view="viewHistory" type="button">紀錄</button>
+</nav>
+
+<!-- 名字 gate -->
+<section class="gate hide" id="gate">
+  <form class="gate-card" id="gateForm">
+    <small>DAILY STAR</small>
+    <h2>你的名字是？</h2>
+    <input id="nameInput" type="text" maxlength="24" autocomplete="nickname" placeholder="輸入名字或代號" aria-label="你的名字">
+    <button class="primary" type="submit">開始 ✦</button>
+  </form>
+</section>
+
+<!-- 抽獎 overlay -->
+<section class="draw-overlay hide" id="drawOverlay">
+  <div class="draw-box">
+    <div id="drawStage1">
+      <h3>今日抽星星</h3>
+      <p class="sub">深呼吸，點下去！</p>
+      <div class="capsule" id="capsule">🌟</div>
+      <button class="primary draw-cta" id="pullBtn" type="button">抽！</button>
+    </div>
+    <div class="hide" id="drawStage2">
+      <h3>抽到了！</h3>
+      <p class="sub">幫這顆星星取個名字吧</p>
+      <img class="reveal-star" id="revealImg" alt="抽到的星星">
+      <div class="name-row">
+        <input id="starNameInput" type="text" maxlength="16" placeholder="星星的名字">
+        <button class="primary" id="starNameBtn" type="button">就是你</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script>
+<script>
+/* ================= 基本設定 ================= */
+const firebaseConfig = {
+  apiKey: "AIzaSyD5ytWrUOI6UIUBIcKpF3fyODQR2pXFMmY",
+  authDomain: "score-calculation-ef584.firebaseapp.com",
+  databaseURL: "https://score-calculation-ef584-default-rtdb.firebaseio.com",
+  projectId: "score-calculation-ef584",
+  storageBucket: "score-calculation-ef584.firebasestorage.app",
+  messagingSenderId: "634074718336",
+  appId: "1:634074718336:web:38960860ad796197a50665",
+  measurementId: "G-R6NT2QJQSC"
+};
+
+const RESET_HOUR = 4; // 凌晨四點重置
+const SHEETS = ["assets/stars1.png", "assets/stars2.png", "assets/stars3.png"];
+
+const QUOTES = [
+  "今天的你，已經比昨天多走了一步。",
+  "慢慢來，比較快。",
+  "你不需要發光，你本來就是星星。",
+  "把今天過好，就是對未來最好的準備。",
+  "累了就休息，休息不是放棄。",
+  "小小的進步，也是進步。",
+  "世界很大，先把自己的角落照亮。",
+  "沒關係，明天的你會接住今天的你。",
+  "你已經做得很好了，真的。",
+  "把擔心的力氣，拿一半來喝口水。",
+  "今天也要記得抬頭看看天空。",
+  "難過的時候，允許自己難過一下。",
+  "你走得慢沒關係，方向對就好。",
+  "別人的光很亮，但你的光是你的。",
+  "今天先完成一件小事就夠了。",
+  "深呼吸，事情沒有想像中那麼糟。",
+  "謝謝你今天也沒有放棄。",
+  "偶爾耍廢，是為了走更長的路。",
+  "你值得被溫柔對待，包括被自己。",
+  "把「應該」放下一點，把「想要」撿起來一點。",
+  "今天的煩惱，交給今天的睡眠處理。",
+  "跌倒的話，就順便撿點東西再站起來。",
+  "不用跟別人比，跟昨天的自己擊掌就好。",
+  "你的存在本身，就已經是一件好事。",
+  "先把飯吃好，再來煩惱世界。",
+  "烏雲後面，太陽一直都在加班。",
+  "勇敢不是不怕，是怕了還是往前走。",
+  "今天適合原諒自己一次。",
+  "心累的時候，記得你也曾經很厲害。",
+  "一次只煩惱一件事，剩下的排隊。",
+  "你的努力，宇宙都有偷偷記帳。",
+  "生活會給糖，只是有時候包裝比較醜。",
+  "今天的目標：活著，且心情不要太差。",
+  "海浪會退，但也一定會再來。",
+  "把自己照顧好，就是最大的成就。",
+  "沒有白走的路，只有還沒看懂的風景。",
+  "你可以慢，但不要停止喜歡自己。",
+  "今天也辛苦了，晚上早點睡。",
+  "所有的迷路,都是在認識新的地圖。",
+  "壞日子會過去，好日子也在路上了。",
+  "你笑起來的樣子，比你想像中好看。",
+  "先完成，再完美。",
+  "允許今天是普通的一天，普通也很好。",
+  "星星不會急著發光，它們只是一直在。",
+  "把心事寫下來，它就輕了一半。",
+  "今天的風是溫柔的，你也可以是。",
+  "再撐一下下就好，然後記得獎勵自己。",
+  "世界偶爾很吵，記得聽自己的聲音。",
+  "你比你以為的，更被需要。",
+  "今天也請多多指教，我親愛的自己。"
+];
+
+/* ================= 小工具 ================= */
+const $ = id => document.getElementById(id);
+const toast = $("toast");
+function toastMessage(message) {
+  toast.textContent = message;
+  toast.classList.add("show");
+  clearTimeout(toastMessage.timer);
+  toastMessage.timer = setTimeout(() => toast.classList.remove("show"), 2000);
+}
+function pad2(n) { return String(n).padStart(2, "0"); }
+function dayKey(ts = Date.now()) {
+  const d = new Date(ts - RESET_HOUR * 3600 * 1000);
+  return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
+}
+function nextReset() {
+  const now = new Date();
+  const r = new Date(now);
+  r.setHours(RESET_HOUR, 0, 0, 0);
+  if (r <= now) r.setDate(r.getDate() + 1);
+  return r;
+}
+function hashString(text) {
+  let h = 7;
+  for (const ch of String(text)) h = (h * 31 + ch.codePointAt(0)) | 0;
+  return Math.abs(h);
+}
+function quoteFor(key) {
+  return QUOTES[hashString("star" + key) % QUOTES.length];
+}
+function weekdayName(key) {
+  return "日一二三四五六"[new Date(key + "T12:00:00").getDay()];
+}
+function sanitizeKey(name) {
+  return String(name).trim().replace(/[.#$/\[\]\s]+/g, "_").slice(0, 40);
+}
+
+/* ================= 星星偵測引擎 =================
+   沿用 rebirth_rank.html 的去背原理：接近白/米色的像素視為紙的底色。
+   在整張圖上做連通區塊分析，自動找出每一顆星星的位置，
+   所以換上任何一張「米色底＋星星」的圖片都能直接用。 */
+const sheetImages = new Map();   // index -> HTMLImageElement
+const sheetBoxes = new Map();    // index -> [{x,y,w,h} 相對座標]
+const starUrlCache = new Map();  // cacheKey -> dataURL
+
+function isPale(r, g, b) {
+  const max = Math.max(r, g, b), min = Math.min(r, g, b);
+  return max >= 224 && max - min <= 34;
+}
+function loadSheet(index) {
+  if (sheetImages.has(index)) return Promise.resolve(sheetImages.get(index));
+  return new Promise((resolve, reject) => {
+    const image = new Image();
+    image.onload = () => { sheetImages.set(index, image); resolve(image); };
+    image.onerror = () => reject(new Error("找不到星星圖片：" + SHEETS[index]));
+    image.src = SHEETS[index];
+  });
+}
+function detectBoxes(image) {
+  const scale = Math.min(1, 900 / image.naturalWidth);
+  const w = Math.max(1, Math.round(image.naturalWidth * scale));
+  const h = Math.max(1, Math.round(image.naturalHeight * scale));
+  const canvas = document.createElement("canvas");
+  canvas.width = w; canvas.height = h;
+  const context = canvas.getContext("2d", { willReadFrequently: true });
+  context.drawImage(image, 0, 0, w, h);
+  const data = context.getImageData(0, 0, w, h).data;
+
+  const mask = new Uint8Array(w * h);
+  for (let i = 0, p = 0; i < data.length; i += 4, p++) {
+    if (data[i + 3] > 40 && !isPale(data[i], data[i + 1], data[i + 2])) mask[p] = 1;
+  }
+
+  // 連通區塊（8 方向）
+  const label = new Int32Array(w * h).fill(-1);
+  const comps = [];
+  const stack = [];
+  for (let start = 0; start < w * h; start++) {
+    if (!mask[start] || label[start] >= 0) continue;
+    const id = comps.length;
+    const c = { minX: w, minY: h, maxX: 0, maxY: 0, count: 0 };
+    stack.length = 0;
+    stack.push(start);
+    label[start] = id;
+    while (stack.length) {
+      const p = stack.pop();
+      const x = p % w, y = (p / w) | 0;
+      c.count++;
+      if (x < c.minX) c.minX = x;
+      if (x > c.maxX) c.maxX = x;
+      if (y < c.minY) c.minY = y;
+      if (y > c.maxY) c.maxY = y;
+      for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) {
+        const nx = x + dx, ny = y + dy;
+        if (nx < 0 || ny < 0 || nx >= w || ny >= h) continue;
+        const np = ny * w + nx;
+        if (mask[np] && label[np] < 0) { label[np] = id; stack.push(np); }
+      }
+    }
+    comps.push(c);
+  }
+
+  // 合併互相重疊 / 包含的區塊（例如空心星星裡的眼睛）
+  let boxes = comps.filter(c => c.count > 24);
+  let changed = true;
+  while (changed) {
+    changed = false;
+    outer:
+    for (let i = 0; i < boxes.length; i++) {
+      for (let j = i + 1; j < boxes.length; j++) {
+        const a = boxes[i], b = boxes[j];
+        const ox = Math.min(a.maxX, b.maxX) - Math.max(a.minX, b.minX);
+        const oy = Math.min(a.maxY, b.maxY) - Math.max(a.minY, b.minY);
+        if (ox <= 0 || oy <= 0) continue;
+        const overlap = ox * oy;
+        const areaA = (a.maxX - a.minX) * (a.maxY - a.minY);
+        const areaB = (b.maxX - b.minX) * (b.maxY - b.minY);
+        if (overlap >= 0.4 * Math.min(areaA, areaB)) {
+          a.minX = Math.min(a.minX, b.minX);
+          a.minY = Math.min(a.minY, b.minY);
+          a.maxX = Math.max(a.maxX, b.maxX);
+          a.maxY = Math.max(a.maxY, b.maxY);
+          a.count += b.count;
+          boxes.splice(j, 1);
+          changed = true;
+          break outer;
+        }
+      }
+    }
+  }
+
+  // 過濾：太小的（手寫字）、太扁太長的（簽名）、貼到邊緣被切掉的
+  const minSize = w * 0.075;
+  const result = [];
+  for (const b of boxes) {
+    const bw = b.maxX - b.minX, bh = b.maxY - b.minY;
+    if (bw < minSize || bh < minSize) continue;
+    const aspect = bw / bh;
+    if (aspect < 0.45 || aspect > 2.2) continue;
+    if (b.minX <= 2 || b.minY <= 2 || b.maxX >= w - 3 || b.maxY >= h - 3) continue;
+    result.push({ x: b.minX / w, y: b.minY / h, w: bw / w, h: bh / h });
+  }
+  return result;
+}
+async function boxesFor(index) {
+  if (sheetBoxes.has(index)) return sheetBoxes.get(index);
+  const image = await loadSheet(index);
+  const cacheKey = `temple:boxes:${SHEETS[index]}:${image.naturalWidth}x${image.naturalHeight}`;
+  let boxes = null;
+  try { boxes = JSON.parse(localStorage.getItem(cacheKey) || "null"); } catch {}
+  if (!Array.isArray(boxes) || !boxes.length) {
+    boxes = detectBoxes(image);
+    try { localStorage.setItem(cacheKey, JSON.stringify(boxes)); } catch {}
+  }
+  sheetBoxes.set(index, boxes);
+  return boxes;
+}
+async function starImageUrl(star) {
+  const cacheKey = `${star.sheet}:${star.x.toFixed(4)}:${star.y.toFixed(4)}:${star.w.toFixed(4)}:${star.h.toFixed(4)}`;
+  if (starUrlCache.has(cacheKey)) return starUrlCache.get(cacheKey);
+  const image = await loadSheet(star.sheet);
+  const W = image.naturalWidth, H = image.naturalHeight;
+  const pad = Math.max(star.w * W, star.h * H) * 0.08;
+  const sx = Math.max(0, star.x * W - pad);
+  const sy = Math.max(0, star.y * H - pad);
+  const sw = Math.min(W - sx, star.w * W + pad * 2);
+  const sh = Math.min(H - sy, star.h * H + pad * 2);
+  const scale = Math.min(1.6, 460 / Math.max(sw, sh));
+  const canvas = document.createElement("canvas");
+  canvas.width = Math.max(1, Math.round(sw * scale));
+  canvas.height = Math.max(1, Math.round(sh * scale));
+  const context = canvas.getContext("2d", { willReadFrequently: true });
+  context.imageSmoothingQuality = "high";
+  context.drawImage(image, sx, sy, sw, sh, 0, 0, canvas.width, canvas.height);
+  const pixels = context.getImageData(0, 0, canvas.width, canvas.height);
+  const data = pixels.data;
+  for (let i = 0; i < data.length; i += 4) {
+    if (isPale(data[i], data[i + 1], data[i + 2])) data[i + 3] = 0;
+  }
+  context.putImageData(pixels, 0, 0);
+  const url = canvas.toDataURL("image/png");
+  starUrlCache.set(cacheKey, url);
+  return url;
+}
+async function randomStar() {
+  const pools = await Promise.all(SHEETS.map((_, i) => boxesFor(i).catch(() => [])));
+  const flat = [];
+  pools.forEach((boxes, sheet) => boxes.forEach(box => flat.push({ sheet, ...box })));
+  if (!flat.length) throw new Error("找不到任何星星，請確認 assets 裡的星星圖片");
+  return flat[Math.floor(Math.random() * flat.length)];
+}
+
+/* ================= 資料層（Firebase + 本機備份） ================= */
+let userName = localStorage.getItem("temple:userName") || "";
+let days = {};          // dayKey -> {quote, text, textAt, star}
+let daysRef = null;
+let connected = false;
+const pendingKey = () => `temple:pending:${sanitizeKey(userName)}`;
+const localKey = () => `temple:days:${sanitizeKey(userName)}`;
+
+function loadLocalDays() {
+  try { days = JSON.parse(localStorage.getItem(localKey()) || "{}") || {}; }
+  catch { days = {}; }
+}
+function saveLocalDays() {
+  try { localStorage.setItem(localKey(), JSON.stringify(days)); } catch {}
+}
+function markPending(key) {
+  try {
+    const list = new Set(JSON.parse(localStorage.getItem(pendingKey()) || "[]"));
+    list.add(key);
+    localStorage.setItem(pendingKey(), JSON.stringify([...list]));
+  } catch {}
+}
+function flushPending() {
+  if (!daysRef || !connected) return;
+  let list = [];
+  try { list = JSON.parse(localStorage.getItem(pendingKey()) || "[]"); } catch {}
+  if (!list.length) return;
+  Promise.all(list.filter(k => days[k]).map(k => daysRef.child(k).set(days[k])))
+    .then(() => localStorage.setItem(pendingKey(), "[]"))
+    .catch(() => {});
+}
+function saveDay(key) {
+  saveLocalDays();
+  if (daysRef) {
+    daysRef.child(key).set(days[key]).catch(() => markPending(key));
+    if (!connected) markPending(key);
+  } else {
+    markPending(key);
+  }
+}
+function startFirebase() {
+  try {
+    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+    const database = firebase.database();
+    // 資料庫規則只開放 rooms/ 底下，所以放在 rooms/temple_star
+    daysRef = database.ref(`rooms/temple_star/users/${sanitizeKey(userName)}/days`);
+    database.ref(`rooms/temple_star/users/${sanitizeKey(userName)}/profile/name`).set(userName).catch(() => {});
+    database.ref(".info/connected").on("value", snap => {
+      connected = Boolean(snap.val());
+      $("connDot").classList.toggle("on", connected);
+      if (connected) flushPending();
+    });
+    daysRef.on("value", snap => {
+      const remote = snap.val() || {};
+      // 以「內容比較多的那份」為準合併本機與雲端
+      for (const [key, record] of Object.entries(remote)) {
+        const local = days[key];
+        if (!local || (record.star && !local.star) || (!local.text && record.text)) days[key] = record;
+      }
+      saveLocalDays();
+      renderAll();
+    });
+  } catch (error) {
+    console.error(error);
+    toastMessage("雲端連線失敗，紀錄先存在手機裡");
+  }
+}
+
+/* ================= 畫面 ================= */
+const todayQuoteEl = $("quoteText");
+
+function todayRecord() { return days[dayKey()]; }
+
+function renderToday() {
+  const key = dayKey();
+  const record = todayRecord();
+  todayQuoteEl.textContent = "「" + quoteFor(key) + "」";
+  const d = new Date(key + "T12:00:00");
+  $("dateLine").textContent = `${d.getFullYear()} 年 ${d.getMonth() + 1} 月 ${d.getDate()} 日（${weekdayName(key)}）・每天凌晨 ${RESET_HOUR} 點更新`;
+
+  const hasText = Boolean(record && record.text);
+  const star = record && record.star;
+  $("writeCard").classList.toggle("hide", hasText);
+  $("submittedCard").classList.toggle("hide", !hasText);
+  if (hasText) {
+    $("myTextView").textContent = record.text;
+    $("drawBtn").classList.toggle("hide", Boolean(star));
+    $("todayStarBox").classList.toggle("hide", !star);
+    if (star) {
+      $("todayStarName").textContent = star.name || "（還沒取名字）";
+      starImageUrl(star).then(url => { $("todayStarImg").src = url; }).catch(() => {});
+    }
+  }
+  renderCountdown();
+}
+function renderCountdown() {
+  const el = $("countdown");
+  if (!todayRecord() || !todayRecord().star) { el.textContent = ""; return; }
+  const ms = nextReset() - new Date();
+  const hours = Math.floor(ms / 3600000);
+  const minutes = Math.floor((ms % 3600000) / 60000);
+  el.textContent = `下一次抽星星：${hours} 小時 ${minutes} 分後 ✦`;
+}
+setInterval(renderCountdown, 30000);
+
+function collectedStars() {
+  return Object.entries(days)
+    .filter(([, record]) => record && record.star)
+    .sort((a, b) => b[0].localeCompare(a[0]))
+    .map(([key, record]) => ({ key, star: record.star }));
+}
+function renderStars() {
+  const list = collectedStars();
+  $("starWallTitle").textContent = `我的星星牆・${list.length} 顆`;
+  $("starEmpty").classList.toggle("hide", list.length > 0);
+  const grid = $("starGrid");
+  grid.innerHTML = "";
+  for (const item of list) {
+    const cell = document.createElement("div");
+    cell.className = "star-cell";
+    cell.innerHTML = `<img alt=""><div class="n"></div><div class="d"></div>`;
+    cell.querySelector(".n").textContent = item.star.name || "無名星";
+    cell.querySelector(".d").textContent = item.key.slice(5).replace("-", "/");
+    starImageUrl(item.star).then(url => { cell.querySelector("img").src = url; }).catch(() => {});
+    grid.appendChild(cell);
+  }
+}
+function renderHistory() {
+  const entries = Object.entries(days)
+    .filter(([, record]) => record && (record.text || record.star))
+    .sort((a, b) => b[0].localeCompare(a[0]));
+  $("historyEmpty").classList.toggle("hide", entries.length > 0);
+  const list = $("historyList");
+  list.innerHTML = "";
+  for (const [key, record] of entries) {
+    const card = document.createElement("div");
+    card.className = "card day-card";
+    const d = new Date(key + "T12:00:00");
+    card.innerHTML = `
+      <div class="h-date">${d.getFullYear()}/${pad2(d.getMonth() + 1)}/${pad2(d.getDate())}（${weekdayName(key)}）</div>
+      <div class="h-quote"></div>
+      <div class="h-flex">
+        <div class="mine-text"></div>
+        <div class="h-star hide"><img alt=""><div class="n"></div></div>
+      </div>`;
+    card.querySelector(".h-quote").textContent = "「" + (record.quote || quoteFor(key)) + "」";
+    card.querySelector(".mine-text").textContent = record.text || "（這天沒有寫字）";
+    if (record.star) {
+      const holder = card.querySelector(".h-star");
+      holder.classList.remove("hide");
+      holder.querySelector(".n").textContent = record.star.name || "無名星";
+      starImageUrl(record.star).then(url => { holder.querySelector("img").src = url; }).catch(() => {});
+    }
+    list.appendChild(card);
+  }
+}
+function renderAll() {
+  renderToday();
+  renderStars();
+  renderHistory();
+}
+
+/* ================= 互動 ================= */
+document.querySelectorAll(".tabbar button").forEach(button => {
+  button.addEventListener("click", () => {
+    document.querySelectorAll(".tabbar button").forEach(b => b.classList.toggle("active", b === button));
+    document.querySelectorAll(".view").forEach(v => v.classList.toggle("active", v.id === button.dataset.view));
+  });
+});
+
+$("submitBtn").addEventListener("click", () => {
+  const text = $("moodInput").value.trim();
+  if (!text) { toastMessage("先寫一句話再送出吧"); return; }
+  const key = dayKey();
+  days[key] = { quote: quoteFor(key), text, textAt: Date.now() };
+  saveDay(key);
+  $("moodInput").value = "";
+  renderAll();
+  toastMessage("已收到！可以抽星星了 ✦");
+});
+
+let pendingStar = null;
+$("drawBtn").addEventListener("click", async () => {
+  $("drawOverlay").classList.remove("hide");
+  $("drawStage1").classList.remove("hide");
+  $("drawStage2").classList.add("hide");
+  $("pullBtn").disabled = false;
+  // 先在背景準備星星資料
+  SHEETS.forEach((_, i) => boxesFor(i).catch(() => {}));
+});
+$("pullBtn").addEventListener("click", async () => {
+  const button = $("pullBtn");
+  button.disabled = true;
+  $("capsule").classList.add("shake");
+  try {
+    const [star] = await Promise.all([
+      randomStar(),
+      new Promise(resolve => setTimeout(resolve, 1400))
+    ]);
+    pendingStar = star;
+    const url = await starImageUrl(star);
+    $("capsule").classList.remove("shake");
+    $("drawStage1").classList.add("hide");
+    $("drawStage2").classList.remove("hide");
+    $("revealImg").src = url;
+    $("starNameInput").value = "";
+    sparkle();
+    setTimeout(() => $("starNameInput").focus(), 400);
+  } catch (error) {
+    console.error(error);
+    $("capsule").classList.remove("shake");
+    button.disabled = false;
+    toastMessage(error.message || "抽獎失敗，再試一次");
+  }
+});
+$("starNameBtn").addEventListener("click", saveStarName);
+$("starNameInput").addEventListener("keydown", event => {
+  if (event.key === "Enter") { event.preventDefault(); saveStarName(); }
+});
+function saveStarName() {
+  if (!pendingStar) return;
+  const name = $("starNameInput").value.trim() || "無名星";
+  const key = dayKey();
+  if (!days[key]) days[key] = { quote: quoteFor(key), text: "", textAt: Date.now() };
+  days[key].star = { ...pendingStar, name, drawnAt: Date.now() };
+  pendingStar = null;
+  saveDay(key);
+  $("drawOverlay").classList.add("hide");
+  renderAll();
+  toastMessage(`「${name}」加入你的星星牆了 ★`);
+}
+function sparkle() {
+  const box = document.querySelector(".draw-box");
+  for (let i = 0; i < 14; i++) {
+    const s = document.createElement("span");
+    s.className = "spark";
+    s.textContent = ["✦", "✧", "⭐", "✨"][i % 4];
+    const angle = Math.PI * 2 * (i / 14);
+    s.style.left = "50%";
+    s.style.top = "40%";
+    s.style.setProperty("--dx", `${Math.cos(angle) * (90 + Math.random() * 70)}px`);
+    s.style.setProperty("--dy", `${Math.sin(angle) * (90 + Math.random() * 70)}px`);
+    box.appendChild(s);
+    setTimeout(() => s.remove(), 1100);
+  }
+}
+
+/* 名字 gate 與切換使用者 */
+$("gateForm").addEventListener("submit", event => {
+  event.preventDefault();
+  const name = $("nameInput").value.trim();
+  if (!name) { toastMessage("輸入一個名字吧"); return; }
+  userName = name;
+  localStorage.setItem("temple:userName", name);
+  $("gate").classList.add("hide");
+  bootUser();
+});
+$("userChip").addEventListener("click", () => {
+  if (!userName) return;
+  if (confirm(`目前使用者：${userName}\n要切換使用者嗎？（紀錄都在雲端，不會不見）`)) {
+    localStorage.removeItem("temple:userName");
+    location.reload();
+  }
+});
+
+function bootUser() {
+  $("userChip").textContent = "☆ " + userName;
+  loadLocalDays();
+  renderAll();
+  startFirebase();
+  // 預先在背景分析星星圖，抽獎時比較快
+  setTimeout(() => SHEETS.forEach((_, i) => boxesFor(i).catch(() => {})), 800);
+}
+function init() {
+  if (userName) bootUser();
+  else $("gate").classList.remove("hide");
+  if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.register("sw.js").catch(() => {});
+  }
+}
+init();
+</script>
+</body>
+</html>
