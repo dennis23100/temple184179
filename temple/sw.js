@@ -1,5 +1,5 @@
 /* 每日星星 service worker：讓 app 加到主畫面後可以離線開啟 */
-const CACHE = "temple-star-v1";
+const CACHE = "temple-star-v4";
 const SHELL = [
   "./",
   "./index.html",
@@ -7,6 +7,7 @@ const SHELL = [
   "./assets/icon-180.png",
   "./assets/icon-192.png",
   "./assets/icon-512.png",
+  "./assets/bgm.mp3",
   "./assets/stars1.png",
   "./assets/stars2.png",
   "./assets/stars3.png"

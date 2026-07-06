@@ -165,6 +165,59 @@ textarea.mood:focus {
   50% { transform: scale(1.025); }
 }
 
+/* ---------- 本週列（像 Pikmin Bloom） ---------- */
+.week-card { padding: 14px 12px 12px; }
+.week-head, .week-strip {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  text-align: center;
+}
+.week-head span {
+  font-size: 12px;
+  font-weight: 900;
+  color: rgba(32, 25, 18, .45);
+  padding-bottom: 8px;
+}
+.wday {
+  position: relative;
+  border: none;
+  background: none;
+  padding: 2px 0 6px;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  min-height: 46px;
+}
+.wday .num {
+  font-size: 17px;
+  font-weight: 900;
+  color: #9db7d8;
+}
+.wday.past .num { color: rgba(32, 25, 18, .3); }
+.wday img {
+  width: 34px;
+  height: 34px;
+  object-fit: contain;
+  filter: drop-shadow(0 3px 4px rgba(30, 24, 17, .18));
+}
+.wday .dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #ffe57d, #d79e45);
+  box-shadow: 0 2px 6px rgba(191, 134, 64, .4);
+}
+.wday.today::after {
+  content: "";
+  position: absolute;
+  left: 22%;
+  right: 22%;
+  bottom: 0;
+  height: 4px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #ffcf5e, #d79e45);
+}
+
 /* today's star result */
 .today-star {
   display: flex;
@@ -201,37 +254,170 @@ textarea.mood:focus {
   font-weight: 900;
 }
 
-/* ---------- star wall ---------- */
+/* ---------- 星星草原 ---------- */
+.scene-card { padding: 12px; }
+.scene {
+  position: relative;
+  height: 54vh;
+  min-height: 330px;
+  border-radius: 18px;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 78% 12%, rgba(255, 245, 190, .9), transparent 26%),
+    linear-gradient(180deg, #dff2fd 0%, #eafbe4 34%, #cdecb2 36%, #b6e296 100%);
+}
+.scene .deco {
+  position: absolute;
+  font-size: 13px;
+  opacity: .85;
+  pointer-events: none;
+}
+.critter {
+  position: absolute;
+  width: 58px;
+  height: 58px;
+  margin: -29px 0 0 -29px;
+  border: none;
+  background: none;
+  padding: 0;
+  cursor: pointer;
+  transition: left 2.6s ease-in-out, top 2.6s ease-in-out;
+  z-index: 2;
+}
+.critter img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 6px 5px rgba(40, 60, 20, .25));
+  transform: scaleX(var(--sx, 1));
+  animation: hop var(--hop, 1.3s) ease-in-out infinite;
+}
+@keyframes hop {
+  0%, 100% { transform: scaleX(var(--sx, 1)) translateY(0); }
+  50% { transform: scaleX(var(--sx, 1)) translateY(-8px); }
+}
+.critter .tag {
+  position: absolute;
+  left: 50%;
+  top: -18px;
+  transform: translateX(-50%);
+  padding: 2px 9px;
+  border-radius: 999px;
+  background: rgba(255, 253, 245, .95);
+  border: 1px solid var(--line);
+  font-size: 11px;
+  font-weight: 900;
+  white-space: nowrap;
+  opacity: 0;
+  transition: opacity .2s;
+  pointer-events: none;
+}
+.critter.show-tag .tag { opacity: 1; }
+.scene-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 10px;
+  padding: 0 6px;
+}
+.scene-bar .count {
+  font-size: 13px;
+  font-weight: 900;
+  color: rgba(32, 25, 18, .55);
+}
+.dex-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 42px;
+  padding: 0 16px;
+  border: 1px solid rgba(168, 110, 40, .24);
+  border-radius: 999px;
+  background: linear-gradient(135deg, #ffe57d, #d79e45);
+  font-size: 14px;
+  font-weight: 900;
+  cursor: pointer;
+  box-shadow: 0 10px 22px rgba(191, 134, 64, .3);
+}
+.scene-empty {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  text-align: center;
+  color: rgba(50, 70, 40, .55);
+  font-weight: 900;
+  font-size: 14px;
+  line-height: 1.8;
+  z-index: 1;
+}
+
+/* ---------- 圖鑑 ---------- */
+.dex-overlay {
+  position: fixed;
+  z-index: 75;
+  inset: 0;
+  overflow-y: auto;
+  background: rgba(255, 247, 230, .97);
+  backdrop-filter: blur(8px);
+  padding: calc(16px + var(--safe-top)) 16px calc(30px + var(--safe-bottom));
+}
+.dex-inner { max-width: 520px; margin: 0 auto; }
+.dex-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+.dex-head h3 {
+  margin: 0;
+  font-family: "Noto Serif TC", serif;
+  font-size: 24px;
+  font-weight: 900;
+}
+.dex-head .close-btn {
+  width: 42px;
+  height: 42px;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  background: rgba(255, 253, 245, .9);
+  font-size: 18px;
+  font-weight: 900;
+  cursor: pointer;
+}
+.dex-count {
+  margin: 0 0 14px;
+  font-size: 13px;
+  font-weight: 900;
+  color: rgba(32, 25, 18, .5);
+}
 .star-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 12px;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
 }
 .star-cell {
   border: 1px solid rgba(60, 45, 24, .1);
-  border-radius: 18px;
+  border-radius: 16px;
   background: rgba(255, 253, 245, .85);
-  padding: 10px 8px 9px;
+  padding: 8px 6px 7px;
   text-align: center;
-  box-shadow: 0 10px 24px rgba(60, 45, 24, .07);
+  box-shadow: 0 8px 18px rgba(60, 45, 24, .06);
 }
 .star-cell img {
   width: 100%;
   aspect-ratio: 1;
   object-fit: contain;
 }
+.star-cell.unknown img { opacity: .88; }
 .star-cell .n {
-  font-size: 13px;
+  font-size: 11.5px;
   font-weight: 900;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-.star-cell .d {
-  color: rgba(32, 25, 18, .42);
-  font-size: 10.5px;
-  font-weight: 700;
-}
+.star-cell.unknown .n { color: rgba(32, 25, 18, .35); letter-spacing: .18em; }
 .empty-hint {
   padding: 34px 10px;
   text-align: center;
@@ -241,32 +427,142 @@ textarea.mood:focus {
   line-height: 1.8;
 }
 
-/* ---------- history ---------- */
-.day-card .h-date {
+/* ---------- 月曆 ---------- */
+.cal-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+.cal-head .title {
+  font-family: "Noto Serif TC", serif;
+  font-size: 21px;
+  font-weight: 900;
+}
+.cal-nav {
+  width: 40px;
+  height: 40px;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  background: rgba(255, 253, 245, .85);
+  font-weight: 900;
+  cursor: pointer;
+}
+.cal-week, .cal-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  text-align: center;
+}
+.cal-week span {
+  font-size: 12px;
+  font-weight: 900;
+  color: rgba(32, 25, 18, .45);
+  padding-bottom: 8px;
+}
+.cal-grid { row-gap: 4px; }
+.cal-cell {
+  position: relative;
+  border: none;
+  background: none;
+  padding: 3px 0;
+  min-height: 56px;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 2px;
+  cursor: pointer;
+  border-radius: 14px;
+}
+.cal-cell:disabled { cursor: default; }
+.cal-cell .num {
+  font-size: 13px;
+  font-weight: 900;
+  color: rgba(32, 25, 18, .55);
+}
+.cal-cell.future .num { color: rgba(157, 183, 216, .9); }
+.cal-cell img {
+  width: 30px;
+  height: 30px;
+  object-fit: contain;
+  filter: drop-shadow(0 3px 3px rgba(30, 24, 17, .16));
+}
+.cal-cell .dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #ffe57d, #d79e45);
+}
+.cal-cell.today { background: rgba(255, 229, 125, .28); }
+
+/* ---------- 單日詳細 modal ---------- */
+.day-modal {
+  position: fixed;
+  z-index: 80;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 22px;
+  background: rgba(60, 45, 24, .35);
+  backdrop-filter: blur(6px);
+}
+.day-modal .sheet {
+  width: min(420px, 100%);
+  max-height: 84vh;
+  overflow-y: auto;
+  border: 1px solid rgba(85, 62, 31, .14);
+  border-radius: 26px;
+  background: rgba(255, 253, 246, .98);
+  box-shadow: 0 34px 90px rgba(60, 45, 24, .35);
+  padding: 22px;
+}
+.day-modal .m-date {
   font-size: 13px;
   font-weight: 900;
   color: rgba(32, 25, 18, .5);
 }
-.day-card .h-quote {
-  margin: 8px 0 10px;
+.day-modal .m-quote {
+  margin: 8px 0 12px;
   font-family: "Noto Serif TC", serif;
-  font-size: 16.5px;
+  font-size: 18px;
   line-height: 1.6;
   font-weight: 900;
 }
-.day-card .h-flex {
-  display: flex;
-  gap: 12px;
-  align-items: flex-start;
+.day-modal .m-label {
+  margin: 14px 0 6px;
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: .2em;
+  color: rgba(32, 25, 18, .45);
 }
-.day-card .h-flex .mine-text { flex: 1; font-size: 14px; }
-.day-card .h-star {
-  width: 74px;
-  flex: none;
+.day-modal .m-star {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.day-modal .m-star img {
+  width: 92px;
+  height: 92px;
+  object-fit: contain;
+  filter: drop-shadow(0 8px 10px rgba(30, 24, 17, .18));
+}
+.day-modal .m-star .n {
+  font-family: "Noto Serif TC", serif;
+  font-size: 20px;
+  font-weight: 900;
+}
+.day-modal .close-row {
+  margin-top: 18px;
   text-align: center;
 }
-.day-card .h-star img { width: 68px; height: 68px; object-fit: contain; }
-.day-card .h-star .n { font-size: 11.5px; font-weight: 900; }
+.day-modal .close-row button {
+  height: 46px;
+  padding: 0 30px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: rgba(255, 253, 245, .9);
+  font-weight: 900;
+  cursor: pointer;
+}
 
 /* ---------- tabs ---------- */
 .tabbar {
@@ -411,11 +707,69 @@ textarea.mood:focus {
   margin: 0 auto 8px;
   object-fit: contain;
   filter: drop-shadow(0 18px 20px rgba(30, 24, 17, .22));
-  animation: popIn .65s cubic-bezier(.2, 1.4, .4, 1) both, floaty 3.2s 0.7s ease-in-out infinite;
 }
+/* 登場動畫（每次隨機一種） */
 @keyframes popIn {
   from { opacity: 0; transform: scale(.2) rotate(-30deg); }
   to { opacity: 1; transform: scale(1) rotate(0); }
+}
+@keyframes dropBounce {
+  0% { opacity: 0; transform: translateY(-70vh) scale(.8); }
+  55% { opacity: 1; transform: translateY(0) scale(1.05, .82); }
+  70% { transform: translateY(-34px) scale(.95, 1.08); }
+  85% { transform: translateY(0) scale(1.03, .94); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes spinIn {
+  from { opacity: 0; transform: scale(.1) rotate(720deg); }
+  70% { opacity: 1; transform: scale(1.15) rotate(-14deg); }
+  to { opacity: 1; transform: scale(1) rotate(0); }
+}
+@keyframes flipIn {
+  from { opacity: 0; transform: perspective(500px) rotateY(540deg) scale(.4); }
+  to { opacity: 1; transform: perspective(500px) rotateY(0) scale(1); }
+}
+@keyframes zoomWobble {
+  0% { opacity: 0; transform: scale(3); filter: blur(6px) drop-shadow(0 18px 20px rgba(30,24,17,.22)); }
+  45% { opacity: 1; transform: scale(.88) rotate(-7deg); filter: blur(0); }
+  65% { transform: scale(1.08) rotate(6deg); }
+  82% { transform: scale(.97) rotate(-3deg); }
+  100% { opacity: 1; transform: scale(1) rotate(0); }
+}
+@keyframes slideSquash {
+  0% { opacity: 0; transform: translateY(46vh) scale(1.2, .6); }
+  60% { opacity: 1; transform: translateY(-22px) scale(.9, 1.12); }
+  80% { transform: translateY(0) scale(1.06, .92); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+/* 待機動畫（登場後接著隨機一種） */
+@keyframes wiggle {
+  0%, 100% { transform: rotate(-7deg); }
+  50% { transform: rotate(7deg); }
+}
+@keyframes spinSlow {
+  from { transform: rotate(0); }
+  to { transform: rotate(360deg); }
+}
+@keyframes heartbeat {
+  0%, 100% { transform: scale(1); }
+  12% { transform: scale(1.12); }
+  24% { transform: scale(.98); }
+  36% { transform: scale(1.08); }
+  48% { transform: scale(1); }
+}
+@keyframes happyDance {
+  0%, 100% { transform: translateX(0) rotate(0); }
+  20% { transform: translateX(-16px) rotate(-9deg); }
+  45% { transform: translateX(14px) rotate(8deg) translateY(-8px); }
+  70% { transform: translateX(-10px) rotate(-6deg); }
+}
+@keyframes bigBounce {
+  0%, 100% { transform: translateY(0) scale(1); }
+  35% { transform: translateY(-26px) scale(.96, 1.06); }
+  50% { transform: translateY(0) scale(1.05, .93); }
+  62% { transform: translateY(-11px) scale(1); }
+  72% { transform: translateY(0) scale(1); }
 }
 .name-row {
   display: flex;
@@ -454,6 +808,29 @@ textarea.mood:focus {
   from { opacity: 1; transform: translate(0, 0) scale(.6); }
   to { opacity: 0; transform: translate(var(--dx), var(--dy)) scale(1.4); }
 }
+.spark.rain { animation: sparkRain 1.5s linear both; }
+@keyframes sparkRain {
+  from { opacity: 1; transform: translateY(-30px) rotate(0); }
+  to { opacity: 0; transform: translateY(var(--dy)) rotate(220deg); }
+}
+.spark.fountain { animation: sparkFountain 1.3s cubic-bezier(.2, .6, .6, 1) both; }
+@keyframes sparkFountain {
+  0% { opacity: 1; transform: translate(0, 0) scale(.5); }
+  40% { opacity: 1; transform: translate(calc(var(--dx) * .5), calc(var(--dy) * 1.2)) scale(1.2); }
+  100% { opacity: 0; transform: translate(var(--dx), 60px) scale(.8); }
+}
+.music-btn {
+  width: 40px;
+  height: 40px;
+  flex: none;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  background: rgba(255, 253, 245, .8);
+  font-size: 17px;
+  cursor: pointer;
+  box-shadow: 0 8px 20px rgba(80, 56, 24, .08);
+}
+.music-btn.off { opacity: .45; }
 
 .hide { display: none !important; }
 .toast {
@@ -493,11 +870,21 @@ textarea.mood:focus {
       <h1>每日星星</h1>
       <small>DAILY STAR<span class="status-chip" id="connDot" title="連線狀態"></span></small>
     </div>
-    <button class="user-chip" id="userChip" type="button">☆</button>
+    <div style="display:flex;align-items:center;gap:8px">
+      <button class="music-btn" id="musicBtn" type="button" aria-label="背景音樂">🎵</button>
+      <button class="user-chip" id="userChip" type="button">☆</button>
+    </div>
   </header>
 
   <!-- 今日 -->
   <section class="view active" id="viewToday">
+    <div class="card week-card">
+      <div class="week-head">
+        <span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span><span>日</span>
+      </div>
+      <div class="week-strip" id="weekStrip"></div>
+    </div>
+
     <div class="card">
       <h2>今日精神小語</h2>
       <p class="quote-text" id="quoteText">…</p>
@@ -519,7 +906,7 @@ textarea.mood:focus {
           <img id="todayStarImg" alt="今日星星">
           <div>
             <div class="star-name" id="todayStarName"></div>
-            <div class="star-sub" id="todayStarSub">今天的星星，明天凌晨四點再見！</div>
+            <div class="star-sub">今天的星星，明天凌晨四點再見！</div>
           </div>
         </div>
       </div>
@@ -527,20 +914,31 @@ textarea.mood:focus {
     </div>
   </section>
 
-  <!-- 我的星星 -->
+  <!-- 我的星星（草原） -->
   <section class="view" id="viewStars">
-    <div class="card">
-      <h2 id="starWallTitle">我的星星牆</h2>
-      <div class="star-grid" id="starGrid"></div>
-      <div class="empty-hint hide" id="starEmpty">還沒有星星。<br>每天寫一句話，就能抽一顆 ✦</div>
+    <div class="card scene-card">
+      <div class="scene" id="scene">
+        <div class="scene-empty hide" id="sceneEmpty">草原上還沒有星星。<br>每天寫一句話抽一顆，<br>牠們就會在這裡跑來跑去 ✦</div>
+      </div>
+      <div class="scene-bar">
+        <span class="count" id="sceneCount">0 顆星星</span>
+        <button class="dex-btn" id="dexBtn" type="button">📖 圖鑑</button>
+      </div>
     </div>
   </section>
 
-  <!-- 紀錄 -->
+  <!-- 紀錄（月曆） -->
   <section class="view" id="viewHistory">
-    <div id="historyList"></div>
-    <div class="card hide" id="historyEmpty">
-      <div class="empty-hint">還沒有任何紀錄。<br>今天就開始吧！</div>
+    <div class="card">
+      <div class="cal-head">
+        <button class="cal-nav" id="calPrev" type="button">‹</button>
+        <span class="title" id="calTitle"></span>
+        <button class="cal-nav" id="calNext" type="button">›</button>
+      </div>
+      <div class="cal-week">
+        <span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span><span>日</span>
+      </div>
+      <div class="cal-grid" id="calGrid"></div>
     </div>
   </section>
 </div>
@@ -550,6 +948,36 @@ textarea.mood:focus {
   <button data-view="viewStars" type="button">我的星星</button>
   <button data-view="viewHistory" type="button">紀錄</button>
 </nav>
+
+<!-- 圖鑑 -->
+<section class="dex-overlay hide" id="dexOverlay">
+  <div class="dex-inner">
+    <div class="dex-head">
+      <h3>星星圖鑑</h3>
+      <button class="close-btn" id="dexClose" type="button">✕</button>
+    </div>
+    <p class="dex-count" id="dexCount">整理中⋯</p>
+    <div class="star-grid" id="dexGrid"></div>
+  </div>
+</section>
+
+<!-- 單日詳細 -->
+<section class="day-modal hide" id="dayModal">
+  <div class="sheet">
+    <div class="m-date" id="mDate"></div>
+    <div class="m-quote" id="mQuote"></div>
+    <div class="m-label">我寫下的話</div>
+    <div class="mine-text" id="mText"></div>
+    <div id="mStarWrap">
+      <div class="m-label">抽到的星星</div>
+      <div class="m-star">
+        <img id="mStarImg" alt="">
+        <div class="n" id="mStarName"></div>
+      </div>
+    </div>
+    <div class="close-row"><button id="mClose" type="button">關閉</button></div>
+  </div>
+</section>
 
 <!-- 名字 gate -->
 <section class="gate hide" id="gate">
@@ -583,6 +1011,7 @@ textarea.mood:focus {
 </section>
 
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
+<audio id="bgm" src="assets/bgm.mp3" loop preload="none"></audio>
 
 <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script>
@@ -601,6 +1030,7 @@ const firebaseConfig = {
 
 const RESET_HOUR = 4; // 凌晨四點重置
 const SHEETS = ["assets/stars1.png", "assets/stars2.png", "assets/stars3.png"];
+const SCENE_MAX = 30; // 草原上最多幾隻
 
 const QUOTES = [
   "今天的你，已經比昨天多走了一步。",
@@ -641,7 +1071,7 @@ const QUOTES = [
   "沒有白走的路，只有還沒看懂的風景。",
   "你可以慢，但不要停止喜歡自己。",
   "今天也辛苦了，晚上早點睡。",
-  "所有的迷路,都是在認識新的地圖。",
+  "所有的迷路，都是在認識新的地圖。",
   "壞日子會過去，好日子也在路上了。",
   "你笑起來的樣子，比你想像中好看。",
   "先完成，再完美。",
@@ -665,9 +1095,11 @@ function toastMessage(message) {
   toastMessage.timer = setTimeout(() => toast.classList.remove("show"), 2000);
 }
 function pad2(n) { return String(n).padStart(2, "0"); }
-function dayKey(ts = Date.now()) {
-  const d = new Date(ts - RESET_HOUR * 3600 * 1000);
+function keyOfDate(d) {
   return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
+}
+function dayKey(ts = Date.now()) {
+  return keyOfDate(new Date(ts - RESET_HOUR * 3600 * 1000));
 }
 function nextReset() {
   const now = new Date();
@@ -698,6 +1130,10 @@ function sanitizeKey(name) {
 const sheetImages = new Map();   // index -> HTMLImageElement
 const sheetBoxes = new Map();    // index -> [{x,y,w,h} 相對座標]
 const starUrlCache = new Map();  // cacheKey -> dataURL
+// 每張圖要跳過的區域（相對座標）：stars2.png 左上角是作者簽名
+const EXCLUDE_ZONES = {
+  1: [{ x: 0, y: 0, w: 0.62, h: 0.14 }]
+};
 
 function isPale(r, g, b) {
   const max = Math.max(r, g, b), min = Math.min(r, g, b);
@@ -712,7 +1148,7 @@ function loadSheet(index) {
     image.src = SHEETS[index];
   });
 }
-function detectBoxes(image) {
+function detectBoxes(image, sheetIndex) {
   const scale = Math.min(1, 900 / image.naturalWidth);
   const w = Math.max(1, Math.round(image.naturalWidth * scale));
   const h = Math.max(1, Math.round(image.naturalHeight * scale));
@@ -771,7 +1207,7 @@ function detectBoxes(image) {
         const overlap = ox * oy;
         const areaA = (a.maxX - a.minX) * (a.maxY - a.minY);
         const areaB = (b.maxX - b.minX) * (b.maxY - b.minY);
-        if (overlap >= 0.4 * Math.min(areaA, areaB)) {
+        if (overlap >= 0.6 * Math.min(areaA, areaB)) {
           a.minX = Math.min(a.minX, b.minX);
           a.minY = Math.min(a.minY, b.minY);
           a.maxX = Math.max(a.maxX, b.maxX);
@@ -794,26 +1230,30 @@ function detectBoxes(image) {
     const aspect = bw / bh;
     if (aspect < 0.45 || aspect > 2.2) continue;
     if (b.minX <= 2 || b.minY <= 2 || b.maxX >= w - 3 || b.maxY >= h - 3) continue;
+    const cx = (b.minX + b.maxX) / 2 / w, cy = (b.minY + b.maxY) / 2 / h;
+    const excluded = (EXCLUDE_ZONES[sheetIndex] || []).some(z =>
+      cx >= z.x && cx <= z.x + z.w && cy >= z.y && cy <= z.y + z.h);
+    if (excluded) continue;
     result.push({ x: b.minX / w, y: b.minY / h, w: bw / w, h: bh / h });
   }
+  // 固定順序：由上到下、由左到右，圖鑑的編號才會穩定
+  result.sort((a, b) => (a.y - b.y) || (a.x - b.x));
   return result;
 }
 async function boxesFor(index) {
   if (sheetBoxes.has(index)) return sheetBoxes.get(index);
   const image = await loadSheet(index);
-  const cacheKey = `temple:boxes:${SHEETS[index]}:${image.naturalWidth}x${image.naturalHeight}`;
+  const cacheKey = `temple:boxes:v3:${SHEETS[index]}:${image.naturalWidth}x${image.naturalHeight}`;
   let boxes = null;
   try { boxes = JSON.parse(localStorage.getItem(cacheKey) || "null"); } catch {}
   if (!Array.isArray(boxes) || !boxes.length) {
-    boxes = detectBoxes(image);
+    boxes = detectBoxes(image, index);
     try { localStorage.setItem(cacheKey, JSON.stringify(boxes)); } catch {}
   }
   sheetBoxes.set(index, boxes);
   return boxes;
 }
-async function starImageUrl(star) {
-  const cacheKey = `${star.sheet}:${star.x.toFixed(4)}:${star.y.toFixed(4)}:${star.w.toFixed(4)}:${star.h.toFixed(4)}`;
-  if (starUrlCache.has(cacheKey)) return starUrlCache.get(cacheKey);
+async function renderStarCanvas(star) {
   const image = await loadSheet(star.sheet);
   const W = image.naturalWidth, H = image.naturalHeight;
   const pad = Math.max(star.w * W, star.h * H) * 0.08;
@@ -828,22 +1268,84 @@ async function starImageUrl(star) {
   const context = canvas.getContext("2d", { willReadFrequently: true });
   context.imageSmoothingQuality = "high";
   context.drawImage(image, sx, sy, sw, sh, 0, 0, canvas.width, canvas.height);
+  return { canvas, context };
+}
+/* 把裁下來的方框清乾淨：只留星星本體，
+   旁邊的手寫字、隔壁星星伸進來的角都拿掉 */
+function cleanupCrop(pixels, w, h) {
+  const data = pixels.data;
+  const solid = new Uint8Array(w * h);
+  for (let p = 0; p < w * h; p++) solid[p] = data[p * 4 + 3] > 40 ? 1 : 0;
+  const label = new Int32Array(w * h).fill(-1);
+  const comps = [];
+  const stack = [];
+  for (let start = 0; start < w * h; start++) {
+    if (!solid[start] || label[start] >= 0) continue;
+    const id = comps.length;
+    const c = { minX: w, minY: h, maxX: 0, maxY: 0, count: 0 };
+    stack.length = 0;
+    stack.push(start);
+    label[start] = id;
+    while (stack.length) {
+      const p = stack.pop();
+      const x = p % w, y = (p / w) | 0;
+      c.count++;
+      if (x < c.minX) c.minX = x;
+      if (x > c.maxX) c.maxX = x;
+      if (y < c.minY) c.minY = y;
+      if (y > c.maxY) c.maxY = y;
+      for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) {
+        const nx = x + dx, ny = y + dy;
+        if (nx < 0 || ny < 0 || nx >= w || ny >= h) continue;
+        const np = ny * w + nx;
+        if (solid[np] && label[np] < 0) { label[np] = id; stack.push(np); }
+      }
+    }
+    comps.push(c);
+  }
+  // 保留：夠大的區塊，或有碰到畫面正中央的區塊（星星身體、空心星星裡的眼睛）
+  const cx0 = w * .38, cx1 = w * .62, cy0 = h * .38, cy1 = h * .62;
+  const total = w * h;
+  const keep = comps.map(c =>
+    c.count >= total * .06 ||
+    (c.maxX >= cx0 && c.minX <= cx1 && c.maxY >= cy0 && c.minY <= cy1));
+  for (let p = 0; p < w * h; p++) {
+    if (solid[p] && !keep[label[p]]) data[p * 4 + 3] = 0;
+  }
+}
+async function starImageUrl(star, variant = "color") {
+  const cacheKey = `${variant}:${star.sheet}:${star.x.toFixed(4)}:${star.y.toFixed(4)}:${star.w.toFixed(4)}:${star.h.toFixed(4)}`;
+  if (starUrlCache.has(cacheKey)) return starUrlCache.get(cacheKey);
+  const { canvas, context } = await renderStarCanvas(star);
   const pixels = context.getImageData(0, 0, canvas.width, canvas.height);
   const data = pixels.data;
   for (let i = 0; i < data.length; i += 4) {
     if (isPale(data[i], data[i + 1], data[i + 2])) data[i + 3] = 0;
+  }
+  cleanupCrop(pixels, canvas.width, canvas.height);
+  if (variant === "shadow") {
+    for (let i = 0; i < data.length; i += 4) {
+      if (data[i + 3] > 0) { data[i] = 46; data[i + 1] = 42; data[i + 2] = 38; } // 未擁有 → 全黑剪影
+    }
   }
   context.putImageData(pixels, 0, 0);
   const url = canvas.toDataURL("image/png");
   starUrlCache.set(cacheKey, url);
   return url;
 }
-async function randomStar() {
+async function catalogAll() {
   const pools = await Promise.all(SHEETS.map((_, i) => boxesFor(i).catch(() => [])));
   const flat = [];
   pools.forEach((boxes, sheet) => boxes.forEach(box => flat.push({ sheet, ...box })));
+  return flat;
+}
+async function randomStar() {
+  const flat = await catalogAll();
   if (!flat.length) throw new Error("找不到任何星星，請確認 assets 裡的星星圖片");
   return flat[Math.floor(Math.random() * flat.length)];
+}
+function sameStar(a, b) {
+  return a.sheet === b.sheet && Math.abs(a.x - b.x) < 0.02 && Math.abs(a.y - b.y) < 0.02;
 }
 
 /* ================= 資料層（Firebase + 本機備份） ================= */
@@ -913,16 +1415,27 @@ function startFirebase() {
     toastMessage("雲端連線失敗，紀錄先存在手機裡");
   }
 }
+function ownedStars() {
+  // 依日期新到舊；同一顆只留最新那次（名字用最新的）
+  const seen = [];
+  const entries = Object.entries(days)
+    .filter(([, record]) => record && record.star)
+    .sort((a, b) => b[0].localeCompare(a[0]));
+  for (const [key, record] of entries) {
+    if (!seen.some(item => sameStar(item.star, record.star))) {
+      seen.push({ key, star: record.star });
+    }
+  }
+  return seen;
+}
 
-/* ================= 畫面 ================= */
-const todayQuoteEl = $("quoteText");
-
+/* ================= 今日 ================= */
 function todayRecord() { return days[dayKey()]; }
 
 function renderToday() {
   const key = dayKey();
   const record = todayRecord();
-  todayQuoteEl.textContent = "「" + quoteFor(key) + "」";
+  $("quoteText").textContent = "「" + quoteFor(key) + "」";
   const d = new Date(key + "T12:00:00");
   $("dateLine").textContent = `${d.getFullYear()} 年 ${d.getMonth() + 1} 月 ${d.getDate()} 日（${weekdayName(key)}）・每天凌晨 ${RESET_HOUR} 點更新`;
 
@@ -939,7 +1452,37 @@ function renderToday() {
       starImageUrl(star).then(url => { $("todayStarImg").src = url; }).catch(() => {});
     }
   }
+  renderWeekStrip();
   renderCountdown();
+}
+function renderWeekStrip() {
+  const strip = $("weekStrip");
+  strip.innerHTML = "";
+  const todayK = dayKey();
+  const t = new Date(todayK + "T12:00:00");
+  const monday = new Date(t);
+  monday.setDate(t.getDate() - ((t.getDay() + 6) % 7));
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(monday);
+    d.setDate(monday.getDate() + i);
+    const k = keyOfDate(d);
+    const record = days[k];
+    const cell = document.createElement("button");
+    cell.type = "button";
+    cell.className = "wday" + (k === todayK ? " today" : "") + (k < todayK ? " past" : "");
+    if (record && record.star) {
+      const img = document.createElement("img");
+      img.alt = record.star.name || "星星";
+      starImageUrl(record.star).then(url => { img.src = url; }).catch(() => {});
+      cell.appendChild(img);
+    } else if (record && record.text) {
+      cell.innerHTML = `<span class="dot"></span>`;
+    } else {
+      cell.innerHTML = `<span class="num">${d.getDate()}</span>`;
+    }
+    if (record) cell.addEventListener("click", () => openDayModal(k));
+    strip.appendChild(cell);
+  }
 }
 function renderCountdown() {
   const el = $("countdown");
@@ -951,61 +1494,186 @@ function renderCountdown() {
 }
 setInterval(renderCountdown, 30000);
 
-function collectedStars() {
-  return Object.entries(days)
-    .filter(([, record]) => record && record.star)
-    .sort((a, b) => b[0].localeCompare(a[0]))
-    .map(([key, record]) => ({ key, star: record.star }));
-}
-function renderStars() {
-  const list = collectedStars();
-  $("starWallTitle").textContent = `我的星星牆・${list.length} 顆`;
-  $("starEmpty").classList.toggle("hide", list.length > 0);
-  const grid = $("starGrid");
-  grid.innerHTML = "";
+/* ================= 星星草原 ================= */
+let sceneSignature = "";
+let wanderTimer = null;
+const DECOS = ["🌼", "🌸", "🌷", "🌻", "🍀", "✿"];
+
+function renderScene() {
+  const list = ownedStars().slice(0, SCENE_MAX);
+  const total = list.length;
+  $("sceneCount").textContent = total
+    ? `草原上有 ${total} 顆星星${ownedStars().length > SCENE_MAX ? `（最多 ${SCENE_MAX} 隻）` : ""}`
+    : "0 顆星星";
+  $("sceneEmpty").classList.toggle("hide", total > 0);
+
+  const signature = list.map(item => `${item.key}:${item.star.name || ""}`).join("|");
+  if (signature === sceneSignature) return;
+  sceneSignature = signature;
+
+  const scene = $("scene");
+  scene.querySelectorAll(".critter, .deco").forEach(el => el.remove());
+
+  // 小花裝飾
+  for (let i = 0; i < 14; i++) {
+    const deco = document.createElement("span");
+    deco.className = "deco";
+    deco.textContent = DECOS[i % DECOS.length];
+    deco.style.left = `${4 + Math.random() * 92}%`;
+    deco.style.top = `${40 + Math.random() * 55}%`;
+    deco.style.fontSize = `${10 + Math.random() * 9}px`;
+    scene.appendChild(deco);
+  }
+
   for (const item of list) {
-    const cell = document.createElement("div");
-    cell.className = "star-cell";
-    cell.innerHTML = `<img alt=""><div class="n"></div><div class="d"></div>`;
-    cell.querySelector(".n").textContent = item.star.name || "無名星";
-    cell.querySelector(".d").textContent = item.key.slice(5).replace("-", "/");
-    starImageUrl(item.star).then(url => { cell.querySelector("img").src = url; }).catch(() => {});
+    const critter = document.createElement("button");
+    critter.type = "button";
+    critter.className = "critter";
+    critter.style.left = `${8 + Math.random() * 84}%`;
+    critter.style.top = `${14 + Math.random() * 72}%`;
+    critter.style.setProperty("--hop", `${1.05 + Math.random() * .8}s`);
+    critter.innerHTML = `<span class="tag"></span><img alt="">`;
+    critter.querySelector(".tag").textContent = item.star.name || "無名星";
+    starImageUrl(item.star).then(url => { critter.querySelector("img").src = url; }).catch(() => {});
+    critter.addEventListener("click", () => {
+      critter.classList.add("show-tag");
+      clearTimeout(critter._tagTimer);
+      critter._tagTimer = setTimeout(() => critter.classList.remove("show-tag"), 1600);
+    });
+    scene.appendChild(critter);
+  }
+
+  clearInterval(wanderTimer);
+  wanderTimer = setInterval(() => {
+    if (!document.getElementById("viewStars").classList.contains("active")) return;
+    for (const critter of scene.querySelectorAll(".critter")) {
+      if (Math.random() < 0.72) {
+        const x = 8 + Math.random() * 84;
+        const oldX = parseFloat(critter.style.left);
+        critter.style.left = `${x}%`;
+        critter.style.top = `${14 + Math.random() * 72}%`;
+        critter.querySelector("img").style.setProperty("--sx", x < oldX ? -1 : 1);
+      }
+    }
+  }, 2800);
+}
+
+/* ================= 圖鑑 ================= */
+let dexToken = 0;
+async function openDex() {
+  $("dexOverlay").classList.remove("hide");
+  $("dexGrid").innerHTML = "";
+  $("dexCount").textContent = "整理中⋯";
+  const token = ++dexToken;
+  try {
+    const catalog = await catalogAll();
+    if (token !== dexToken) return;
+    const owned = ownedStars();
+    let ownedCount = 0;
+    const cells = catalog.map(entry => {
+      const match = owned.find(item => sameStar(item.star, entry));
+      if (match) ownedCount++;
+      const cell = document.createElement("div");
+      cell.className = "star-cell" + (match ? "" : " unknown");
+      cell.innerHTML = `<img alt=""><div class="n"></div>`;
+      cell.querySelector(".n").textContent = match ? (match.star.name || "無名星") : "？？？";
+      return { cell, entry, match };
+    });
+    $("dexCount").textContent = `已收集 ${ownedCount} / ${catalog.length} 顆`;
+    const grid = $("dexGrid");
+    cells.forEach(({ cell }) => grid.appendChild(cell));
+    // 一格一格畫，不卡畫面
+    for (const { cell, entry, match } of cells) {
+      if (token !== dexToken) return;
+      const url = await starImageUrl(entry, match ? "color" : "shadow");
+      cell.querySelector("img").src = url;
+    }
+  } catch (error) {
+    console.error(error);
+    $("dexCount").textContent = "讀取星星圖失敗";
+  }
+}
+$("dexBtn").addEventListener("click", openDex);
+$("dexClose").addEventListener("click", () => $("dexOverlay").classList.add("hide"));
+
+/* ================= 紀錄（月曆） ================= */
+let calCursor = null; // Date（該月一日）
+function calMonthStart() {
+  if (!calCursor) {
+    const t = new Date(dayKey() + "T12:00:00");
+    calCursor = new Date(t.getFullYear(), t.getMonth(), 1, 12);
+  }
+  return calCursor;
+}
+function renderCalendar() {
+  const first = calMonthStart();
+  $("calTitle").textContent = `${first.getFullYear()} 年 ${pad2(first.getMonth() + 1)} 月`;
+  const grid = $("calGrid");
+  grid.innerHTML = "";
+  const todayK = dayKey();
+  const lead = (first.getDay() + 6) % 7; // 週一開頭
+  const daysInMonth = new Date(first.getFullYear(), first.getMonth() + 1, 0).getDate();
+  for (let i = 0; i < lead; i++) grid.appendChild(document.createElement("span"));
+  for (let day = 1; day <= daysInMonth; day++) {
+    const d = new Date(first.getFullYear(), first.getMonth(), day, 12);
+    const k = keyOfDate(d);
+    const record = days[k];
+    const cell = document.createElement("button");
+    cell.type = "button";
+    cell.className = "cal-cell" + (k === todayK ? " today" : "") + (k > todayK ? " future" : "");
+    let inner = `<span class="num">${day}</span>`;
+    if (record && record.star) inner += `<img alt="">`;
+    else if (record && record.text) inner += `<span class="dot"></span>`;
+    cell.innerHTML = inner;
+    if (record && record.star) {
+      starImageUrl(record.star).then(url => {
+        const img = cell.querySelector("img");
+        if (img) img.src = url;
+      }).catch(() => {});
+    }
+    if (record) cell.addEventListener("click", () => openDayModal(k));
+    else cell.disabled = true;
     grid.appendChild(cell);
   }
 }
-function renderHistory() {
-  const entries = Object.entries(days)
-    .filter(([, record]) => record && (record.text || record.star))
-    .sort((a, b) => b[0].localeCompare(a[0]));
-  $("historyEmpty").classList.toggle("hide", entries.length > 0);
-  const list = $("historyList");
-  list.innerHTML = "";
-  for (const [key, record] of entries) {
-    const card = document.createElement("div");
-    card.className = "card day-card";
-    const d = new Date(key + "T12:00:00");
-    card.innerHTML = `
-      <div class="h-date">${d.getFullYear()}/${pad2(d.getMonth() + 1)}/${pad2(d.getDate())}（${weekdayName(key)}）</div>
-      <div class="h-quote"></div>
-      <div class="h-flex">
-        <div class="mine-text"></div>
-        <div class="h-star hide"><img alt=""><div class="n"></div></div>
-      </div>`;
-    card.querySelector(".h-quote").textContent = "「" + (record.quote || quoteFor(key)) + "」";
-    card.querySelector(".mine-text").textContent = record.text || "（這天沒有寫字）";
-    if (record.star) {
-      const holder = card.querySelector(".h-star");
-      holder.classList.remove("hide");
-      holder.querySelector(".n").textContent = record.star.name || "無名星";
-      starImageUrl(record.star).then(url => { holder.querySelector("img").src = url; }).catch(() => {});
-    }
-    list.appendChild(card);
+$("calPrev").addEventListener("click", () => {
+  const c = calMonthStart();
+  calCursor = new Date(c.getFullYear(), c.getMonth() - 1, 1, 12);
+  renderCalendar();
+});
+$("calNext").addEventListener("click", () => {
+  const c = calMonthStart();
+  calCursor = new Date(c.getFullYear(), c.getMonth() + 1, 1, 12);
+  renderCalendar();
+});
+
+/* ================= 單日詳細 ================= */
+function openDayModal(key) {
+  const record = days[key];
+  if (!record) return;
+  const d = new Date(key + "T12:00:00");
+  $("mDate").textContent = `${d.getFullYear()} 年 ${d.getMonth() + 1} 月 ${d.getDate()} 日（${weekdayName(key)}）`;
+  $("mQuote").textContent = "「" + (record.quote || quoteFor(key)) + "」";
+  $("mText").textContent = record.text || "（這天沒有寫字）";
+  const hasStar = Boolean(record.star);
+  $("mStarWrap").classList.toggle("hide", !hasStar);
+  if (hasStar) {
+    $("mStarName").textContent = record.star.name || "無名星";
+    $("mStarImg").removeAttribute("src");
+    starImageUrl(record.star).then(url => { $("mStarImg").src = url; }).catch(() => {});
   }
+  $("dayModal").classList.remove("hide");
 }
+$("mClose").addEventListener("click", () => $("dayModal").classList.add("hide"));
+$("dayModal").addEventListener("click", event => {
+  if (event.target === $("dayModal")) $("dayModal").classList.add("hide");
+});
+
+/* ================= 全部重繪 ================= */
 function renderAll() {
   renderToday();
-  renderStars();
-  renderHistory();
+  renderScene();
+  renderCalendar();
 }
 
 /* ================= 互動 ================= */
@@ -1051,9 +1719,9 @@ $("pullBtn").addEventListener("click", async () => {
     $("drawStage1").classList.add("hide");
     $("drawStage2").classList.remove("hide");
     $("revealImg").src = url;
+    playRevealShow();
     $("starNameInput").value = "";
-    sparkle();
-    setTimeout(() => $("starNameInput").focus(), 400);
+    setTimeout(() => $("starNameInput").focus(), 700);
   } catch (error) {
     console.error(error);
     $("capsule").classList.remove("shake");
@@ -1075,23 +1743,93 @@ function saveStarName() {
   saveDay(key);
   $("drawOverlay").classList.add("hide");
   renderAll();
-  toastMessage(`「${name}」加入你的星星牆了 ★`);
+  toastMessage(`「${name}」加入你的星星草原了 ★`);
 }
-function sparkle() {
+/* 每次抽星都隨機組合：登場動畫 × 待機動畫 × 閃亮特效 */
+const ENTRY_ANIMS = [
+  { name: "popIn", dur: .65, ease: "cubic-bezier(.2,1.4,.4,1)" },
+  { name: "dropBounce", dur: .9, ease: "ease-out" },
+  { name: "spinIn", dur: .85, ease: "ease-out" },
+  { name: "flipIn", dur: .8, ease: "cubic-bezier(.2,1.2,.4,1)" },
+  { name: "zoomWobble", dur: .9, ease: "ease-out" },
+  { name: "slideSquash", dur: .8, ease: "ease-out" }
+];
+const IDLE_ANIMS = [
+  { name: "floaty", dur: 3.2 },
+  { name: "wiggle", dur: 1.1 },
+  { name: "spinSlow", dur: 5 },
+  { name: "heartbeat", dur: 1.6 },
+  { name: "happyDance", dur: 2.2 },
+  { name: "bigBounce", dur: 1.9 }
+];
+const SPARKLE_KINDS = ["burst", "rain", "fountain"];
+const pick = list => list[Math.floor(Math.random() * list.length)];
+
+function playRevealShow() {
+  const img = $("revealImg");
+  const entry = pick(ENTRY_ANIMS);
+  const idle = pick(IDLE_ANIMS);
+  img.style.animation = "none";
+  void img.offsetWidth; // 重新觸發動畫
+  img.style.animation =
+    `${entry.name} ${entry.dur}s ${entry.ease} both, ` +
+    `${idle.name} ${idle.dur}s ${entry.dur + .15}s ease-in-out infinite`;
+  const kind = pick(SPARKLE_KINDS);
+  sparkle(kind);
+  if (kind !== "rain") setTimeout(() => sparkle("rain"), 550);
+}
+function sparkle(kind = "burst") {
   const box = document.querySelector(".draw-box");
-  for (let i = 0; i < 14; i++) {
+  const glyphs = ["✦", "✧", "⭐", "✨", "🌟", "💫"];
+  const count = kind === "burst" ? 14 : 12;
+  for (let i = 0; i < count; i++) {
     const s = document.createElement("span");
-    s.className = "spark";
-    s.textContent = ["✦", "✧", "⭐", "✨"][i % 4];
-    const angle = Math.PI * 2 * (i / 14);
-    s.style.left = "50%";
-    s.style.top = "40%";
-    s.style.setProperty("--dx", `${Math.cos(angle) * (90 + Math.random() * 70)}px`);
-    s.style.setProperty("--dy", `${Math.sin(angle) * (90 + Math.random() * 70)}px`);
+    s.className = "spark" + (kind === "burst" ? "" : " " + kind);
+    s.textContent = glyphs[(i + Math.floor(Math.random() * 2)) % glyphs.length];
+    s.style.fontSize = `${15 + Math.random() * 14}px`;
+    if (kind === "rain") {
+      s.style.left = `${5 + Math.random() * 90}%`;
+      s.style.top = "-4%";
+      s.style.setProperty("--dy", `${260 + Math.random() * 240}px`);
+      s.style.animationDelay = `${Math.random() * .6}s`;
+    } else {
+      const angle = Math.PI * 2 * (i / count);
+      s.style.left = "50%";
+      s.style.top = "40%";
+      s.style.setProperty("--dx", `${Math.cos(angle) * (90 + Math.random() * 70)}px`);
+      s.style.setProperty("--dy", kind === "fountain"
+        ? `${-120 - Math.random() * 80}px`
+        : `${Math.sin(angle) * (90 + Math.random() * 70)}px`);
+    }
     box.appendChild(s);
-    setTimeout(() => s.remove(), 1100);
+    setTimeout(() => s.remove(), 2200);
   }
 }
+
+/* ================= 背景音樂 ================= */
+const bgm = $("bgm");
+bgm.volume = 0.45;
+let bgmOn = localStorage.getItem("temple:bgm") !== "off";
+function updateMusicBtn() {
+  $("musicBtn").textContent = bgmOn ? "🎵" : "🔇";
+  $("musicBtn").classList.toggle("off", !bgmOn);
+}
+function tryPlayBgm() {
+  if (bgmOn) bgm.play().catch(() => {});
+}
+$("musicBtn").addEventListener("click", () => {
+  bgmOn = !bgmOn;
+  localStorage.setItem("temple:bgm", bgmOn ? "on" : "off");
+  updateMusicBtn();
+  if (bgmOn) tryPlayBgm();
+  else bgm.pause();
+});
+// 瀏覽器規定要先有互動才能播音樂：第一次點擊任何地方就開始
+document.addEventListener("pointerdown", function firstTap() {
+  tryPlayBgm();
+  document.removeEventListener("pointerdown", firstTap);
+});
+updateMusicBtn();
 
 /* 名字 gate 與切換使用者 */
 $("gateForm").addEventListener("submit", event => {
@@ -1116,7 +1854,7 @@ function bootUser() {
   loadLocalDays();
   renderAll();
   startFirebase();
-  // 預先在背景分析星星圖，抽獎時比較快
+  // 預先在背景分析星星圖，抽獎和圖鑑比較快
   setTimeout(() => SHEETS.forEach((_, i) => boxesFor(i).catch(() => {})), 800);
 }
 function init() {
